@@ -1,0 +1,157 @@
+{
+  "checked_at": "2026-09-29T08:16:51.067Z",
+  "tool": "Chrome DevTools isolated browser context",
+  "valid": true,
+  "cases": [
+    {
+      "name": "desktop no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "blank title rejected",
+      "passed": true
+    },
+    {
+      "name": "issue creation",
+      "passed": true
+    },
+    {
+      "name": "user content escaped",
+      "passed": true
+    },
+    {
+      "name": "issue task association",
+      "passed": true
+    },
+    {
+      "name": "multiple actions",
+      "passed": true
+    },
+    {
+      "name": "incomplete action blocks resolution",
+      "passed": true
+    },
+    {
+      "name": "start task",
+      "passed": true
+    },
+    {
+      "name": "all tasks done is not auto resolution",
+      "passed": true
+    },
+    {
+      "name": "blank resolution rejected",
+      "passed": true
+    },
+    {
+      "name": "explicit verification closes issue",
+      "passed": true
+    },
+    {
+      "name": "review visible",
+      "passed": true
+    },
+    {
+      "name": "reopening task reopens issue",
+      "passed": true
+    },
+    {
+      "name": "edit task to standalone",
+      "passed": true
+    },
+    {
+      "name": "search empty state",
+      "passed": true
+    },
+    {
+      "name": "priority filter",
+      "passed": true
+    },
+    {
+      "name": "record type preserves title",
+      "passed": true
+    },
+    {
+      "name": "undated task excluded today",
+      "passed": true
+    },
+    {
+      "name": "storage failure visible",
+      "passed": true
+    },
+    {
+      "name": "export contains all records",
+      "passed": true
+    },
+    {
+      "name": "all buttons mapped",
+      "passed": true
+    },
+    {
+      "name": "refresh persists saved records",
+      "passed": true
+    },
+    {
+      "name": "mobile today no overflow",
+      "passed": true
+    },
+    {
+      "name": "mobile issues no overflow",
+      "passed": true
+    },
+    {
+      "name": "mobile tasks no overflow",
+      "passed": true
+    },
+    {
+      "name": "mobile review no overflow",
+      "passed": true
+    },
+    {
+      "name": "mobile dialog fits",
+      "passed": true
+    }
+  ],
+  "additional_device_emulation": {
+    "width": 390,
+    "cases": [
+      {
+        "name": "390px mobile today no overflow",
+        "passed": true
+      },
+      {
+        "name": "390px mobile issues no overflow",
+        "passed": true
+      },
+      {
+        "name": "390px mobile tasks no overflow",
+        "passed": true
+      },
+      {
+        "name": "390px mobile review no overflow",
+        "passed": true
+      },
+      {
+        "name": "390px mobile dialog fits",
+        "passed": true
+      }
+    ],
+    "passed": true
+  },
+  "notes": [
+    "使用真实浏览器，通过DOM按钮与表单触发交互；业务断言同时检查数据状态。",
+    "测试在隔离上下文运行，测试数据已恢复为初始示例。",
+    "窄窗口实测500px；另以真实设备模拟390x844验证全部四视图与弹窗通过。",
+    "SQLite参考DDL在内存库成功执行；API仅设计，未部署。"
+  ],
+  "final_revision_checks": [
+    {
+      "name": "field edit clears validation error",
+      "passed": true
+    },
+    {
+      "name": "every rendered button/input/select/textarea has event ID",
+      "passed": true
+    }
+  ]
+}

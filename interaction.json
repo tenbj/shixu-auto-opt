@@ -1,0 +1,97 @@
+{
+  "version": "1.0.0",
+  "runtime": "offline-localStorage; no HTTP requests",
+  "interactions": [
+    {
+      "id": "EVT-FIELD",
+      "component_id": "field-control",
+      "trigger": "input/change",
+      "from_state": "editing",
+      "to_state": "editing",
+      "action": "编辑表单值并清除旧校验提示，提交时统一校验",
+      "requirement_ids": [
+        "REQ-001",
+        "REQ-003",
+        "REQ-005"
+      ]
+    },
+    {
+      "id": "EVT-ACTION",
+      "component_id": "action-control",
+      "trigger": "click",
+      "from_state": "ready",
+      "to_state": "ready",
+      "actions": {
+        "nav": "切换 today/issues/tasks/review 页面",
+        "new": "新建问题",
+        "new-task": "新建独立或关联行动",
+        "new-linked": "从问题新增行动",
+        "detail": "显示问题及行动与处理记录",
+        "edit-task": "编辑行动",
+        "edit-issue": "编辑问题",
+        "close": "取消并关闭弹窗",
+        "toggle": "完成/重开行动；必要时重开问题",
+        "advance": "待办与进行中切换",
+        "resolve": "检查行动全部完成再显示验证表单",
+        "reopen": "重开问题并保留上次验证",
+        "export": "下载当前JSON记录"
+      },
+      "branches": {
+        "new/new-task/new-linked/edit-task/edit-issue": "editing",
+        "detail": "detail",
+        "resolve": "validating 或保持detail并提示阻塞",
+        "toggle/advance/reopen": "success",
+        "export": "success",
+        "close": "ready"
+      },
+      "requirement_ids": [
+        "REQ-001",
+        "REQ-003",
+        "REQ-004",
+        "REQ-005",
+        "REQ-006"
+      ]
+    },
+    {
+      "id": "EVT-FILTER",
+      "component_id": "filter-control",
+      "trigger": "input/change",
+      "from_state": "ready",
+      "to_state": "ready",
+      "action": "按搜索/优先级/状态重新渲染；无结果为empty",
+      "requirement_ids": [
+        "REQ-002"
+      ]
+    },
+    {
+      "id": "EVT-KIND",
+      "component_id": "kind-control",
+      "trigger": "change",
+      "from_state": "editing",
+      "to_state": "editing",
+      "action": "切换问题/行动表单；保留标题，其他可选字段重新设置",
+      "requirement_ids": [
+        "REQ-001"
+      ]
+    },
+    {
+      "id": "EVT-SUBMIT",
+      "component_id": "record-form",
+      "trigger": "submit",
+      "from_state": "editing",
+      "to_state": "success",
+      "action": "校验标题或验证结论；更新实体及日志；本地保存；失败为error",
+      "guards": [
+        "trim(title)非空",
+        "trim(resolution)非空",
+        "解决前无未完成行动"
+      ],
+      "requirement_ids": [
+        "REQ-001",
+        "REQ-003",
+        "REQ-005",
+        "REQ-006"
+      ]
+    }
+  ]
+}

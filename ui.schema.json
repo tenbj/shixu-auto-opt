@@ -1,0 +1,150 @@
+{
+  "version": "1.0.0",
+  "page": {
+    "id": "personal-workspace",
+    "states": [
+      "loading",
+      "ready",
+      "editing",
+      "detail",
+      "validating",
+      "success",
+      "empty",
+      "error"
+    ],
+    "views": [
+      {
+        "id": "today",
+        "title": "今日概览"
+      },
+      {
+        "id": "issues",
+        "title": "问题池"
+      },
+      {
+        "id": "tasks",
+        "title": "行动看板"
+      },
+      {
+        "id": "review",
+        "title": "复盘记录"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "field-control",
+      "type": "form-input",
+      "selector": "[data-event-id=\"EVT-FIELD\"]",
+      "events": [
+        "EVT-FIELD"
+      ],
+      "states": [
+        "editing",
+        "validating"
+      ],
+      "requirement_ids": [
+        "REQ-001",
+        "REQ-003",
+        "REQ-005"
+      ]
+    },
+    {
+      "id": "action-control",
+      "type": "reusable-button",
+      "selector": "[data-event-id=\"EVT-ACTION\"]",
+      "events": [
+        "EVT-ACTION"
+      ],
+      "states": [
+        "ready",
+        "detail",
+        "success"
+      ],
+      "requirement_ids": [
+        "REQ-001",
+        "REQ-003",
+        "REQ-004",
+        "REQ-005",
+        "REQ-006"
+      ],
+      "variants": {
+        "nav": "切换 today/issues/tasks/review 页面",
+        "new": "新建问题",
+        "new-task": "新建独立或关联行动",
+        "new-linked": "从问题新增行动",
+        "detail": "显示问题及行动与处理记录",
+        "edit-task": "编辑行动",
+        "edit-issue": "编辑问题",
+        "close": "取消并关闭弹窗",
+        "toggle": "完成/重开行动；必要时重开问题",
+        "advance": "待办与进行中切换",
+        "resolve": "检查行动全部完成再显示验证表单",
+        "reopen": "重开问题并保留上次验证",
+        "export": "下载当前JSON记录"
+      }
+    },
+    {
+      "id": "filter-control",
+      "type": "search-and-select",
+      "selector": "[data-event-id=\"EVT-FILTER\"]",
+      "events": [
+        "EVT-FILTER"
+      ],
+      "states": [
+        "ready",
+        "empty"
+      ],
+      "requirement_ids": [
+        "REQ-002"
+      ]
+    },
+    {
+      "id": "kind-control",
+      "type": "select",
+      "selector": "[data-event-id=\"EVT-KIND\"]",
+      "events": [
+        "EVT-KIND"
+      ],
+      "states": [
+        "editing"
+      ],
+      "requirement_ids": [
+        "REQ-001"
+      ]
+    },
+    {
+      "id": "record-form",
+      "type": "form",
+      "selector": "form[data-event-id=\"EVT-SUBMIT\"]",
+      "events": [
+        "EVT-SUBMIT"
+      ],
+      "states": [
+        "editing",
+        "validating",
+        "success",
+        "error"
+      ],
+      "requirement_ids": [
+        "REQ-001",
+        "REQ-003",
+        "REQ-005",
+        "REQ-006"
+      ]
+    }
+  ],
+  "entity_states": {
+    "issue": [
+      "待梳理",
+      "处理中",
+      "已解决"
+    ],
+    "task": [
+      "待办",
+      "进行中",
+      "已完成"
+    ]
+  },
+  "notes": "组件是复用组件定义；实例通过data-action与data-id识别。表单输入通过name与所属form识别，提交时统一读取，事件委托绑定在document。"
+}

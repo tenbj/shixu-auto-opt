@@ -1,0 +1,416 @@
+openapi: 3.1.0
+info:
+  title: 拾序后续工程接口合同
+  version: 1.0.0
+  description: 仅设计，尚未实现。当前原型完全离线。单人部署；日期映射：原型空字符串在API中为null。状态变更和日志写入必须同一事务；问题解决时锁定关联行动集合防止并发新建。
+paths:
+  /issues:
+    get:
+      summary: 读取问题列表
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Issue'
+        '400':
+          description: 输入为空或字段不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 记录不存在
+        '409':
+          description: 状态冲突，例如未完成行动阻止问题解决
+        '500':
+          description: 保存失败，可重试，不能误报成功
+    post:
+      summary: 记录问题
+      responses:
+        '201':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+        '400':
+          description: 输入为空或字段不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 记录不存在
+        '409':
+          description: 状态冲突，例如未完成行动阻止问题解决
+        '500':
+          description: 保存失败，可重试，不能误报成功
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssueWrite'
+  /issues/{id}:
+    get:
+      summary: 问题详情
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+        '400':
+          description: 输入为空或字段不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 记录不存在
+        '409':
+          description: 状态冲突，例如未完成行动阻止问题解决
+        '500':
+          description: 保存失败，可重试，不能误报成功
+    put:
+      summary: 更新问题内容
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+        '400':
+          description: 输入为空或字段不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 记录不存在
+        '409':
+          description: 状态冲突，例如未完成行动阻止问题解决
+        '500':
+          description: 保存失败，可重试，不能误报成功
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssueWrite'
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  /issues/{id}/resolve:
+    post:
+      summary: 校验全部行动完成并保存验证结论
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+        '400':
+          description: 输入为空或字段不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 记录不存在
+        '409':
+          description: 状态冲突，例如未完成行动阻止问题解决
+        '500':
+          description: 保存失败，可重试，不能误报成功
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Resolution'
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  /issues/{id}/reopen:
+    post:
+      summary: 重新打开问题，保留上次验证结论
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+        '400':
+          description: 输入为空或字段不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 记录不存在
+        '409':
+          description: 状态冲突，例如未完成行动阻止问题解决
+        '500':
+          description: 保存失败，可重试，不能误报成功
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  /tasks:
+    get:
+      summary: 读取全部行动，客户端按日期和状态组织
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '400':
+          description: 输入为空或字段不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 记录不存在
+        '409':
+          description: 状态冲突，例如未完成行动阻止问题解决
+        '500':
+          description: 保存失败，可重试，不能误报成功
+    post:
+      summary: 新建独立或关联行动
+      responses:
+        '201':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: 输入为空或字段不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 记录不存在
+        '409':
+          description: 状态冲突，例如未完成行动阻止问题解决
+        '500':
+          description: 保存失败，可重试，不能误报成功
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskWrite'
+  /tasks/{id}:
+    put:
+      summary: 更新行动内容或状态，重开行动时联动问题
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: 输入为空或字段不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 记录不存在
+        '409':
+          description: 状态冲突，例如未完成行动阻止问题解决
+        '500':
+          description: 保存失败，可重试，不能误报成功
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskUpdate'
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  /export:
+    get:
+      summary: 导出全部问题和行动
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Export'
+        '400':
+          description: 输入为空或字段不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 记录不存在
+        '409':
+          description: 状态冲突，例如未完成行动阻止问题解决
+        '500':
+          description: 保存失败，可重试，不能误报成功
+components:
+  schemas:
+    IssueWrite:
+      type: object
+      required:
+      - title
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 160
+          pattern: .*\S.*
+        description:
+          type: string
+          maxLength: 5000
+          default: ''
+        priority:
+          type: string
+          enum:
+          - 高
+          - 中
+          - 低
+          default: 中
+        tag:
+          type: string
+          maxLength: 40
+          default: 未分类
+    TaskWrite:
+      type: object
+      required:
+      - title
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 160
+          pattern: .*\S.*
+        issueId:
+          type:
+          - string
+          - 'null'
+        due:
+          type:
+          - string
+          - 'null'
+          format: date
+    Issue:
+      allOf:
+      - $ref: '#/components/schemas/IssueWrite'
+      - type: object
+        required:
+        - id
+        - status
+        - logs
+        - resolution
+        properties:
+          id:
+            type: string
+          status:
+            type: string
+            enum:
+            - 待梳理
+            - 处理中
+            - 已解决
+          resolution:
+            type: string
+          logs:
+            type: array
+            items:
+              type: string
+    Task:
+      allOf:
+      - $ref: '#/components/schemas/TaskWrite'
+      - type: object
+        required:
+        - id
+        - status
+        properties:
+          id:
+            type: string
+          status:
+            type: string
+            enum:
+            - 待办
+            - 进行中
+            - 已完成
+    TaskUpdate:
+      allOf:
+      - $ref: '#/components/schemas/TaskWrite'
+      - type: object
+        properties:
+          status:
+            type: string
+            enum:
+            - 待办
+            - 进行中
+            - 已完成
+    Resolution:
+      type: object
+      required:
+      - resolution
+      properties:
+        resolution:
+          type: string
+          minLength: 1
+          maxLength: 5000
+          pattern: .*\S.*
+    Error:
+      type: object
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+    Export:
+      type: object
+      required:
+      - version
+      - issues
+      - tasks
+      properties:
+        version:
+          type: integer
+          const: 1
+        issues:
+          type: array
+          items:
+            $ref: '#/components/schemas/Issue'
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Task'

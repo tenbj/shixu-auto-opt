@@ -1,0 +1,17 @@
+# Personal data and local tooling
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+.Claude.json
+.claude/
+.history/
+.memory/
+.temp/
+input/
+*.exe
+__pycache__/
+.DS_Store
+Thumbs.db
+拾序记录-*.json

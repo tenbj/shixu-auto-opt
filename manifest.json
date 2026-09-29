@@ -1,0 +1,131 @@
+{
+  "asoc_version": "1.0.0",
+  "skill": "HH02_原型设计",
+  "intent": "设计个人问题痛点与待办工作台，让记录的问题转为行动并得到验证闭环",
+  "artifacts": [
+    {
+      "id": "prd",
+      "path": "prd.md",
+      "layer": "human"
+    },
+    {
+      "id": "prototype",
+      "path": "prototype.html",
+      "layer": "human"
+    },
+    {
+      "id": "ui",
+      "path": "ui.schema.json",
+      "layer": "machine"
+    },
+    {
+      "id": "interaction",
+      "path": "interaction.json",
+      "layer": "machine"
+    },
+    {
+      "id": "flow",
+      "path": "user-flow.md",
+      "layer": "human"
+    },
+    {
+      "id": "api",
+      "path": "api.yaml",
+      "layer": "machine"
+    },
+    {
+      "id": "database",
+      "path": "database.sql",
+      "layer": "machine"
+    },
+    {
+      "id": "evaluation",
+      "path": "evaluation/report.json",
+      "layer": "evaluation"
+    },
+    {
+      "id": "browser-tests",
+      "path": "evaluation/browser-tests.json",
+      "layer": "evaluation"
+    }
+  ],
+  "input": {
+    "intent": "设计个人问题痛点与待办工作台，让记录的问题转为行动并得到验证闭环",
+    "target_users": [
+      "个人工作者"
+    ],
+    "product_context": "个人工作台：记录困扰、拆解待办并验证改善。",
+    "target_platform": "web",
+    "constraints": [
+      "单文件离线可打开",
+      "本版不实现多人同步、账号与云端服务"
+    ],
+    "assumptions": [
+      "桌面优先并适配手机",
+      "示例均为虚构数据",
+      "浏览器本地保存并提供JSON导出",
+      "问题可关联多个待办，待办可以独立创建"
+    ],
+    "requirements": [
+      {
+        "id": "REQ-001",
+        "statement": "快速记录问题或待办",
+        "acceptance_criteria": [
+          "仅标题必填",
+          "空白标题不能保存"
+        ]
+      },
+      {
+        "id": "REQ-002",
+        "statement": "浏览、搜索和筛选问题池",
+        "acceptance_criteria": [
+          "按标题描述搜索",
+          "按优先级筛选",
+          "无匹配显示空态"
+        ]
+      },
+      {
+        "id": "REQ-003",
+        "statement": "问题拆解为关联待办",
+        "acceptance_criteria": [
+          "可从问题详情创建多个待办",
+          "创建后可追溯来源"
+        ]
+      },
+      {
+        "id": "REQ-004",
+        "statement": "关注今日行动并推进待办",
+        "acceptance_criteria": [
+          "显示今日和逾期未完成事项",
+          "支持待办、进行中、已完成状态切换"
+        ]
+      },
+      {
+        "id": "REQ-005",
+        "statement": "验证问题是否解决",
+        "acceptance_criteria": [
+          "有未完成行动不能解决问题",
+          "解决前必须填写验证结论",
+          "解决的问题可以重新打开"
+        ]
+      },
+      {
+        "id": "REQ-006",
+        "statement": "本地保存与导出",
+        "acceptance_criteria": [
+          "刷新保留数据",
+          "本地保存失败有明确提示",
+          "可导出包含问题和待办的JSON"
+        ]
+      }
+    ]
+  },
+  "product": "拾序 · 个人工作台",
+  "version": "1.0.0",
+  "runtime": "offline personal browser prototype",
+  "limitations": [
+    "本地数据，无账号或跨设备同步",
+    "API与SQL仅为工程合同",
+    "JSON可导出，未提供导入UI"
+  ]
+}
