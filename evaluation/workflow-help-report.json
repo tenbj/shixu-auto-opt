@@ -1,0 +1,62 @@
+{
+  "valid": true,
+  "cases": [
+    {
+      "name": "卡片优先级分类可直接点击",
+      "passed": true
+    },
+    {
+      "name": "回填现有属性",
+      "passed": true
+    },
+    {
+      "name": "保存属性不改变问题状态背景",
+      "passed": true
+    },
+    {
+      "name": "分类筛选即时更新",
+      "passed": true
+    },
+    {
+      "name": "属性刷新保留",
+      "passed": true
+    },
+    {
+      "name": "空分类归未分类且保存返回详情",
+      "passed": true
+    },
+    {
+      "name": "问题规则含验证及异常分支",
+      "passed": true
+    },
+    {
+      "name": "行动规则区分两级状态",
+      "passed": true
+    },
+    {
+      "name": "规则可返回原问题详情",
+      "passed": true
+    },
+    {
+      "name": "全局规则入口可用",
+      "passed": true
+    },
+    {
+      "name": "复盘页说明用途且只展示已解决",
+      "passed": true
+    },
+    {
+      "name": "手机复盘页面无溢出",
+      "passed": true
+    },
+    {
+      "name": "手机说明无溢出",
+      "passed": true
+    },
+    {
+      "name": "无运行错误",
+      "passed": true
+    }
+  ],
+  "runtime_errors": []
+}

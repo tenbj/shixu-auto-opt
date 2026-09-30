@@ -72,6 +72,16 @@
       "id": "action-analysis-report",
       "path": "evaluation/action-analysis-report.json",
       "layer": "evaluation"
+    },
+    {
+      "id": "workflow-help-report",
+      "path": "evaluation/workflow-help-report.json",
+      "layer": "evaluation"
+    },
+    {
+      "id": "workflow-diagram-report",
+      "path": "evaluation/workflow-diagram-report.json",
+      "layer": "evaluation"
     }
   ],
   "input": {
@@ -224,11 +234,22 @@
           "点击图表进入带条件的看板，可清除筛选",
           "空数据与手机布局正确"
         ]
+      },
+      {
+        "id": "REQ-015",
+        "statement": "快捷修改属性并查看整体状态流转和复盘用途",
+        "acceptance_criteria": [
+          "问题卡片与详情的优先级分类可点击修改",
+          "原值回填并可输入新分类，空值归未分类，保存不改状态和背景",
+          "全局状态流转入口和详情入口展示问题/行动完整主流程与异常返回图",
+          "详细条件可展开查看，手机图表局部横向滚动",
+          "复盘页说明来源用途和边界，仅展示已解决问题的验证结论"
+        ]
       }
     ]
   },
   "product": "拾序 · 个人工作台",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "runtime": "offline personal browser prototype",
   "limitations": [
     "本地数据，无账号或跨设备同步",

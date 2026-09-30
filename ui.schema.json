@@ -1,5 +1,5 @@
 {
-  "version": "1.3.0",
+  "version": "1.4.0",
   "page": {
     "id": "personal-workspace",
     "states": [
@@ -61,7 +61,8 @@
         "REQ-010",
         "REQ-011",
         "REQ-012",
-        "REQ-013"
+        "REQ-013",
+        "REQ-015"
       ]
     },
     {
@@ -89,7 +90,8 @@
         "REQ-011",
         "REQ-012",
         "REQ-013",
-        "REQ-014"
+        "REQ-014",
+        "REQ-015"
       ],
       "variants": {
         "nav": "切换 today/issues/tasks/review 页面",
@@ -122,7 +124,11 @@
         "analysis-tab": "切换问题/行动分析",
         "overview-task-status": "按行动状态进入看板",
         "overview-task-due": "按未完成行动时间分组进入看板",
-        "clear-task-filter": "清除看板筛选"
+        "clear-task-filter": "清除看板筛选",
+        "edit-attributes": "编辑优先级和分类",
+        "workflow-guide": "全局流转图",
+        "issue-guide": "从详情打开流转图，可返回详情",
+        "guide-tab": "切换问题/行动流转图"
       }
     },
     {
@@ -341,5 +347,14 @@
       "未来到期",
       "未设日期"
     ]
+  },
+  "workflow_guide": {
+    "presentation": "SVG overview plus collapsed rules",
+    "tabs": [
+      "issues",
+      "tasks"
+    ],
+    "mobile": "local horizontal scrolling",
+    "read_only": true
   }
 }

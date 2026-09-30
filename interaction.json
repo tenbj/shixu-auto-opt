@@ -1,5 +1,5 @@
 {
-  "version": "1.3.0",
+  "version": "1.4.0",
   "runtime": "offline-localStorage; no HTTP requests",
   "interactions": [
     {
@@ -18,7 +18,8 @@
         "REQ-010",
         "REQ-011",
         "REQ-012",
-        "REQ-013"
+        "REQ-013",
+        "REQ-015"
       ]
     },
     {
@@ -58,7 +59,11 @@
         "analysis-tab": "切换问题/行动分析页签",
         "overview-task-status": "设置taskFilter.status并打开看板",
         "overview-task-due": "设置taskFilter.due并打开未完成行动看板",
-        "clear-task-filter": "清除行动筛选"
+        "clear-task-filter": "清除行动筛选",
+        "edit-attributes": "打开预填属性表单",
+        "workflow-guide": "打开问题整体流转图",
+        "issue-guide": "打开流转图并保留详情返回入口",
+        "guide-tab": "切换流转图"
       },
       "branches": {
         "workflow-form": "editing",
@@ -79,7 +84,8 @@
         "REQ-011",
         "REQ-012",
         "REQ-013",
-        "REQ-014"
+        "REQ-014",
+        "REQ-015"
       ]
     },
     {
@@ -139,7 +145,8 @@
         "REQ-010",
         "REQ-011",
         "REQ-012",
-        "REQ-013"
+        "REQ-013",
+        "REQ-015"
       ]
     }
   ],
@@ -264,5 +271,16 @@
     "field": "description",
     "validation": "optional, maximum 5000 chars",
     "success": "save description only, log, return detail; status and followups unchanged"
+  },
+  "attributes_submit": {
+    "form": "attributes-form",
+    "event": "EVT-SUBMIT",
+    "validation": "priority in 高/中/低; trimmed category <=40 chars; blank becomes 未分类",
+    "success": "update priority/tag, save, return to prior list/detail",
+    "preserve": [
+      "status",
+      "description",
+      "followups"
+    ]
   }
 }

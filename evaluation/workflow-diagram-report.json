@@ -1,0 +1,21 @@
+{
+  "valid": true,
+  "cases": [
+    {
+      "name": "完整问题图包含七状态与返回分支",
+      "passed": true
+    },
+    {
+      "name": "完整行动图包含四状态与返回分支",
+      "passed": true
+    },
+    {
+      "name": "详细规则可以展开查看",
+      "passed": true
+    },
+    {
+      "name": "手机图表局部滚动，页面不溢出",
+      "passed": true
+    }
+  ]
+}
