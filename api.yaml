@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: 拾序后续工程接口合同
-  version: 1.1.0
+  version: 1.2.0
   description: 未来单人服务端合同；当前原型离线。状态跳转、关联行动处置和历史写入必须同一事务。读取时保留旧记录内容与阶段，导出schemaVersion=2。实际日期空值在原型为空字符串，API/SQL为null。
 paths:
   /issues:
@@ -245,6 +245,41 @@ paths:
           description: 问题不存在
         '409':
           description: 状态冲突或存在未完成必要行动
+  /issues/{id}/followups:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    post:
+      summary: 追加跟进，不改变问题状态；正文去除首尾空白后校验
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - content
+              properties:
+                content:
+                  type: string
+                  minLength: 1
+                  maxLength: 5000
+      responses:
+        '201':
+          description: 保存成功；时间与记录人由服务端生成
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Followup'
+        '400':
+          description: 正文为空或超长
+        '404':
+          description: 问题不存在
+        '500':
+          description: 保存失败，不得报成功
 components:
   schemas:
     IssueWrite:
@@ -346,6 +381,11 @@ components:
             type: array
             items:
               $ref: '#/components/schemas/History'
+          followups:
+            type: array
+            default: []
+            items:
+              $ref: '#/components/schemas/Followup'
     Task:
       allOf:
       - $ref: '#/components/schemas/TaskWrite'
@@ -482,6 +522,25 @@ components:
         taskPolicy:
           type: string
       description: 按action逐项校验必填条件，参见x-workflow；所有文本trim后不可为空。
+    Followup:
+      type: object
+      required:
+      - id
+      - content
+      - at
+      - actor
+      properties:
+        id:
+          type: string
+        content:
+          type: string
+          minLength: 1
+          maxLength: 5000
+        at:
+          type: string
+          format: date-time
+        actor:
+          type: string
 x-workflow:
   triage:
     from:

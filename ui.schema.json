@@ -1,5 +1,5 @@
 {
-  "version": "1.1.1",
+  "version": "1.2.0",
   "page": {
     "id": "personal-workspace",
     "states": [
@@ -51,7 +51,8 @@
         "REQ-008",
         "REQ-009",
         "REQ-010",
-        "REQ-011"
+        "REQ-011",
+        "REQ-012"
       ]
     },
     {
@@ -76,7 +77,8 @@
         "REQ-008",
         "REQ-009",
         "REQ-010",
-        "REQ-011"
+        "REQ-011",
+        "REQ-012"
       ],
       "variants": {
         "nav": "切换 today/issues/tasks/review 页面",
@@ -101,7 +103,8 @@
         "close-issue": "已关闭",
         "retriage": "待梳理",
         "cancel-task": "取消行动并填写理由",
-        "status-filter": "七状态筛选"
+        "status-filter": "七状态筛选",
+        "followup": "打开问题跟进输入"
       }
     },
     {
@@ -293,5 +296,11 @@
         "reason"
       ]
     }
+  },
+  "followup_fields": {
+    "id": "string",
+    "content": "trimmed text, 1..5000",
+    "at": "ISO timestamp",
+    "actor": "我"
   }
 }

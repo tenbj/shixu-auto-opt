@@ -57,6 +57,11 @@
       "id": "workflow-report",
       "path": "evaluation/workflow-report.json",
       "layer": "evaluation"
+    },
+    {
+      "id": "followup-report",
+      "path": "evaluation/followup-report.json",
+      "layer": "evaluation"
     }
   ],
   "input": {
@@ -175,11 +180,22 @@
           "后续改进不阻止验证",
           "重新打开必要行动使已解决或待验证问题回到处理中"
         ]
+      },
+      {
+        "id": "REQ-012",
+        "statement": "快捷记录问题跟进并按时间查看",
+        "acceptance_criteria": [
+          "问题卡片和详情均有记跟进入口",
+          "跟进只需正文，拒绝空白与超过5000字",
+          "自动记录时间与记录人，最新在前，不改变问题状态",
+          "列表显示最近跟进摘要，旧记录、刷新保存和JSON导出兼容",
+          "行动状态与问题状态明确区分，卡片标题与状态相邻"
+        ]
       }
     ]
   },
   "product": "拾序 · 个人工作台",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "runtime": "offline personal browser prototype",
   "limitations": [
     "本地数据，无账号或跨设备同步",

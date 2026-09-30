@@ -1,4 +1,4 @@
--- SQLite参考设计1.1.0，当前原型不使用数据库，严禁当成部署迁移脚本。
+-- SQLite参考设计1.2.0，当前原型不使用数据库，严禁当成部署迁移脚本。
 -- JS issueId -> issue_id, required -> required_for_resolution, 空日期 -> NULL。
 -- 状态动作、原因校验、任务处置与history/logs写入由应用在同一事务执行。
 PRAGMA foreign_keys=ON;
@@ -42,3 +42,11 @@ WHEN NEW.status='已关闭' AND EXISTS(SELECT 1 FROM task WHERE issue_id=NEW.id 
 BEGIN SELECT RAISE(ABORT,'先处置未完成行动'); END;
 -- 其余合法边、暂停恢复目标、重复问题引用、必填字段、必需行动重开联动等按interaction.json状态机在应用层强制验证。
 -- issue_event中from/to非空的事件对应history；message供可读logs使用。旧数据导入须保留原状态与日志。
+
+-- 人工跟进独立于自动状态事件；原型issue.followups映射此表。
+CREATE TABLE issue_followup(
+ id TEXT PRIMARY KEY, issue_id TEXT NOT NULL REFERENCES issue(id),
+ content TEXT NOT NULL CHECK(length(trim(content)) BETWEEN 1 AND 5000),
+ created_at TEXT NOT NULL, actor TEXT NOT NULL
+);
+CREATE INDEX ix_followup_issue_time ON issue_followup(issue_id,created_at DESC);

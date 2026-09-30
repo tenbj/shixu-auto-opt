@@ -47,7 +47,7 @@ async () => {
     check('关闭并取消未完成待办',canceled.status==='已取消'&&canceled.cancelReason.includes('决定放弃'));
     detail(p.id);click('toggle',canceled.id);check('关闭问题不可经任务绕过重开',p.status==='已关闭'&&canceled.status==='已取消');
     const before=JSON.stringify(p);check('非法跳转在状态机层拒绝',!!transitionIssue(p,'resolve',{resolution:'跳过'})&&JSON.stringify(p)===before);
-    click('close');click('nav','issues');click('status-filter','已关闭');check('七状态筛选可用',document.querySelector('#app').textContent.includes(p.title)&&document.querySelectorAll('.status-chip').length===7);
+    click('close');click('nav','issues');click('status-filter','已关闭');check('七状态筛选可用',document.querySelector('#app').textContent.includes(p.title)&&document.querySelectorAll('.status-chip').length===8);
     document.querySelector('#search').value='NO_MATCH_123';document.querySelector('#search').dispatchEvent(new Event('input',{bubbles:true}));check('状态筛选与搜索组合空态',document.querySelector('#app').textContent.includes('这里还没有匹配'));
     query='';priority='全部';scope='未解决';view='today';render();
     click('new');fill('title','没有行动也可验证的观察');submit();const observed=db.issues[0];

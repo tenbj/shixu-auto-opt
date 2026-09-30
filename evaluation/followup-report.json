@@ -1,0 +1,62 @@
+{
+  "valid": true,
+  "cases": [
+    {
+      "name": "旧记录初始化为空跟进且内容不变",
+      "passed": true
+    },
+    {
+      "name": "空白跟进拒绝且不写入",
+      "passed": true
+    },
+    {
+      "name": "保存后详情时间线显示且状态不变",
+      "passed": true
+    },
+    {
+      "name": "跟进内容按纯文本安全展示",
+      "passed": true
+    },
+    {
+      "name": "最新跟进在最上方并保留旧内容",
+      "passed": true
+    },
+    {
+      "name": "原操作记录保留且默认折叠",
+      "passed": true
+    },
+    {
+      "name": "刷新持久保存两条跟进",
+      "passed": true
+    },
+    {
+      "name": "取消不新增记录",
+      "passed": true
+    },
+    {
+      "name": "JSON导出包含完整跟进",
+      "passed": true
+    },
+    {
+      "name": "卡片展示最近跟进摘要",
+      "passed": true
+    },
+    {
+      "name": "行动与问题状态分别明确标注",
+      "passed": true
+    },
+    {
+      "name": "390px问题池无横向溢出",
+      "passed": true
+    },
+    {
+      "name": "390px跟进详情无横向溢出",
+      "passed": true
+    },
+    {
+      "name": "无运行错误",
+      "passed": true
+    }
+  ],
+  "runtime_errors": []
+}

@@ -1,5 +1,5 @@
 {
-  "version": "1.1.1",
+  "version": "1.2.0",
   "runtime": "offline-localStorage; no HTTP requests",
   "interactions": [
     {
@@ -16,7 +16,8 @@
         "REQ-007",
         "REQ-008",
         "REQ-010",
-        "REQ-011"
+        "REQ-011",
+        "REQ-012"
       ]
     },
     {
@@ -48,13 +49,15 @@
         "close-issue": "已关闭",
         "retriage": "待梳理",
         "cancel-task": "打开取消原因表单",
-        "status-filter": "按状态过滤"
+        "status-filter": "按状态过滤",
+        "followup": "打开单正文跟进表单"
       },
       "branches": {
         "workflow-form": "editing",
         "detail": "detail",
         "error": "error",
-        "successful-mutation": "success"
+        "successful-mutation": "success",
+        "followup-form": "editing"
       },
       "requirement_ids": [
         "REQ-001",
@@ -65,7 +68,8 @@
         "REQ-007",
         "REQ-008",
         "REQ-010",
-        "REQ-011"
+        "REQ-011",
+        "REQ-012"
       ]
     },
     {
@@ -121,7 +125,8 @@
         "REQ-007",
         "REQ-008",
         "REQ-010",
-        "REQ-011"
+        "REQ-011",
+        "REQ-012"
       ]
     }
   ],
@@ -231,5 +236,13 @@
         "reason"
       ]
     }
+  },
+  "followup_submit": {
+    "form": "followup-form",
+    "event": "EVT-SUBMIT",
+    "validation": "content.trim length 1..5000",
+    "success": "append issue.followups, save, return detail timeline",
+    "failure": "inline validation; persistence failure shows export warning",
+    "status_change": false
   }
 }
