@@ -62,6 +62,16 @@
       "id": "followup-report",
       "path": "evaluation/followup-report.json",
       "layer": "evaluation"
+    },
+    {
+      "id": "distribution-report",
+      "path": "evaluation/distribution-report.json",
+      "layer": "evaluation"
+    },
+    {
+      "id": "action-analysis-report",
+      "path": "evaluation/action-analysis-report.json",
+      "layer": "evaluation"
     }
   ],
   "input": {
@@ -160,7 +170,7 @@
           "暂缓到期首页提示",
           "暂缓任务不挤入今日行动",
           "状态快捷筛选首项为全部并显示总数",
-          "问题卡片标题区域有醒目状态徽标"
+          "问题卡片标题旁有醒目状态徽标"
         ]
       },
       {
@@ -191,11 +201,34 @@
           "列表显示最近跟进摘要，旧记录、刷新保存和JSON导出兼容",
           "行动状态与问题状态明确区分，卡片标题与状态相邻"
         ]
+      },
+      {
+        "id": "REQ-013",
+        "statement": "可编辑问题背景、按分类筛选与概览分布",
+        "acceptance_criteria": [
+          "背景显示标题，支持直接编辑或补充，保存返回详情",
+          "分类下拉替换状态下拉，动态收集分类；状态保留快捷标签",
+          "状态分类优先级关键词可组合筛选",
+          "独立统计分析页的问题页签展示状态分类数量占比，今日仅留入口",
+          "点击分布清除旧筛选后跳至匹配列表",
+          "空数据与手机布局有效，旧记录兼容"
+        ]
+      },
+      {
+        "id": "REQ-014",
+        "statement": "行动分析与看板跳转",
+        "acceptance_criteria": [
+          "统计分析页提供问题与行动两个页签",
+          "行动四状态计数与总数相符",
+          "时间分布只包含待办和进行中，已完成和取消不计逾期",
+          "点击图表进入带条件的看板，可清除筛选",
+          "空数据与手机布局正确"
+        ]
       }
     ]
   },
   "product": "拾序 · 个人工作台",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "runtime": "offline personal browser prototype",
   "limitations": [
     "本地数据，无账号或跨设备同步",

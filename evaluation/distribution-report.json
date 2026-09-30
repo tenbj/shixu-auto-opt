@@ -1,0 +1,91 @@
+{
+  "valid": true,
+  "cases": [
+    {
+      "name": "overview-state总数正确",
+      "passed": true
+    },
+    {
+      "name": "overview-category总数正确",
+      "passed": true
+    },
+    {
+      "name": "分类图点击清除旧条件",
+      "passed": true
+    },
+    {
+      "name": "组合筛选",
+      "passed": true
+    },
+    {
+      "name": "状态图点击清除分类",
+      "passed": true
+    },
+    {
+      "name": "背景有标题与编辑入口",
+      "passed": true
+    },
+    {
+      "name": "回填原背景",
+      "passed": true
+    },
+    {
+      "name": "保存回详情且状态跟进不变",
+      "passed": true
+    },
+    {
+      "name": "刷新保留背景",
+      "passed": true
+    },
+    {
+      "name": "空背景可补充",
+      "passed": true
+    },
+    {
+      "name": "新分类自动出现",
+      "passed": true
+    },
+    {
+      "name": "全部命名分类不会与不限分类混淆",
+      "passed": true
+    },
+    {
+      "name": "手机概览无溢出",
+      "passed": true
+    },
+    {
+      "name": "手机分类筛选无溢出",
+      "passed": true
+    },
+    {
+      "name": "空数据无NaN且有空态",
+      "passed": true
+    },
+    {
+      "name": "无运行错误",
+      "passed": true
+    },
+    {
+      "name": "今日概览保留入口但不展示大图",
+      "passed": true
+    },
+    {
+      "name": "独立分析页含两种分布和正确导航",
+      "passed": true
+    },
+    {
+      "name": "分析页分类图可跳转列表",
+      "passed": true
+    },
+    {
+      "name": "分析页状态图可跳转列表",
+      "passed": true
+    },
+    {
+      "name": "手机五导航与两张图无横向溢出",
+      "passed": true
+    }
+  ],
+  "runtime_errors": [],
+  "checked_at": "2026-09-30T09:09:11.511241+00:00"
+}

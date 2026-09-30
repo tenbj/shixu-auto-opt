@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: 拾序后续工程接口合同
-  version: 1.2.0
+  version: 1.3.0
   description: 未来单人服务端合同；当前原型离线。状态跳转、关联行动处置和历史写入必须同一事务。读取时保留旧记录内容与阶段，导出schemaVersion=2。实际日期空值在原型为空字符串，API/SQL为null。
 paths:
   /issues:
@@ -28,6 +28,13 @@ paths:
           description: 状态冲突，例如未完成行动阻止问题解决
         '500':
           description: 保存失败，可重试，不能误报成功
+      parameters:
+      - name: category
+        in: query
+        required: false
+        description: 按分类精确匹配；省略时不限分类
+        schema:
+          type: string
     post:
       summary: 记录问题
       responses:
@@ -280,6 +287,40 @@ paths:
           description: 问题不存在
         '500':
           description: 保存失败，不得报成功
+  /issues/{id}/background:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    patch:
+      summary: 单独更新问题背景，不改变状态与跟进
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - description
+              properties:
+                description:
+                  type: string
+                  maxLength: 5000
+      responses:
+        '200':
+          description: 更新后的问题
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+        '400':
+          description: 背景超长或不合法
+        '404':
+          description: 问题不存在
+        '500':
+          description: 保存失败
 components:
   schemas:
     IssueWrite:

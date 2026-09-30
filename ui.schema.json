@@ -1,5 +1,5 @@
 {
-  "version": "1.2.0",
+  "version": "1.3.0",
   "page": {
     "id": "personal-workspace",
     "states": [
@@ -24,6 +24,14 @@
       {
         "id": "tasks",
         "title": "行动看板"
+      },
+      {
+        "id": "analysis",
+        "title": "统计分析",
+        "tabs": [
+          "issues",
+          "tasks"
+        ]
       },
       {
         "id": "review",
@@ -52,7 +60,8 @@
         "REQ-009",
         "REQ-010",
         "REQ-011",
-        "REQ-012"
+        "REQ-012",
+        "REQ-013"
       ]
     },
     {
@@ -78,7 +87,9 @@
         "REQ-009",
         "REQ-010",
         "REQ-011",
-        "REQ-012"
+        "REQ-012",
+        "REQ-013",
+        "REQ-014"
       ],
       "variants": {
         "nav": "切换 today/issues/tasks/review 页面",
@@ -104,7 +115,14 @@
         "retriage": "待梳理",
         "cancel-task": "取消行动并填写理由",
         "status-filter": "七状态筛选",
-        "followup": "打开问题跟进输入"
+        "followup": "打开问题跟进输入",
+        "edit-background": "只编辑description并返回详情",
+        "overview-state": "清除旧条件，按状态打开问题池",
+        "overview-category": "清除旧条件，按分类打开问题池",
+        "analysis-tab": "切换问题/行动分析",
+        "overview-task-status": "按行动状态进入看板",
+        "overview-task-due": "按未完成行动时间分组进入看板",
+        "clear-task-filter": "清除看板筛选"
       }
     },
     {
@@ -124,7 +142,8 @@
         "REQ-008",
         "REQ-009",
         "REQ-010",
-        "REQ-011"
+        "REQ-011",
+        "REQ-013"
       ]
     },
     {
@@ -302,5 +321,25 @@
     "content": "trimmed text, 1..5000",
     "at": "ISO timestamp",
     "actor": "我"
+  },
+  "distribution": {
+    "scope": "all issues including resolved, deferred and closed",
+    "position": "analysis page, issues tab; today has entry link only",
+    "metrics": [
+      "count",
+      "rounded percentage"
+    ],
+    "empty": "zero safe; no category data message",
+    "category_source": "distinct trimmed issue.tag, blank becomes 未分类"
+  },
+  "action_distribution": {
+    "scope_status": "all tasks",
+    "scope_due": "pending tasks, includes deferred-parent tasks",
+    "due_groups": [
+      "已逾期",
+      "今天到期",
+      "未来到期",
+      "未设日期"
+    ]
   }
 }

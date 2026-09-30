@@ -1,0 +1,45 @@
+{
+  "valid": true,
+  "cases": [
+    {
+      "name": "统计分析页默认显示问题分析",
+      "passed": true
+    },
+    {
+      "name": "行动状态合计为全部行动",
+      "passed": true
+    },
+    {
+      "name": "时间分布合计仅未完成行动",
+      "passed": true
+    },
+    {
+      "name": "已完成的过期任务不计为逾期",
+      "passed": true
+    },
+    {
+      "name": "点击逾期展示正确行动和可见筛选",
+      "passed": true
+    },
+    {
+      "name": "清除筛选恢复全部行动",
+      "passed": true
+    },
+    {
+      "name": "点击已完成显示对应列与行动",
+      "passed": true
+    },
+    {
+      "name": "手机行动分析无溢出",
+      "passed": true
+    },
+    {
+      "name": "手机问题分析无溢出",
+      "passed": true
+    },
+    {
+      "name": "空行动统计无NaN",
+      "passed": true
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "version": "1.2.0",
+  "version": "1.3.0",
   "runtime": "offline-localStorage; no HTTP requests",
   "interactions": [
     {
@@ -17,7 +17,8 @@
         "REQ-008",
         "REQ-010",
         "REQ-011",
-        "REQ-012"
+        "REQ-012",
+        "REQ-013"
       ]
     },
     {
@@ -50,7 +51,14 @@
         "retriage": "待梳理",
         "cancel-task": "打开取消原因表单",
         "status-filter": "按状态过滤",
-        "followup": "打开单正文跟进表单"
+        "followup": "打开单正文跟进表单",
+        "edit-background": "打开背景表单",
+        "overview-state": "清除query/priority/category，设置scope后到问题池",
+        "overview-category": "清除query/priority/scope，设置category后到问题池",
+        "analysis-tab": "切换问题/行动分析页签",
+        "overview-task-status": "设置taskFilter.status并打开看板",
+        "overview-task-due": "设置taskFilter.due并打开未完成行动看板",
+        "clear-task-filter": "清除行动筛选"
       },
       "branches": {
         "workflow-form": "editing",
@@ -69,7 +77,9 @@
         "REQ-008",
         "REQ-010",
         "REQ-011",
-        "REQ-012"
+        "REQ-012",
+        "REQ-013",
+        "REQ-014"
       ]
     },
     {
@@ -78,13 +88,14 @@
       "trigger": "input/change",
       "from_state": "ready",
       "to_state": "ready",
-      "action": "按搜索/优先级/状态重新渲染；无结果为empty",
+      "action": "搜索/优先级/分类重新渲染；状态使用EVT-ACTION快捷标签；无结果为empty",
       "requirement_ids": [
         "REQ-002",
         "REQ-007",
         "REQ-008",
         "REQ-010",
-        "REQ-011"
+        "REQ-011",
+        "REQ-013"
       ]
     },
     {
@@ -99,7 +110,8 @@
         "REQ-007",
         "REQ-008",
         "REQ-010",
-        "REQ-011"
+        "REQ-011",
+        "REQ-013"
       ]
     },
     {
@@ -126,7 +138,8 @@
         "REQ-008",
         "REQ-010",
         "REQ-011",
-        "REQ-012"
+        "REQ-012",
+        "REQ-013"
       ]
     }
   ],
@@ -244,5 +257,12 @@
     "success": "append issue.followups, save, return detail timeline",
     "failure": "inline validation; persistence failure shows export warning",
     "status_change": false
+  },
+  "background_submit": {
+    "form": "background-form",
+    "event": "EVT-SUBMIT",
+    "field": "description",
+    "validation": "optional, maximum 5000 chars",
+    "success": "save description only, log, return detail; status and followups unchanged"
   }
 }

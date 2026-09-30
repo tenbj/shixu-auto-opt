@@ -203,6 +203,6 @@
     }
   ],
   "runtime_errors": [],
-  "checked_at": "2026-09-30T08:56:11.789317+00:00",
+  "checked_at": "2026-09-30T09:09:54.547204+00:00",
   "method": "Isolated headless Chrome, DOM events plus data assertions; no user browser storage touched."
 }
