@@ -1,0 +1,208 @@
+{
+  "valid": true,
+  "cases": [
+    {
+      "name": "新建记录仍为一个标题即可保存",
+      "passed": true
+    },
+    {
+      "name": "空白标题被拒绝",
+      "passed": true
+    },
+    {
+      "name": "新问题默认待梳理",
+      "passed": true
+    },
+    {
+      "name": "用户内容经过转义",
+      "passed": true
+    },
+    {
+      "name": "创建待办不会自动开始问题",
+      "passed": true
+    },
+    {
+      "name": "待梳理不能绕过梳理开始行动",
+      "passed": true
+    },
+    {
+      "name": "梳理阶段要求下一步",
+      "passed": true
+    },
+    {
+      "name": "完成梳理进入待处理",
+      "passed": true
+    },
+    {
+      "name": "待处理新增待办仍不算开工",
+      "passed": true
+    },
+    {
+      "name": "首个行动开工推动问题处理中",
+      "passed": true
+    },
+    {
+      "name": "未完成必要行动阻止验证",
+      "passed": true
+    },
+    {
+      "name": "完成行动不自动解决或提交验证",
+      "passed": true
+    },
+    {
+      "name": "验证方式不能只填空格",
+      "passed": true
+    },
+    {
+      "name": "后续改进不阻止进入待验证",
+      "passed": true
+    },
+    {
+      "name": "验证失败退回处理中",
+      "passed": true
+    },
+    {
+      "name": "解决必须有验证结论",
+      "passed": true
+    },
+    {
+      "name": "待验证成功进入已解决",
+      "passed": true
+    },
+    {
+      "name": "解决数量不计关闭",
+      "passed": true
+    },
+    {
+      "name": "重新打开必要行动同步重开问题",
+      "passed": true
+    },
+    {
+      "name": "暂缓保存原阶段和回看日期",
+      "passed": true
+    },
+    {
+      "name": "暂缓期间不可推进关联任务",
+      "passed": true
+    },
+    {
+      "name": "暂缓任务不出现在今日清单",
+      "passed": true
+    },
+    {
+      "name": "暂缓到期在首页提示",
+      "passed": true
+    },
+    {
+      "name": "恢复返回原阶段",
+      "passed": true
+    },
+    {
+      "name": "关闭要求处置未完成任务",
+      "passed": true
+    },
+    {
+      "name": "关闭并保留独立待办",
+      "passed": true
+    },
+    {
+      "name": "关闭重开返回待梳理",
+      "passed": true
+    },
+    {
+      "name": "重复关闭要求原问题",
+      "passed": true
+    },
+    {
+      "name": "重复关闭记录关联",
+      "passed": true
+    },
+    {
+      "name": "关闭并取消未完成待办",
+      "passed": true
+    },
+    {
+      "name": "关闭问题不可经任务绕过重开",
+      "passed": true
+    },
+    {
+      "name": "非法跳转在状态机层拒绝",
+      "passed": true
+    },
+    {
+      "name": "七状态筛选可用",
+      "passed": true
+    },
+    {
+      "name": "状态筛选与搜索组合空态",
+      "passed": true
+    },
+    {
+      "name": "零行动可凭观察提交验证",
+      "passed": true
+    },
+    {
+      "name": "零行动仍须验证结论才解决",
+      "passed": true
+    },
+    {
+      "name": "已解决可手动重开",
+      "passed": true
+    },
+    {
+      "name": "状态变化保留结构化轨迹",
+      "passed": true
+    },
+    {
+      "name": "行动取消保留理由",
+      "passed": true
+    },
+    {
+      "name": "存储失败明确警示",
+      "passed": true
+    },
+    {
+      "name": "导出含七状态扩展和轨迹",
+      "passed": true
+    },
+    {
+      "name": "每个交互控件有事件ID",
+      "passed": true
+    },
+    {
+      "name": "旧版数据兼容且原状态内容不变",
+      "passed": true
+    },
+    {
+      "name": "刷新保留新状态、原阶段和轨迹",
+      "passed": true
+    },
+    {
+      "name": "390px today无溢出",
+      "passed": true
+    },
+    {
+      "name": "390px issues无溢出",
+      "passed": true
+    },
+    {
+      "name": "390px tasks无溢出",
+      "passed": true
+    },
+    {
+      "name": "390px review无溢出",
+      "passed": true
+    },
+    {
+      "name": "390px状态详情无溢出",
+      "passed": true
+    },
+    {
+      "name": "无JavaScript运行错误",
+      "passed": true
+    }
+  ],
+  "runtime_errors": [],
+  "checked_at": "2026-09-30T08:37:10.773477+00:00",
+  "method": "Isolated headless Chrome, DOM events plus data assertions; no user browser storage touched."
+}

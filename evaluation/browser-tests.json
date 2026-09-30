@@ -1,157 +1,208 @@
 {
-  "checked_at": "2026-09-29T08:16:51.067Z",
-  "tool": "Chrome DevTools isolated browser context",
   "valid": true,
   "cases": [
     {
-      "name": "desktop no horizontal overflow",
+      "name": "新建记录仍为一个标题即可保存",
       "passed": true
     },
     {
-      "name": "blank title rejected",
+      "name": "空白标题被拒绝",
       "passed": true
     },
     {
-      "name": "issue creation",
+      "name": "新问题默认待梳理",
       "passed": true
     },
     {
-      "name": "user content escaped",
+      "name": "用户内容经过转义",
       "passed": true
     },
     {
-      "name": "issue task association",
+      "name": "创建待办不会自动开始问题",
       "passed": true
     },
     {
-      "name": "multiple actions",
+      "name": "待梳理不能绕过梳理开始行动",
       "passed": true
     },
     {
-      "name": "incomplete action blocks resolution",
+      "name": "梳理阶段要求下一步",
       "passed": true
     },
     {
-      "name": "start task",
+      "name": "完成梳理进入待处理",
       "passed": true
     },
     {
-      "name": "all tasks done is not auto resolution",
+      "name": "待处理新增待办仍不算开工",
       "passed": true
     },
     {
-      "name": "blank resolution rejected",
+      "name": "首个行动开工推动问题处理中",
       "passed": true
     },
     {
-      "name": "explicit verification closes issue",
+      "name": "未完成必要行动阻止验证",
       "passed": true
     },
     {
-      "name": "review visible",
+      "name": "完成行动不自动解决或提交验证",
       "passed": true
     },
     {
-      "name": "reopening task reopens issue",
+      "name": "验证方式不能只填空格",
       "passed": true
     },
     {
-      "name": "edit task to standalone",
+      "name": "后续改进不阻止进入待验证",
       "passed": true
     },
     {
-      "name": "search empty state",
+      "name": "验证失败退回处理中",
       "passed": true
     },
     {
-      "name": "priority filter",
+      "name": "解决必须有验证结论",
       "passed": true
     },
     {
-      "name": "record type preserves title",
+      "name": "待验证成功进入已解决",
       "passed": true
     },
     {
-      "name": "undated task excluded today",
+      "name": "解决数量不计关闭",
       "passed": true
     },
     {
-      "name": "storage failure visible",
+      "name": "重新打开必要行动同步重开问题",
       "passed": true
     },
     {
-      "name": "export contains all records",
+      "name": "暂缓保存原阶段和回看日期",
       "passed": true
     },
     {
-      "name": "all buttons mapped",
+      "name": "暂缓期间不可推进关联任务",
       "passed": true
     },
     {
-      "name": "refresh persists saved records",
+      "name": "暂缓任务不出现在今日清单",
       "passed": true
     },
     {
-      "name": "mobile today no overflow",
+      "name": "暂缓到期在首页提示",
       "passed": true
     },
     {
-      "name": "mobile issues no overflow",
+      "name": "恢复返回原阶段",
       "passed": true
     },
     {
-      "name": "mobile tasks no overflow",
+      "name": "关闭要求处置未完成任务",
       "passed": true
     },
     {
-      "name": "mobile review no overflow",
+      "name": "关闭并保留独立待办",
       "passed": true
     },
     {
-      "name": "mobile dialog fits",
+      "name": "关闭重开返回待梳理",
+      "passed": true
+    },
+    {
+      "name": "重复关闭要求原问题",
+      "passed": true
+    },
+    {
+      "name": "重复关闭记录关联",
+      "passed": true
+    },
+    {
+      "name": "关闭并取消未完成待办",
+      "passed": true
+    },
+    {
+      "name": "关闭问题不可经任务绕过重开",
+      "passed": true
+    },
+    {
+      "name": "非法跳转在状态机层拒绝",
+      "passed": true
+    },
+    {
+      "name": "七状态筛选可用",
+      "passed": true
+    },
+    {
+      "name": "状态筛选与搜索组合空态",
+      "passed": true
+    },
+    {
+      "name": "零行动可凭观察提交验证",
+      "passed": true
+    },
+    {
+      "name": "零行动仍须验证结论才解决",
+      "passed": true
+    },
+    {
+      "name": "已解决可手动重开",
+      "passed": true
+    },
+    {
+      "name": "状态变化保留结构化轨迹",
+      "passed": true
+    },
+    {
+      "name": "行动取消保留理由",
+      "passed": true
+    },
+    {
+      "name": "存储失败明确警示",
+      "passed": true
+    },
+    {
+      "name": "导出含七状态扩展和轨迹",
+      "passed": true
+    },
+    {
+      "name": "每个交互控件有事件ID",
+      "passed": true
+    },
+    {
+      "name": "旧版数据兼容且原状态内容不变",
+      "passed": true
+    },
+    {
+      "name": "刷新保留新状态、原阶段和轨迹",
+      "passed": true
+    },
+    {
+      "name": "390px today无溢出",
+      "passed": true
+    },
+    {
+      "name": "390px issues无溢出",
+      "passed": true
+    },
+    {
+      "name": "390px tasks无溢出",
+      "passed": true
+    },
+    {
+      "name": "390px review无溢出",
+      "passed": true
+    },
+    {
+      "name": "390px状态详情无溢出",
+      "passed": true
+    },
+    {
+      "name": "无JavaScript运行错误",
       "passed": true
     }
   ],
-  "additional_device_emulation": {
-    "width": 390,
-    "cases": [
-      {
-        "name": "390px mobile today no overflow",
-        "passed": true
-      },
-      {
-        "name": "390px mobile issues no overflow",
-        "passed": true
-      },
-      {
-        "name": "390px mobile tasks no overflow",
-        "passed": true
-      },
-      {
-        "name": "390px mobile review no overflow",
-        "passed": true
-      },
-      {
-        "name": "390px mobile dialog fits",
-        "passed": true
-      }
-    ],
-    "passed": true
-  },
-  "notes": [
-    "使用真实浏览器，通过DOM按钮与表单触发交互；业务断言同时检查数据状态。",
-    "测试在隔离上下文运行，测试数据已恢复为初始示例。",
-    "窄窗口实测500px；另以真实设备模拟390x844验证全部四视图与弹窗通过。",
-    "SQLite参考DDL在内存库成功执行；API仅设计，未部署。"
-  ],
-  "final_revision_checks": [
-    {
-      "name": "field edit clears validation error",
-      "passed": true
-    },
-    {
-      "name": "every rendered button/input/select/textarea has event ID",
-      "passed": true
-    }
-  ]
+  "runtime_errors": [],
+  "checked_at": "2026-09-30T08:37:10.773477+00:00",
+  "method": "Isolated headless Chrome, DOM events plus data assertions; no user browser storage touched."
 }

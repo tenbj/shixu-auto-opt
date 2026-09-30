@@ -1,0 +1,67 @@
+async () => {
+  const cases=[],check=(name,pass)=>{cases.push({name,passed:!!pass});if(!pass)throw Error(name)};
+  const original=structuredClone(db),stored=localStorage.getItem(KEY);
+  const click=(a,id)=>{const selector=`[data-action="${a}"]${id?`[data-id="${id}"]`:''}`;const el=document.querySelector('#modal[open] '+selector)||document.querySelector(selector);if(!el)throw Error('missing '+selector);el.click()};
+  const fill=(name,value)=>{document.querySelector(`[name="${name}"]`).value=value};
+  const submit=()=>document.querySelector('#modal form').requestSubmit();
+  const error=()=>document.querySelector('#form-error')?.textContent||'';
+  const formAction=(action,p,values={})=>{detail(p.id);click(action,p.id);Object.entries(values).forEach(([k,v])=>fill(k,v));submit()};
+  let restoreStorage=Storage.prototype.setItem,oldURL=URL.createObjectURL,oldClick=HTMLAnchorElement.prototype.click;
+  try{
+    check('新建记录仍为一个标题即可保存',true);
+    click('new');fill('title','   ');submit();check('空白标题被拒绝',error().length>0);
+    fill('title','测试 <img src=x onerror=alert(1)>');submit();const p=db.issues[0];
+    check('新问题默认待梳理',p.status==='待梳理'&&!p.successCriteria);
+    detail(p.id);check('用户内容经过转义',!document.querySelector('#modal img'));
+    click('new-linked',p.id);fill('title','本轮行动');submit();const t=db.tasks[0];
+    check('创建待办不会自动开始问题',p.status==='待梳理'&&t.required===true);
+    detail(p.id);click('advance',t.id);check('待梳理不能绕过梳理开始行动',t.status==='待办'&&p.status==='待梳理');
+    formAction('triage',p,{nextStep:'   ',successCriteria:'可观察的改善'});check('梳理阶段要求下一步',error().length>0);
+    fill('nextStep','先完成本轮行动');submit();check('完成梳理进入待处理',p.status==='待处理');
+    click('new-linked',p.id);fill('title','后续优化');fill('required','later');submit();const later=db.tasks[0];
+    check('待处理新增待办仍不算开工',p.status==='待处理'&&!later.required);
+    detail(p.id);click('advance',t.id);check('首个行动开工推动问题处理中',p.status==='处理中'&&t.status==='进行中');
+    click('verify',p.id);check('未完成必要行动阻止验证',p.status==='处理中'&&document.querySelector('#modal-title').textContent==='问题详情');
+    click('toggle',t.id);check('完成行动不自动解决或提交验证',p.status==='处理中'&&remaining(p.id).length===0);
+    formAction('verify',p,{successCriteria:'困扰减少',treatment:'完成了必要步骤',verificationMethod:'   '});check('验证方式不能只填空格',error().length>0);
+    fill('verificationMethod','观察三个工作日');submit();check('后续改进不阻止进入待验证',p.status==='待验证'&&later.status==='待办');
+    formAction('reject',p,{reason:'仍然每天重复'});check('验证失败退回处理中',p.status==='处理中');
+    formAction('verify',p,{successCriteria:'重复工作少于10分钟',treatment:'再次调整',verificationMethod:'连续观察'});
+    formAction('resolve',p,{resolution:'   '});check('解决必须有验证结论',error().length>0&&p.status==='待验证');
+    fill('resolution','连续三天小于10分钟');submit();check('待验证成功进入已解决',p.status==='已解决');
+    check('解决数量不计关闭',db.issues.filter(x=>x.status==='已解决').includes(p));
+    click('toggle',t.id);check('重新打开必要行动同步重开问题',p.status==='处理中'&&t.status==='待办'&&p.resolution.length>0);
+    formAction('pause',p,{reason:'等待材料',reviewDate:date(1)});check('暂缓保存原阶段和回看日期',p.status==='已暂缓'&&p.pausedFrom==='处理中');
+    click('advance',t.id);check('暂缓期间不可推进关联任务',p.status==='已暂缓'&&t.status==='待办');
+    click('close');click('nav','today');check('暂缓任务不出现在今日清单',!document.querySelector('#app').textContent.includes('本轮行动'));
+    p.reviewDate=today;render();check('暂缓到期在首页提示',!!document.querySelector('.review-reminder'));
+    detail(p.id);click('resume',p.id);check('恢复返回原阶段',p.status==='处理中');
+    formAction('close-issue',p,{reason:'不值得继续',closeType:'收益不足'});check('关闭要求处置未完成任务',error().includes('处置'));
+    fill('taskPolicy','detach');submit();check('关闭并保留独立待办',p.status==='已关闭'&&t.issueId===null&&later.issueId===null&&t.status==='待办');
+    formAction('reopen',p,{reason:'需求有变化'});check('关闭重开返回待梳理',p.status==='待梳理');
+    formAction('close-issue',p,{reason:'重复记录',closeType:'重复问题'});check('重复关闭要求原问题',error().length>0);
+    fill('duplicateOf','p1');submit();check('重复关闭记录关联',p.status==='已关闭'&&p.duplicateOf==='p1');
+    formAction('reopen',p,{reason:'重新评估'});
+    click('new-linked',p.id);fill('title','取消测试');submit();const canceled=db.tasks[0];
+    formAction('close-issue',p,{reason:'决定放弃',closeType:'不再处理',taskPolicy:'cancel'});
+    check('关闭并取消未完成待办',canceled.status==='已取消'&&canceled.cancelReason.includes('决定放弃'));
+    detail(p.id);click('toggle',canceled.id);check('关闭问题不可经任务绕过重开',p.status==='已关闭'&&canceled.status==='已取消');
+    const before=JSON.stringify(p);check('非法跳转在状态机层拒绝',!!transitionIssue(p,'resolve',{resolution:'跳过'})&&JSON.stringify(p)===before);
+    click('close');click('nav','issues');click('status-filter','已关闭');check('七状态筛选可用',document.querySelector('#app').textContent.includes(p.title)&&document.querySelectorAll('.status-chip').length===7);
+    document.querySelector('#search').value='NO_MATCH_123';document.querySelector('#search').dispatchEvent(new Event('input',{bubbles:true}));check('状态筛选与搜索组合空态',document.querySelector('#app').textContent.includes('这里还没有匹配'));
+    query='';priority='全部';scope='未解决';view='today';render();
+    click('new');fill('title','没有行动也可验证的观察');submit();const observed=db.issues[0];
+    formAction('verify',observed,{successCriteria:'问题不再出现',treatment:'观察后已自行消失',verificationMethod:'持续观察三天'});check('零行动可凭观察提交验证',observed.status==='待验证');
+    formAction('resolve',observed,{resolution:'三天没有再次发生'});check('零行动仍须验证结论才解决',observed.status==='已解决');
+    formAction('reopen',observed,{reason:'再次发生'});check('已解决可手动重开',observed.status==='处理中');
+    check('状态变化保留结构化轨迹',p.history.every(h=>h.from&&h.to&&h.reason&&h.at&&h.actor)&&p.history.length>=10);
+    detail(observed.id);click('new-linked',observed.id);fill('title','可取消行动');submit();const optional=db.tasks[0];
+    detail(observed.id);click('cancel-task',optional.id);fill('reason','改变方案');submit();check('行动取消保留理由',optional.status==='已取消'&&optional.cancelReason==='改变方案');
+    click('close');Storage.prototype.setItem=function(){throw Error('quota')};click('new');fill('title','保存失败测试');submit();check('存储失败明确警示',!document.querySelector('#storage-warning').classList.contains('hidden'));Storage.prototype.setItem=restoreStorage;
+    let blob;URL.createObjectURL=b=>{blob=b;return oldURL(b)};HTMLAnchorElement.prototype.click=function(){};click('export');URL.createObjectURL=oldURL;HTMLAnchorElement.prototype.click=oldClick;
+    const exported=JSON.parse(await blob.text());check('导出含七状态扩展和轨迹',exported.schemaVersion===2&&exported.issues.find(x=>x.id===p.id).history.length>0);
+    click('new');check('每个交互控件有事件ID',[...document.querySelectorAll('button,input,select,textarea')].every(x=>x.dataset.eventId));click('close');
+    return {valid:true,cases};
+  }catch(e){return {valid:false,cases,error:String(e)}}
+  finally{Storage.prototype.setItem=restoreStorage;URL.createObjectURL=oldURL;HTMLAnchorElement.prototype.click=oldClick;db=original;if(stored===null)localStorage.removeItem(KEY);else localStorage.setItem(KEY,stored);$('#modal').close();$('#storage-warning').classList.add('hidden');view='today';query='';priority='全部';scope='未解决';render()}
+}

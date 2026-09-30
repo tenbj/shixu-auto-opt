@@ -47,6 +47,16 @@
       "id": "browser-tests",
       "path": "evaluation/browser-tests.json",
       "layer": "evaluation"
+    },
+    {
+      "id": "workflow-test",
+      "path": "evaluation/workflow-test.js",
+      "layer": "evaluation"
+    },
+    {
+      "id": "workflow-report",
+      "path": "evaluation/workflow-report.json",
+      "layer": "evaluation"
     }
   ],
   "input": {
@@ -54,7 +64,7 @@
     "target_users": [
       "个人工作者"
     ],
-    "product_context": "个人工作台：记录困扰、拆解待办并验证改善。",
+    "product_context": "个人工作台；保持现有视觉和快捷记录，新问题默认待梳理。",
     "target_platform": "web",
     "constraints": [
       "单文件离线可打开",
@@ -104,9 +114,9 @@
         "id": "REQ-005",
         "statement": "验证问题是否解决",
         "acceptance_criteria": [
-          "有未完成行动不能解决问题",
-          "解决前必须填写验证结论",
-          "解决的问题可以重新打开"
+          "尚有未完成必要行动不能进入验证/解决",
+          "待验证填写非空验证结论才能解决",
+          "解决的问题可以填写原因重新打开"
         ]
       },
       {
@@ -117,11 +127,57 @@
           "本地保存失败有明确提示",
           "可导出包含问题和待办的JSON"
         ]
+      },
+      {
+        "id": "REQ-007",
+        "statement": "问题七状态与受约束流转",
+        "acceptance_criteria": [
+          "新建只填标题且默认待梳理",
+          "完成梳理、开始、验证、解决有明确动作与校验",
+          "非法状态跳转拒绝且不改数据"
+        ]
+      },
+      {
+        "id": "REQ-008",
+        "statement": "暂缓恢复与关闭重开",
+        "acceptance_criteria": [
+          "暂缓要求原因及回看日期，并恢复原阶段",
+          "关闭必须说明原因并处置未完成行动",
+          "重复问题关联原问题"
+        ]
+      },
+      {
+        "id": "REQ-009",
+        "statement": "按状态呈现与筛选",
+        "acceptance_criteria": [
+          "卡片有状态徽标",
+          "七状态可筛选",
+          "暂缓到期首页提示",
+          "暂缓任务不挤入今日行动"
+        ]
+      },
+      {
+        "id": "REQ-010",
+        "statement": "兼容原有本地记录",
+        "acceptance_criteria": [
+          "存储键和version保持1，schemaVersion升级2",
+          "旧记录内容、状态和日志不改写",
+          "导出包含完整新字段和状态轨迹"
+        ]
+      },
+      {
+        "id": "REQ-011",
+        "statement": "必要行动与后续改进区分",
+        "acceptance_criteria": [
+          "必要行动完成或说明原因取消才可验证",
+          "后续改进不阻止验证",
+          "重新打开必要行动使已解决或待验证问题回到处理中"
+        ]
       }
     ]
   },
   "product": "拾序 · 个人工作台",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "runtime": "offline personal browser prototype",
   "limitations": [
     "本地数据，无账号或跨设备同步",

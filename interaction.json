@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "runtime": "offline-localStorage; no HTTP requests",
   "interactions": [
     {
@@ -12,7 +12,11 @@
       "requirement_ids": [
         "REQ-001",
         "REQ-003",
-        "REQ-005"
+        "REQ-005",
+        "REQ-007",
+        "REQ-008",
+        "REQ-010",
+        "REQ-011"
       ]
     },
     {
@@ -32,24 +36,36 @@
         "close": "取消并关闭弹窗",
         "toggle": "完成/重开行动；必要时重开问题",
         "advance": "待办与进行中切换",
-        "resolve": "检查行动全部完成再显示验证表单",
-        "reopen": "重开问题并保留上次验证",
-        "export": "下载当前JSON记录"
+        "resolve": "已解决",
+        "reopen": "已解决重开到处理中；已关闭重开到待梳理",
+        "export": "下载当前JSON记录",
+        "triage": "待处理",
+        "start": "处理中",
+        "verify": "待验证",
+        "reject": "处理中",
+        "pause": "已暂缓",
+        "resume": "pausedFrom",
+        "close-issue": "已关闭",
+        "retriage": "待梳理",
+        "cancel-task": "打开取消原因表单",
+        "status-filter": "按状态过滤"
       },
       "branches": {
-        "new/new-task/new-linked/edit-task/edit-issue": "editing",
+        "workflow-form": "editing",
         "detail": "detail",
-        "resolve": "validating 或保持detail并提示阻塞",
-        "toggle/advance/reopen": "success",
-        "export": "success",
-        "close": "ready"
+        "error": "error",
+        "successful-mutation": "success"
       },
       "requirement_ids": [
         "REQ-001",
         "REQ-003",
         "REQ-004",
         "REQ-005",
-        "REQ-006"
+        "REQ-006",
+        "REQ-007",
+        "REQ-008",
+        "REQ-010",
+        "REQ-011"
       ]
     },
     {
@@ -60,7 +76,11 @@
       "to_state": "ready",
       "action": "按搜索/优先级/状态重新渲染；无结果为empty",
       "requirement_ids": [
-        "REQ-002"
+        "REQ-002",
+        "REQ-007",
+        "REQ-008",
+        "REQ-010",
+        "REQ-011"
       ]
     },
     {
@@ -71,7 +91,11 @@
       "to_state": "editing",
       "action": "切换问题/行动表单；保留标题，其他可选字段重新设置",
       "requirement_ids": [
-        "REQ-001"
+        "REQ-001",
+        "REQ-007",
+        "REQ-008",
+        "REQ-010",
+        "REQ-011"
       ]
     },
     {
@@ -80,18 +104,132 @@
       "trigger": "submit",
       "from_state": "editing",
       "to_state": "success",
-      "action": "校验标题或验证结论；更新实体及日志；本地保存；失败为error",
+      "action": "校验记录、工作流或取消行动表单；原子更新内存与日志后持久保存",
       "guards": [
-        "trim(title)非空",
-        "trim(resolution)非空",
-        "解决前无未完成行动"
+        "新问题默认待梳理",
+        "校验当前状态允许动作",
+        "原因/梳理/验证字段非空",
+        "仅本轮必要且未完成/未取消行动阻止验证",
+        "暂停日期校验",
+        "关闭前处置未完成行动"
       ],
       "requirement_ids": [
         "REQ-001",
         "REQ-003",
         "REQ-005",
-        "REQ-006"
+        "REQ-006",
+        "REQ-007",
+        "REQ-008",
+        "REQ-010",
+        "REQ-011"
       ]
     }
-  ]
+  ],
+  "issue_transitions": {
+    "triage": {
+      "from": [
+        "待梳理"
+      ],
+      "to": "待处理",
+      "required": [
+        "nextStep",
+        "successCriteria"
+      ]
+    },
+    "start": {
+      "from": [
+        "待处理"
+      ],
+      "to": "处理中",
+      "guard": "nextStep与successCriteria已填写"
+    },
+    "verify": {
+      "from": [
+        "待梳理",
+        "待处理",
+        "处理中"
+      ],
+      "to": "待验证",
+      "required": [
+        "successCriteria",
+        "treatment",
+        "verificationMethod"
+      ],
+      "guard": "无未完成必要行动；前两种源状态仅在零关联行动时允许直接观察验证"
+    },
+    "resolve": {
+      "from": [
+        "待验证"
+      ],
+      "to": "已解决",
+      "required": [
+        "resolution"
+      ],
+      "guard": "无未完成必要行动"
+    },
+    "reject": {
+      "from": [
+        "待验证"
+      ],
+      "to": "处理中",
+      "required": [
+        "reason"
+      ]
+    },
+    "pause": {
+      "from": [
+        "待梳理",
+        "待处理",
+        "处理中",
+        "待验证"
+      ],
+      "to": "已暂缓",
+      "required": [
+        "reason",
+        "reviewDate"
+      ],
+      "guard": "回看日期不得早于今天；保存pausedFrom"
+    },
+    "resume": {
+      "from": [
+        "已暂缓"
+      ],
+      "to": "pausedFrom",
+      "guard": "恢复待验证时若有未完成必要行动则退回处理中"
+    },
+    "close-issue": {
+      "from": [
+        "待梳理",
+        "待处理",
+        "处理中",
+        "待验证",
+        "已暂缓"
+      ],
+      "to": "已关闭",
+      "required": [
+        "reason",
+        "closeType"
+      ],
+      "guard": "重复需duplicateOf，存在未完成行动需taskPolicy=detach或cancel"
+    },
+    "reopen": {
+      "from": [
+        "已解决",
+        "已关闭"
+      ],
+      "to": "已解决重开到处理中；已关闭重开到待梳理",
+      "required": [
+        "reason"
+      ]
+    },
+    "retriage": {
+      "from": [
+        "待处理"
+      ],
+      "to": "待梳理",
+      "required": [
+        "reason"
+      ]
+    }
+  }
 }

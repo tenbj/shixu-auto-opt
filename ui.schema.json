@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "page": {
     "id": "personal-workspace",
     "states": [
@@ -46,7 +46,12 @@
       "requirement_ids": [
         "REQ-001",
         "REQ-003",
-        "REQ-005"
+        "REQ-005",
+        "REQ-007",
+        "REQ-008",
+        "REQ-009",
+        "REQ-010",
+        "REQ-011"
       ]
     },
     {
@@ -66,7 +71,12 @@
         "REQ-003",
         "REQ-004",
         "REQ-005",
-        "REQ-006"
+        "REQ-006",
+        "REQ-007",
+        "REQ-008",
+        "REQ-009",
+        "REQ-010",
+        "REQ-011"
       ],
       "variants": {
         "nav": "切换 today/issues/tasks/review 页面",
@@ -79,9 +89,19 @@
         "close": "取消并关闭弹窗",
         "toggle": "完成/重开行动；必要时重开问题",
         "advance": "待办与进行中切换",
-        "resolve": "检查行动全部完成再显示验证表单",
-        "reopen": "重开问题并保留上次验证",
-        "export": "下载当前JSON记录"
+        "resolve": "已解决",
+        "reopen": "已解决重开到处理中；已关闭重开到待梳理",
+        "export": "下载当前JSON记录",
+        "triage": "待处理",
+        "start": "处理中",
+        "verify": "待验证",
+        "reject": "处理中",
+        "pause": "已暂缓",
+        "resume": "pausedFrom",
+        "close-issue": "已关闭",
+        "retriage": "待梳理",
+        "cancel-task": "取消行动并填写理由",
+        "status-filter": "七状态筛选"
       }
     },
     {
@@ -96,7 +116,12 @@
         "empty"
       ],
       "requirement_ids": [
-        "REQ-002"
+        "REQ-002",
+        "REQ-007",
+        "REQ-008",
+        "REQ-009",
+        "REQ-010",
+        "REQ-011"
       ]
     },
     {
@@ -110,7 +135,12 @@
         "editing"
       ],
       "requirement_ids": [
-        "REQ-001"
+        "REQ-001",
+        "REQ-007",
+        "REQ-008",
+        "REQ-009",
+        "REQ-010",
+        "REQ-011"
       ]
     },
     {
@@ -130,21 +160,138 @@
         "REQ-001",
         "REQ-003",
         "REQ-005",
-        "REQ-006"
+        "REQ-006",
+        "REQ-007",
+        "REQ-008",
+        "REQ-009",
+        "REQ-010",
+        "REQ-011"
       ]
     }
   ],
   "entity_states": {
     "issue": [
       "待梳理",
+      "待处理",
       "处理中",
-      "已解决"
+      "待验证",
+      "已解决",
+      "已暂缓",
+      "已关闭"
     ],
     "task": [
       "待办",
       "进行中",
-      "已完成"
+      "已完成",
+      "已取消"
     ]
   },
-  "notes": "组件是复用组件定义；实例通过data-action与data-id识别。表单输入通过name与所属form识别，提交时统一读取，事件委托绑定在document。"
+  "notes": "组件是复用组件定义；实例通过data-action与data-id识别。表单输入通过name与所属form识别，提交时统一读取，事件委托绑定在document。",
+  "issue_transitions": {
+    "triage": {
+      "from": [
+        "待梳理"
+      ],
+      "to": "待处理",
+      "required": [
+        "nextStep",
+        "successCriteria"
+      ]
+    },
+    "start": {
+      "from": [
+        "待处理"
+      ],
+      "to": "处理中",
+      "guard": "nextStep与successCriteria已填写"
+    },
+    "verify": {
+      "from": [
+        "待梳理",
+        "待处理",
+        "处理中"
+      ],
+      "to": "待验证",
+      "required": [
+        "successCriteria",
+        "treatment",
+        "verificationMethod"
+      ],
+      "guard": "无未完成必要行动；前两种源状态仅在零关联行动时允许直接观察验证"
+    },
+    "resolve": {
+      "from": [
+        "待验证"
+      ],
+      "to": "已解决",
+      "required": [
+        "resolution"
+      ],
+      "guard": "无未完成必要行动"
+    },
+    "reject": {
+      "from": [
+        "待验证"
+      ],
+      "to": "处理中",
+      "required": [
+        "reason"
+      ]
+    },
+    "pause": {
+      "from": [
+        "待梳理",
+        "待处理",
+        "处理中",
+        "待验证"
+      ],
+      "to": "已暂缓",
+      "required": [
+        "reason",
+        "reviewDate"
+      ],
+      "guard": "回看日期不得早于今天；保存pausedFrom"
+    },
+    "resume": {
+      "from": [
+        "已暂缓"
+      ],
+      "to": "pausedFrom",
+      "guard": "恢复待验证时若有未完成必要行动则退回处理中"
+    },
+    "close-issue": {
+      "from": [
+        "待梳理",
+        "待处理",
+        "处理中",
+        "待验证",
+        "已暂缓"
+      ],
+      "to": "已关闭",
+      "required": [
+        "reason",
+        "closeType"
+      ],
+      "guard": "重复需duplicateOf，存在未完成行动需taskPolicy=detach或cancel"
+    },
+    "reopen": {
+      "from": [
+        "已解决",
+        "已关闭"
+      ],
+      "to": "已解决重开到处理中；已关闭重开到待梳理",
+      "required": [
+        "reason"
+      ]
+    },
+    "retriage": {
+      "from": [
+        "待处理"
+      ],
+      "to": "待梳理",
+      "required": [
+        "reason"
+      ]
+    }
+  }
 }

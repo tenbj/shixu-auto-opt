@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: 拾序后续工程接口合同
-  version: 1.0.0
-  description: 仅设计，尚未实现。当前原型完全离线。单人部署；日期映射：原型空字符串在API中为null。状态变更和日志写入必须同一事务；问题解决时锁定关联行动集合防止并发新建。
+  version: 1.1.0
+  description: 未来单人服务端合同；当前原型离线。状态跳转、关联行动处置和历史写入必须同一事务。读取时保留旧记录内容与阶段，导出schemaVersion=2。实际日期空值在原型为空字符串，API/SQL为null。
 paths:
   /issues:
     get:
@@ -104,68 +104,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/IssueWrite'
-    parameters:
-    - name: id
-      in: path
-      required: true
-      schema:
-        type: string
-  /issues/{id}/resolve:
-    post:
-      summary: 校验全部行动完成并保存验证结论
-      responses:
-        '200':
-          description: 成功
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Issue'
-        '400':
-          description: 输入为空或字段不合法
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: 记录不存在
-        '409':
-          description: 状态冲突，例如未完成行动阻止问题解决
-        '500':
-          description: 保存失败，可重试，不能误报成功
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Resolution'
-    parameters:
-    - name: id
-      in: path
-      required: true
-      schema:
-        type: string
-  /issues/{id}/reopen:
-    post:
-      summary: 重新打开问题，保留上次验证结论
-      responses:
-        '200':
-          description: 成功
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Issue'
-        '400':
-          description: 输入为空或字段不合法
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: 记录不存在
-        '409':
-          description: 状态冲突，例如未完成行动阻止问题解决
-        '500':
-          description: 保存失败，可重试，不能误报成功
     parameters:
     - name: id
       in: path
@@ -279,6 +217,34 @@ paths:
           description: 状态冲突，例如未完成行动阻止问题解决
         '500':
           description: 保存失败，可重试，不能误报成功
+  /issues/{id}/transitions:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    post:
+      summary: 执行问题状态流转及关联行动处置
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Transition'
+      responses:
+        '200':
+          description: 返回更新问题
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+        '400':
+          description: 字段或日期不合法
+        '404':
+          description: 问题不存在
+        '409':
+          description: 状态冲突或存在未完成必要行动
 components:
   schemas:
     IssueWrite:
@@ -325,6 +291,9 @@ components:
           - string
           - 'null'
           format: date
+        required:
+          type: boolean
+          default: true
     Issue:
       allOf:
       - $ref: '#/components/schemas/IssueWrite'
@@ -339,16 +308,44 @@ components:
             type: string
           status:
             type: string
-            enum:
+            enum: &id001
             - 待梳理
+            - 待处理
             - 处理中
+            - 待验证
             - 已解决
+            - 已暂缓
+            - 已关闭
           resolution:
             type: string
           logs:
             type: array
             items:
               type: string
+          nextStep:
+            type: string
+          successCriteria:
+            type: string
+          treatment:
+            type: string
+          verificationMethod:
+            type: string
+          pauseReason:
+            type: string
+          reviewDate:
+            type: string
+          pausedFrom:
+            type: string
+          closeReason:
+            type: string
+          closeType:
+            type: string
+          duplicateOf:
+            type: string
+          history:
+            type: array
+            items:
+              $ref: '#/components/schemas/History'
     Task:
       allOf:
       - $ref: '#/components/schemas/TaskWrite'
@@ -365,6 +362,9 @@ components:
             - 待办
             - 进行中
             - 已完成
+            - 已取消
+          cancelReason:
+            type: string
     TaskUpdate:
       allOf:
       - $ref: '#/components/schemas/TaskWrite'
@@ -376,6 +376,10 @@ components:
             - 待办
             - 进行中
             - 已完成
+            - 已取消
+          cancelReason:
+            type: string
+            description: 状态改为已取消时必填；服务端校验
     Resolution:
       type: object
       required:
@@ -414,3 +418,145 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Task'
+        schemaVersion:
+          type: integer
+          const: 2
+    History:
+      type: object
+      required:
+      - from
+      - to
+      - reason
+      - at
+      - actor
+      properties:
+        from:
+          type: string
+          enum: *id001
+        to:
+          type: string
+          enum: *id001
+        reason:
+          type: string
+        at:
+          type: string
+          format: date-time
+        actor:
+          type: string
+    Transition:
+      type: object
+      required:
+      - action
+      properties:
+        action:
+          type: string
+          enum:
+          - triage
+          - start
+          - verify
+          - resolve
+          - reject
+          - pause
+          - resume
+          - close-issue
+          - reopen
+          - retriage
+        reason:
+          type: string
+        nextStep:
+          type: string
+        successCriteria:
+          type: string
+        treatment:
+          type: string
+        verificationMethod:
+          type: string
+        resolution:
+          type: string
+        reviewDate:
+          type: string
+        closeType:
+          type: string
+        duplicateOf:
+          type: string
+        taskPolicy:
+          type: string
+      description: 按action逐项校验必填条件，参见x-workflow；所有文本trim后不可为空。
+x-workflow:
+  triage:
+    from:
+    - 待梳理
+    to: 待处理
+    required:
+    - nextStep
+    - successCriteria
+  start:
+    from:
+    - 待处理
+    to: 处理中
+    guard: nextStep与successCriteria已填写
+  verify:
+    from:
+    - 待梳理
+    - 待处理
+    - 处理中
+    to: 待验证
+    required:
+    - successCriteria
+    - treatment
+    - verificationMethod
+    guard: 无未完成必要行动；前两种源状态仅在零关联行动时允许直接观察验证
+  resolve:
+    from:
+    - 待验证
+    to: 已解决
+    required:
+    - resolution
+    guard: 无未完成必要行动
+  reject:
+    from:
+    - 待验证
+    to: 处理中
+    required:
+    - reason
+  pause:
+    from:
+    - 待梳理
+    - 待处理
+    - 处理中
+    - 待验证
+    to: 已暂缓
+    required:
+    - reason
+    - reviewDate
+    guard: 回看日期不得早于今天；保存pausedFrom
+  resume:
+    from:
+    - 已暂缓
+    to: pausedFrom
+    guard: 恢复待验证时若有未完成必要行动则退回处理中
+  close-issue:
+    from:
+    - 待梳理
+    - 待处理
+    - 处理中
+    - 待验证
+    - 已暂缓
+    to: 已关闭
+    required:
+    - reason
+    - closeType
+    guard: 重复需duplicateOf，存在未完成行动需taskPolicy=detach或cancel
+  reopen:
+    from:
+    - 已解决
+    - 已关闭
+    to: 已解决重开到处理中；已关闭重开到待梳理
+    required:
+    - reason
+  retriage:
+    from:
+    - 待处理
+    to: 待梳理
+    required:
+    - reason
