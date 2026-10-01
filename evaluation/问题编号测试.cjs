@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const html = fs.readFileSync(require('node:path').join(__dirname, '../prototype.html'), 'utf8');
 const normalize = html.slice(html.indexOf('function normalizeData('), html.indexOf('\nfunction log('));
 const ctx = vm.createContext({ ISSUE_STATES: ['待梳理','待处理','处理中','待验证','已解决','已暂缓','已关闭'], numberingMigrated: false });
-vm.runInContext(normalize, ctx);
+vm.runInContext(html.slice(html.indexOf('function dependencyError('), html.indexOf('function blockedBy(')) + normalize, ctx);
 const row = (id, number) => ({id, number, title:id, status:'待梳理'});
 const data = {version:1, issues:[row('甲'),row('乙')], tasks:[{id:'行动',title:'关联',status:'待办',issueId:'甲'}]};
 ctx.normalizeData(data);
