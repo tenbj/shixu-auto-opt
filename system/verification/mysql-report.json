@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "backend": "mysql",
+  "database_kind": "new-dedicated-test-database",
+  "checks": [
+    "4个并发同版本请求仅1成功，其余409",
+    "非法梳理触发完整事务回滚",
+    "重复request_id只提交1次且保存相同响应",
+    "直接SQL确认问题/行动/跟进/状态历史/依赖均在实体表",
+    "新建独立连接回读完整状态一致"
+  ],
+  "entity_counts": {
+    "issues": 14,
+    "tasks": 6,
+    "followups": 4,
+    "histories": 16,
+    "dependencies": 2
+  },
+  "old_databases_accessed": false
+}

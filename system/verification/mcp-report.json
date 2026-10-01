@@ -1,0 +1,142 @@
+{
+  "kind": "real-stdio-sdk-fixed-sequence",
+  "ai_autonomous": false,
+  "steps": [
+    {
+      "tool": "get_system_status",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "list_issues",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "get_workspace",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "create_issue",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "create_issue",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "get_issue",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "transition_issue",
+      "passed": true,
+      "expected_error": true
+    },
+    {
+      "tool": "add_followup",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "update_issue",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "transition_issue",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "create_task",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "create_task",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "update_task",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "get_task",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "set_task_dependencies",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "reorder_task",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "transition_task",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "transition_task",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "transition_issue",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "transition_issue",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "list_tasks",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "list_activity",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "export_workspace",
+      "passed": true,
+      "expected_error": false
+    }
+  ],
+  "tools": [
+    "get_system_status",
+    "get_workspace",
+    "list_issues",
+    "get_issue",
+    "create_issue",
+    "update_issue",
+    "transition_issue",
+    "add_followup",
+    "list_tasks",
+    "get_task",
+    "create_task",
+    "update_task",
+    "transition_task",
+    "set_task_dependencies",
+    "reorder_task",
+    "list_activity",
+    "export_workspace"
+  ],
+  "backend": "mysql",
+  "passed": true
+}

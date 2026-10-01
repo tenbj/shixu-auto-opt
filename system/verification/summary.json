@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "business_api_tests": 25,
+  "browser_checks": 16,
+  "mcp_tools": 17,
+  "integration_backend": "mysql",
+  "mysql_checks": 5,
+  "persistence": "passed",
+  "ai_autonomous": "not_run",
+  "environment": {
+    "os": "win32",
+    "python": "3.11.7"
+  },
+  "scope": "单机服务；MySQL模式在新建_test库真实联调；浏览器响应丢失使用网络拦截模拟；未做AI自主任务验收"
+}

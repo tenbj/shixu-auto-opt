@@ -1,0 +1,13 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>拾序 API 调用示例</title>
+<style>body{font:16px system-ui;max-width:880px;margin:40px auto;padding:20px;background:#f6f8f2;color:#214636}button,input{font:inherit;padding:10px;margin:6px}pre{white-space:pre-wrap;background:white;padding:20px;border-radius:12px}label{display:block}</style>
+<h1>拾序 API 调用示例</h1><p>通过同源服务打开。默认只读；写入按钮仅创建新的演示问题，再为该问题提交观察依据。</p>
+<button id="load">读取状态与问题列表</button><button id="create">创建一条演示问题</button>
+<label>观察与证据 <input id="evidence" maxlength="5000" placeholder="填写实际观察结果"></label><button id="verify" disabled>为本页新建问题提交验证</button><pre id="result" role="status">点击读取开始</pre>
+<script>
+let created=null,revision=null;
+async function api(path,method='GET',body){const r=await fetch(path,{method,headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});const v=await r.json();if(!r.ok)throw Error(r.status+' '+JSON.stringify(v.detail));return v}
+async function run(fn){try{document.querySelector('#result').textContent=JSON.stringify(await fn(),null,2)}catch(e){document.querySelector('#result').textContent=e.message+'；409请重新读取，网络失败请先检查列表确认结果，勿重复创建。'}}
+document.querySelector('#load').onclick=()=>run(async()=>{const h=await api('/api/health'),list=await api('/api/issues');revision=list.revision;return {health:h,...list}});
+document.querySelector('#create').onclick=()=>run(async()=>{if(created)throw Error('本页已创建演示问题，请刷新后再创建');const s=await api('/api/workspace');const r=await api('/api/issues','POST',{title:'HTML 合成演示问题',description:'仅用于接口演示',request_id:crypto.randomUUID(),expected_version:s.revision,actor:'HTML示例'});created=r.resource.id;revision=r.revision;document.querySelector('#verify').disabled=false;return r.resource});
+document.querySelector('#verify').onclick=()=>run(async()=>{const e=document.querySelector('#evidence').value.trim();if(!e)throw Error('请填写观察依据');const r=await api('/api/issues/'+created+'/transitions','POST',{action:'verify',successCriteria:'示例能创建并回读',treatment:e,verificationMethod:'页面与API回读',request_id:crypto.randomUUID(),expected_version:revision,actor:'HTML示例'});revision=r.revision;document.querySelector('#verify').disabled=true;return r.resource});
+</script></html>

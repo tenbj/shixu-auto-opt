@@ -1,0 +1,68 @@
+from typing import Literal
+from pydantic import BaseModel, ConfigDict, Field, StrictBool
+
+class Write(BaseModel):
+    model_config = ConfigDict(extra='forbid', str_strip_whitespace=True)
+    request_id: str = Field(min_length=8, max_length=120, description='同一次请求重试使用同号，内容改变须换号')
+    expected_version: int = Field(ge=0, strict=True, description='GET /api/workspace 返回的全局 revision')
+    actor: str = Field(default='我', min_length=1, max_length=80, description='审计标签，不代表认证身份')
+
+
+class IssueCreate(Write):
+    title: str = Field(min_length=1, max_length=160)
+    description: str = Field(default='', max_length=5000)
+    priority: Literal['高', '中', '低'] = '中'
+    tag: str = Field(default='', max_length=40)
+
+
+class IssueUpdate(Write):
+    title: str | None = Field(default=None, min_length=1, max_length=160)
+    description: str | None = Field(default=None, max_length=5000)
+    priority: Literal['高', '中', '低'] | None = None
+    tag: str | None = Field(default=None, max_length=40)
+
+
+class IssueTransition(Write):
+    action: Literal['triage', 'start', 'verify', 'resolve', 'reject', 'pause', 'resume', 'close-issue', 'reopen', 'retriage']
+    reason: str = Field(default='', max_length=5000)
+    nextStep: str = Field(default='', max_length=5000)
+    successCriteria: str = Field(default='', max_length=5000)
+    treatment: str = Field(default='', max_length=5000)
+    verificationMethod: str = Field(default='', max_length=5000)
+    resolution: str = Field(default='', max_length=5000)
+    reviewDate: str = Field(default='', max_length=10)
+    closeType: str = Field(default='', max_length=40)
+    duplicateOf: str = Field(default='', max_length=120)
+    taskPolicy: Literal['', 'detach', 'cancel'] = ''
+
+
+class Followup(Write):
+    content: str = Field(min_length=1, max_length=5000)
+
+
+class TaskCreate(Write):
+    title: str = Field(min_length=1, max_length=160)
+    issueId: str | None = Field(default=None, max_length=120)
+    due: str = Field(default='', max_length=10)
+    required: StrictBool = True
+
+
+class TaskUpdate(Write):
+    title: str | None = Field(default=None, min_length=1, max_length=160)
+    issueId: str | None = Field(default=None, max_length=120)
+    due: str | None = Field(default=None, max_length=10)
+    required: StrictBool | None = None
+
+
+class TaskTransition(Write):
+    status: Literal['待办', '进行中', '已完成', '已取消']
+    reason: str = Field(default='', max_length=5000)
+
+
+class Dependencies(Write):
+    dependsOn: list[str] = Field(max_length=100)
+
+
+class Reorder(Write):
+    target_id: str = Field(min_length=1, max_length=120)
+    after: StrictBool = False
