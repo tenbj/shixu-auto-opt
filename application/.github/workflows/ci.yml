@@ -16,7 +16,7 @@ jobs:
       - name: 定位系统目录
         shell: pwsh
         run: |
-          if (Test-Path system/requirements-dev.txt) { 'SYSTEM_DIR=system' >> $env:GITHUB_ENV } else { 'SYSTEM_DIR=.' >> $env:GITHUB_ENV }
+          if (Test-Path application/requirements-dev.txt) { 'SYSTEM_DIR=application' >> $env:GITHUB_ENV } else { 'SYSTEM_DIR=.' >> $env:GITHUB_ENV }
       - run: python -m pip install -r requirements-dev.txt
         working-directory: ${{ env.SYSTEM_DIR }}
       - run: python -m playwright install chromium

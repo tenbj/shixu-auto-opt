@@ -1,7 +1,7 @@
 {
   "server": "shixu",
   "transport": "stdio",
-  "command": "python /absolute/path/system/mcp_server.py",
+  "command": "python /absolute/path/application/mcp_server.py",
   "url": null,
   "instructions": "先 health，再 list/get 获取 revision，写入携带 request_id 和 expected_version。重试同号；409重读，422修正输入，503不得声称成功。提交验证必须填写处理说明、方法；确认解决必须填写验证依据。actor仅为审计标签。",
   "tools": [

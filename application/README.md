@@ -1,6 +1,6 @@
 # 拾序 · 系统 + API + MCP
 
-版本 2.0.0 · 基于拾序 v1.5.0 原型 · 单机服务 + MySQL 实体存储
+版本 2.0.1 · 基于拾序 v1.5.0 原型 · 单机服务 + MySQL 实体存储
 
 系统保留今日概览、问题池、行动看板、统计分析、复盘记录，以及七状态流转、问题与行动固定编号、依赖、排序、日历、跟进和背景/属性编辑。页面和 MCP 共用同一套 API 与 MySQL 实体数据库。每次读取来自数据库，每次写入事务提交；内存仅作为单次请求的计算空间。
 
@@ -8,7 +8,7 @@
 
 要求 Python 3.11+、MySQL 8.0 和现代浏览器。无 Node 构建步骤。首次安装须配置仓库外私有连接，并新建专属数据库；分发包不包含任何使用者的连接凭据。
 
-在当前 `system` 目录执行：
+在当前 `application` 目录执行：
 
 ```powershell
 python -m venv .venv
@@ -27,7 +27,7 @@ macOS/Linux 使用 `.venv/bin/python` 代替 `.venv\Scripts\python`。本次实�
 - OpenAPI：http://127.0.0.1:8765/openapi.json
 - 健康检查：http://127.0.0.1:8765/api/health
 - HTML 示例：http://127.0.0.1:8765/examples/
-- MCP：客户端以 stdio 启动 `python /绝对路径/system/mcp_server.py`
+- MCP：客户端以 stdio 启动 `python /绝对路径/application/mcp_server.py`
 - ER 图：http://127.0.0.1:8765/static/diagrams/erd.html
 - 架构图：http://127.0.0.1:8765/static/diagrams/architecture.html
 

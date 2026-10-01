@@ -17,4 +17,4 @@ Thumbs.db
 拾序记录-*.json
 
 # Local access verification may contain the real workspace.
-system/verification/frp-public.*
+application/verification/frp-public.*

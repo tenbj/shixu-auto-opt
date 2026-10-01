@@ -11,7 +11,7 @@ python scripts/configure_mcp.py --format json
 python scripts/configure_mcp.py --format toml
 ```
 
-脚本只输出配置片段，不写入任何客户端配置。JSON 格式给支持 `mcpServers` 的客户端；TOML 片段的服务名为 `shixu`。路径由当前 Python 和项目位置生成，复制后按客户端的 MCP 配置入口添加并重新连接。默认 stdio 命令为 `python /绝对路径/system/mcp_server.py`，环境变量 `SHIXU_API_URL=http://127.0.0.1:8765`。
+脚本只输出配置片段，不写入任何客户端配置。JSON 格式给支持 `mcpServers` 的客户端；TOML 片段的服务名为 `shixu`。路径由当前 Python 和项目位置生成，复制后按客户端的 MCP 配置入口添加并重新连接。默认 stdio 命令为 `python /绝对路径/application/mcp_server.py`，环境变量 `SHIXU_API_URL=http://127.0.0.1:8765`。
 
 实现基于 [官方 MCP Python SDK v2 文档](https://py.sdk.modelcontextprotocol.io/)。版本固定在 requirements.txt；stdio 由官方 SDK 处理初始化、工具发现与调用。
 

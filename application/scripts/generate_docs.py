@@ -28,7 +28,7 @@ def main():
     schema = app.openapi()
     tools = asyncio.run(server.list_tools())
     write_json('docs/openapi.json', schema)
-    catalog = {'server': 'shixu', 'transport': 'stdio', 'command': 'python /absolute/path/system/mcp_server.py', 'url': None,
+    catalog = {'server': 'shixu', 'transport': 'stdio', 'command': 'python /absolute/path/application/mcp_server.py', 'url': None,
                'instructions': server.instructions, 'tools': []}
     for tool in tools:
         entry = tool.model_dump(mode='json', by_alias=True)
@@ -39,7 +39,7 @@ def main():
                                     order='先health，再list/get版本，再写入', error_handling='404检查ID；409重读；422修正输入；503不确认成功、同号重试', protocol=entry))
     write_json('docs/MCP工具目录.json', catalog)
     operations = []
-    doc = ['# 拾序 API 中文说明', '', '版本 2.0.0 · 基地址 http://127.0.0.1:8765 · UTF-8 JSON。在线交互文档 `/docs`，机器Schema `/openapi.json`。', '',
+    doc = ['# 拾序 API 中文说明', '', '版本 2.0.1 · 基地址 http://127.0.0.1:8765 · UTF-8 JSON。在线交互文档 `/docs`，机器Schema `/openapi.json`。', '',
            '## 并发、幂等与错误', '',
            '所有写入携带 `request_id`（8–120字符，推荐UUID）、`expected_version`（当前全局revision）与可选 `actor`（审计标签，默认我）。请求体不接受未声明字段。每个写入是一个MySQL InnoDB事务；返回 `revision`、`resource` 和事务提交时的 `data`。失败不改变数据、审计或版本。', '',
            '同一request_id及完全相同内容重放返回原始成功响应；request_id相同但内容不同返回409。网络超时保持请求内容和编号重试。全局版本是工作台版本，不是单个对象版本；任何对象写入都会递增。', '',
@@ -83,12 +83,12 @@ def main():
                 '验证分别见 verification/api-report.json、browser-report.json、mcp-report.json、persistence-report.json；AI自主任务未验收。']
     (ROOT / 'docs/需求与能力映射.md').write_text('\n'.join(mapping)+'\n', encoding='utf-8')
     contract = json.loads((ROOT / 'project-contract.json').read_text(encoding='utf-8'))
-    source = ROOT.parent / 'prototype.html'
+    source = ROOT.parent / 'prototype' / 'prototype.html'
     if source.exists():
         actual = hashlib.sha256(source.read_bytes()).hexdigest()
         if actual != contract['prototype']['sha256']:
             raise RuntimeError('源原型hash变化，停止生成合同')
-    contract['prototype']['path'] = '../prototype.html（原型仓库位置；分发包不附带源原型）'
+    contract['prototype']['path'] = '../prototype/prototype.html（原型仓库位置；分发包不附带源原型）'
     contract['prototype']['source_modified'] = False
     contract['operations'] = operations
     checks = {'business':'api-report.json', 'api':'api-report.json', 'mcp':'mcp-report.json', 'browser':'browser-report.json', 'persistence':'persistence-report.json', 'portable':'portable-report.json', 'release_scan':'release-scan.json'}
