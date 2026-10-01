@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>拾序 · 物理 ER 图</title>
+<style>
+:root{--ink:#183830;--muted:#648077;--accent:#176d56;--line:#7b9790;--paper:#f5f7f2;--white:#fff;--border:#d8e3dc;--gold:#a76c26}*{box-sizing:border-box}body{margin:0;font:14px 'Segoe UI','Microsoft YaHei',sans-serif;background:var(--paper);color:var(--ink)}header{padding:24px 30px 16px;background:var(--white);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:20px}.eyebrow{font-size:11px;letter-spacing:3px;color:var(--accent);font-weight:700}h1{margin:5px 0 6px;font-size:27px;letter-spacing:.5px}header p{margin:0;color:var(--muted);font-size:13px}.badge{padding:8px 14px;border:1px solid var(--border);border-radius:30px;white-space:nowrap;font-size:12px}nav{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 30px;background:#fafcf9;border-bottom:1px solid var(--border)}button,input{font:inherit;border:1px solid #cadbd1;border-radius:7px;background:var(--white);padding:8px 12px;color:var(--ink)}button{cursor:pointer}button:hover{background:#e9f3ed}button.primary{background:var(--accent);color:white;border-color:var(--accent)}input{width:185px}#zoomText{min-width:46px;text-align:center;font-size:12px}.spacer{flex:1}#canvas{display:block;width:100%;height:calc(100vh - 224px);min-height:470px;touch-action:none;background:radial-gradient(#dce6df .7px,transparent .7px);background-size:16px 16px;user-select:none}footer{padding:12px 30px;display:flex;gap:20px;flex-wrap:wrap;align-items:center;font-size:12px;border-top:1px solid var(--border);color:var(--muted)}footer strong{color:var(--accent)}.entity{cursor:grab}.entity .box{fill:white;stroke:#b6ccc0;stroke-width:1.5}.entity .head{fill:#edf5ee}.entity.support .head{fill:#f5f1e7}.entity .short{font-size:12px;font-weight:700;fill:var(--accent)}.entity .name{font-size:18px;font-weight:650;fill:var(--ink)}.entity .meaning{fill:var(--muted);font-size:12px}.field{font:13px Consolas,monospace;fill:#345c4e}.key{font:10px Consolas,monospace;fill:var(--gold)}.entity.active .box{stroke:var(--accent);stroke-width:3}.relation{stroke:var(--line);stroke-width:1.7;fill:none}.edge.active .relation,.edge.active .symbol{stroke:var(--accent);stroke-width:2.6}.hit{stroke:transparent;stroke-width:14;fill:none;cursor:move}.symbol{stroke:var(--line);stroke-width:1.5;fill:none}.symbol circle{fill:var(--paper)}.port{fill:white;stroke:var(--accent);r:5;opacity:0;cursor:crosshair}.edge:hover .port,.edge.active .port{opacity:1}.key-label{cursor:grab}.key-label rect{fill:#f5f7f2;stroke:#d5e2d9;stroke-width:1}.key-label text{font:13px Consolas,monospace;fill:#365a4d}.edge.active .key-label rect{fill:#e1f3e7;stroke:var(--accent)}.zone{font-size:13px;fill:#6c8177;letter-spacing:2px}#detail{position:fixed;right:0;top:0;bottom:0;width:min(510px,95vw);background:white;box-shadow:-12px 0 60px #153c3226;z-index:5;padding:28px;overflow:auto}#detail[hidden],#menu[hidden]{display:none}#detail h2{font-size:21px;margin:15px 0 6px}#detail p{font-size:13px;line-height:1.8;color:var(--muted)}#detail table{width:100%;border-collapse:collapse;font-size:12px}#detail th,#detail td{text-align:left;padding:10px 5px;border-bottom:1px solid #e6ede8;vertical-align:top;overflow-wrap:anywhere}#detail code{font:12px Consolas,monospace}#detail .close{float:right}#menu{position:fixed;z-index:8;background:white;padding:5px;border:1px solid var(--border);box-shadow:0 8px 30px #17382a20;border-radius:8px}#notice{color:var(--gold)}@media(max-width:850px){header{padding:18px}.badge{display:none}nav{padding:10px}header p{font-size:11px}h1{font-size:22px}footer{padding:10px;gap:8px}#canvas{height:65vh}}@media print{nav,#detail,footer{display:none}#canvas{height:auto;min-height:0;aspect-ratio:1820/1380}header{padding:10px}}
+</style></head><body>
+<header><div><div class="eyebrow">SHIXU / DATA MODEL</div><h1>拾序 · 物理 ER 图</h1><p>MySQL 实体模型 · 2026-10-01 · 来源：data/mysql-schema.sql · 单画布 / 可离线查看</p></div><div class="badge">9 张实体表　·　6 个物理外键</div></header>
+<nav><button id="fields" class="primary">隐藏字段</button><button id="show">全部显示</button><button id="fit">适配全图</button><button id="reset">复位布局</button><button id="minus" aria-label="缩小">−</button><span id="zoomText">100%</span><button id="plus" aria-label="放大">＋</button><select id="scale" aria-label="缩放预设" style="padding:8px;border:1px solid #cadbd1;border-radius:7px;color:#183830"><option value="">缩放预设</option><option value="0.5">50%</option><option value="1">100%</option><option value="2">200%</option></select><input id="search" placeholder="搜索表名 / 中文 / 简称" aria-label="搜索实体"><span class="spacer"></span><span id="counts"></span></nav>
+<svg id="canvas" xmlns="http://www.w3.org/2000/svg" aria-label="拾序单画布物理实体关系图"><g id="scene"></g></svg>
+<footer><span><strong>读图</strong>　│ 必有一　○ 可选零　鸡脚 多</span><span>点击表看全部字段 · 拖动表 / 端点 / 线 / 连接键 · 右键隐藏表 · 空白处拖动平移</span><span id="notice" role="status"></span></footer>
+<aside id="detail" hidden aria-label="实体字段详情"></aside><div id="menu" hidden><button id="hide">隐藏实体</button></div>
+<script>
+'use strict';
+const MODEL=__MODEL__;
+const svg=document.querySelector('#canvas'),scene=document.querySelector('#scene'),root=document.documentElement,ns='http://www.w3.org/2000/svg';
+const byId=Object.fromEntries(MODEL.tables.map(t=>[t.id,t]));
+let visible=true, hidden=new Set(), selected=null,hover=null,contextId=null,view={x:0,y:0,w:1820,h:1380},drag=null,rendered=[],checked={shown:false,hidden:false};
+let moves={},ports={},lanes={},anchors={};
+const measure=document.createElement('canvas').getContext('2d');measure.font='13px Consolas,monospace';
+function el(tag,attrs={},parent=scene){const n=document.createElementNS(ns,tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,v);parent.append(n);return n}
+function txt(x,y,value,attrs={},parent=scene){let n=el('text',{x,y,...attrs},parent);n.textContent=value;return n}
+function box(id){const t=byId[id],m=moves[id]||{x:0,y:0};return{x:t.x+m.x,y:t.y+m.y,w:320,h:visible?78+t.core.length*26:88}}
+function contains(b,p,pad=0){return p.x>b.x-pad+.01&&p.x<b.x+b.w+pad-.01&&p.y>b.y-pad+.01&&p.y<b.y+b.h+pad-.01}
+function overlap(a,b,pad=0){return a.x+a.w+pad>b.x&&b.x+b.w+pad>a.x&&a.y+a.h+pad>b.y&&b.y+b.h+pad>a.y}
+function norm(side){return{L:{x:-1,y:0},R:{x:1,y:0},T:{x:0,y:-1},B:{x:0,y:1}}[side]}
+function port(r,end){const id=end==='s'?r.parent:r.child,b=box(id),custom=ports[r.id]?.[end];let side,v;
+ if(custom){side=custom.side;v=custom.v}
+ else if(r.child==='FU'){side=end==='s'?'L':'R';v=60/b.h}
+ else if(r.child==='LG'){side=end==='s'?'R':'L';v=60/b.h}
+ else if(r.child==='HI'){side=end==='s'?'B':'T';v=end==='s'?60/320:160/320}
+ else if(r.child==='TA'){side=end==='s'?'B':'T';v=250/320}
+ else{side=end==='s'?'R':'L';v=(r.fk==='task_id'?(visible?72:24):(visible?135:65))/b.h}
+ v=Math.max(.045,Math.min(.955,v));return{side,x:side==='L'?b.x:side==='R'?b.x+b.w:b.x+b.w*v,y:side==='T'?b.y:side==='B'?b.y+b.h:b.y+b.h*v};}
+function tidy(points){const clean=[];for(const p of points){if(!clean.length||Math.abs(clean.at(-1).x-p.x)+Math.abs(clean.at(-1).y-p.y)>.01)clean.push(p)}for(let i=1;i<clean.length-1;){const a=clean[i-1],b=clean[i],c=clean[i+1];if((a.x===b.x&&b.x===c.x)||(a.y===b.y&&b.y===c.y))clean.splice(i,1);else i++}return clean}
+function pathFor(r){const s=port(r,'s'),t=port(r,'t'),sn=norm(s.side),tn=norm(t.side),a={x:s.x+sn.x*48,y:s.y+sn.y*48},b={x:t.x+tn.x*48,y:t.y+tn.y*48},lane=lanes[r.id]||{x:0,y:0};let pts;
+ if(!ports[r.id]&&r.child==='HI'){const y=s.y+(t.y-s.y)*.58+lane.y;pts=[s,{x:s.x,y},{x:t.x,y},t]}
+ else if(sn.x&&tn.x){if(s.y===t.y&&!lane.y)pts=[s,t];else if(!lane.y){const x=b.x+lane.x;pts=[s,{x,y:s.y},{x,y:t.y},t]}else{const y=(s.y+t.y)/2+lane.y;pts=[s,a,{x:a.x,y},{x:b.x,y},b,t]}}
+ else if(sn.y&&tn.y){if(s.x===t.x&&!lane.x)pts=[s,t];else if(!lane.x){const y=b.y+lane.y;pts=[s,{x:s.x,y},{x:t.x,y},t]}else{const x=(s.x+t.x)/2+lane.x;pts=[s,a,{x,y:a.y},{x,y:b.y},b,t]}}
+ else if(sn.x)pts=[s,a,{x:b.x,y:a.y},b,t];else pts=[s,a,{x:a.x,y:b.y},b,t];
+ return tidy(pts);
+}
+function segments(points){return points.slice(1).map((p,i)=>({a:points[i],b:p,i,len:Math.abs(p.x-points[i].x)+Math.abs(p.y-points[i].y),horizontal:p.y===points[i].y}))}
+function labelFor(r,pts){const text=`${r.parent}.${r.pk} = ${r.child}.${r.fk}`,w=Math.ceil(measure.measureText(text).width)+20,h=26;
+ const candidates=segments(pts).filter(s=>s.len>=w+88).sort((a,b)=>b.len-a.len);
+ let s=candidates.find(s=>s.i===anchors[r.id]?.i)||candidates[0];if(!s)s=segments(pts).sort((a,b)=>b.len-a.len)[0];
+ const min=(w/2+44)/s.len,max=1-min,f=Math.max(Math.min(min,.5),Math.min(Math.max(max,.5),anchors[r.id]?.f??.5));const x=s.a.x+(s.b.x-s.a.x)*f,y=s.a.y+(s.b.y-s.a.y)*f;
+ return{text,w,h,x,y,angle:s.horizontal?0:-90,i:s.i,f,rect:{x:x-(s.horizontal?w:h)/2,y:y-(s.horizontal?h:w)/2,w:s.horizontal?w:h,h:s.horizontal?h:w},valid:s.len>=w+88};
+}
+function crow(g,p,kind){const n=norm(p.side),angle=Math.atan2(n.y,n.x)*180/Math.PI;const k=el('g',{class:'symbol',transform:`translate(${p.x} ${p.y}) rotate(${angle})`,'data-kind':kind},g);
+ const line=(x1,y1,x2,y2)=>el('line',{x1,y1,x2,y2},k);
+ if(kind==='many'){line(0,-7,16,0);line(0,7,16,0);line(0,0,16,0);el('circle',{cx:28,cy:0,r:4},k)}
+ else{line(8,-7,8,7);if(kind==='optional')el('circle',{cx:22,cy:0,r:4},k);else line(16,-7,16,7)}
+}
+function render(){scene.replaceChildren();rendered=[];txt(50,38,'01  业务实体与物理约束',{class:'zone'});txt(50,1080,'02  持久化支撑表 · 无物理外键',{class:'zone'});
+ for(const r of MODEL.relations){if(hidden.has(r.parent)||hidden.has(r.child))continue;const pts=pathFor(r),label=labelFor(r,pts);rendered.push({...r,pts,label});const g=el('g',{class:'edge','data-id':r.id,'data-parent':r.parent,'data-child':r.child});
+ const d=pts.map((p,i)=>`${i?'L':'M'}${p.x},${p.y}`).join(' ');el('path',{class:'relation',d,'data-points':JSON.stringify(pts)},g);el('path',{class:'hit',d,'data-drag':'edge'},g);crow(g,port(r,'s'),r.optional?'optional':'one');crow(g,port(r,'t'),'many');
+ const lab=el('g',{class:'key-label',transform:`translate(${label.x} ${label.y}) rotate(${label.angle})`,'data-drag':'label'},g);el('rect',{x:-label.w/2,y:-13,width:label.w,height:26,rx:5},lab);txt(0,4,label.text,{'text-anchor':'middle'},lab);
+ }
+ for(const t of MODEL.tables){if(hidden.has(t.id))continue;const b=box(t.id),g=el('g',{class:'entity'+(['WM','AC','IR'].includes(t.id)?' support':''),'data-id':t.id,'data-name':t.name,'data-box':JSON.stringify(b),transform:`translate(${b.x} ${b.y})`,'data-drag':'entity',tabindex:0,role:'button','aria-label':t.title+' 字段详情'});el('rect',{class:'box',width:b.w,height:b.h,rx:10},g);el('path',{class:'head',d:`M10,1 H310 Q319,1 319,10 V66 H1 V10 Q1,1 10,1`},g);txt(16,21,t.id,{class:'short'},g);txt(49,25,t.name,{class:'name'},g);txt(16,49,t.title+` · ${t.fields.length} 个字段`,{class:'meaning'},g);
+ if(visible)t.core.forEach((name,i)=>{const f=t.fields.find(f=>f.name===name),y=87+i*26;txt(16,y,f.name,{class:'field'},g);txt(302,y,f.keys.join('·')||f.type,{'text-anchor':'end',class:'key'},g)});else txt(16,76,'字段已收起 · 点击查看完整定义',{class:'meaning'},g);
+ }
+ for(const r of rendered){const g=el('g',{class:'endpoint','data-id':r.id});for(const end of ['s','t']){const p=port(r,end);el('circle',{class:'port',cx:p.x,cy:p.y,r:5,'data-drag':'port','data-end':end},g)}}
+ document.querySelector('#fields').textContent=visible?'隐藏字段':'显示字段';document.querySelector('#counts').textContent=`${MODEL.tables.length-hidden.size} 表 / ${rendered.length} 关系`;paint();const report=validate();writeContract(report);return report;
+}
+function segRect(s,b,pad=0){if(s.horizontal)return s.a.y>b.y-pad+.01&&s.a.y<b.y+b.h+pad-.01&&Math.max(s.a.x,s.b.x)>b.x-pad+.01&&Math.min(s.a.x,s.b.x)<b.x+b.w+pad-.01;return s.a.x>b.x-pad+.01&&s.a.x<b.x+b.w+pad-.01&&Math.max(s.a.y,s.b.y)>b.y-pad+.01&&Math.min(s.a.y,s.b.y)<b.y+b.h+pad-.01}
+function cross(a,b){const between=(v,x,y)=>v>=Math.min(x,y)-.01&&v<=Math.max(x,y)+.01;if(a.horizontal===b.horizontal){if(a.horizontal)return Math.abs(a.a.y-b.a.y)<.01&&Math.max(Math.min(a.a.x,a.b.x),Math.min(b.a.x,b.b.x))<=Math.min(Math.max(a.a.x,a.b.x),Math.max(b.a.x,b.b.x))+.01;return Math.abs(a.a.x-b.a.x)<.01&&Math.max(Math.min(a.a.y,a.b.y),Math.min(b.a.y,b.b.y))<=Math.min(Math.max(a.a.y,a.b.y),Math.max(b.a.y,b.b.y))+.01}const h=a.horizontal?a:b,v=a.horizontal?b:a;return between(v.a.x,h.a.x,h.b.x)&&between(h.a.y,v.a.y,v.b.y)}
+function validate(){let errors=[],crossings=0,intrusions=0,labelOverlaps=0;const tables=MODEL.tables.filter(t=>!hidden.has(t.id));
+ for(let i=0;i<tables.length;i++)for(let j=i+1;j<tables.length;j++)if(overlap(box(tables[i].id),box(tables[j].id),8))errors.push('实体重叠');
+ for(const e of rendered){const segs=segments(e.pts);if(segs.some(s=>s.a.x!==s.b.x&&s.a.y!==s.b.y))errors.push(e.id+' 非正交');
+ for(const [end,p,index]of [['s',e.pts[0],0],['t',e.pts.at(-1),segs.length-1]]){const q=port(e,end),n=norm(q.side),other=end==='s'?e.pts[1]:e.pts.at(-2);if(p.x!==q.x||p.y!==q.y||((other.x-p.x)*n.x+(other.y-p.y)*n.y)<36||((other.x-p.x)*n.y-(other.y-p.y)*n.x)!==0)errors.push(e.id+' 端口方向/距离');}
+ for(const s of segs)for(const t of tables)if(segRect(s,box(t.id))){intrusions++;errors.push(e.id+' 穿入 '+t.id)}
+ const own=segs.find(s=>s.i===e.label.i);if(!e.label.valid||!own||(own.horizontal?e.label.y!==own.a.y:e.label.x!==own.a.x))errors.push(e.id+' 标签锚定/净空');
+ for(const t of tables)if(overlap(e.label.rect,box(t.id),4)){labelOverlaps++;errors.push(e.id+' 标签覆盖实体')}
+ for(const other of rendered){if(e.id===other.id)continue;if(segments(other.pts).some(s=>segRect(s,e.label.rect,4))){labelOverlaps++;errors.push(e.id+' 标签覆盖其他线') }}
+ }
+ for(let i=0;i<rendered.length;i++)for(let j=i+1;j<rendered.length;j++){const a=rendered[i],b=rendered[j];for(const s of segments(a.pts))for(const t of segments(b.pts))if(cross(s,t)){crossings++;errors.push(a.id+' × '+b.id)}if(overlap(a.label.rect,b.label.rect,4)){labelOverlaps++;errors.push(a.id+' 标签重叠 '+b.id)}}
+ const nodes=[...scene.querySelectorAll('.entity')],unique=nodes.length===tables.length&&new Set(nodes.map(n=>n.dataset.name)).size===tables.length;
+ const integrity=rendered.length===MODEL.relations.filter(r=>!hidden.has(r.parent)&&!hidden.has(r.child)).length&&scene.querySelectorAll('.key-label').length===rendered.length;
+ const crowfeet=scene.querySelectorAll('.symbol[data-kind="many"]').length===rendered.length&&rendered.every(e=>scene.querySelector(`.edge[data-id="${e.id}"] .symbol[data-kind="${e.optional?'optional':'one'}"]`));
+ return{ok:!errors.length&&unique&&integrity&&crowfeet,errors,crossings,intrusions,labelOverlaps,unique,integrity,crowfeet,tables:tables.length,relations:rendered.length};
+}
+function writeContract(r){if(r.ok){if(visible)checked.shown=true;else checked.hidden=true}const attrs={'geometry-status':r.ok,'entity-uniqueness-status':r.unique,'relation-integrity-status':r.integrity,'crowfoot-status':r.crowfeet,'label-anchor-status':!r.errors.some(e=>e.includes('锚定')),'label-clearance-status':!r.errors.some(e=>e.includes('净空')),'label-overlap-status':r.labelOverlaps===0,'fields-visible-status':checked.shown,'fields-hidden-status':checked.hidden};for(const[k,v]of Object.entries(attrs))root.setAttribute('data-'+k,v?'pass':'fail');for(const[k,v]of Object.entries({crossings:r.crossings,'label-overlaps':r.labelOverlaps,'path-entity-intrusions':r.intrusions,tables:r.tables,relations:r.relations}))root.setAttribute('data-'+k,v);}
+function paint(){const focus=hover||selected,ids=new Set(),edges=new Set();if(focus?.kind==='entity'){ids.add(focus.id);for(const e of rendered)if(e.parent===focus.id||e.child===focus.id){ids.add(e.parent);ids.add(e.child);edges.add(e.id)}}else if(focus){const e=rendered.find(e=>e.id===focus.id);if(e){ids.add(e.parent);ids.add(e.child);edges.add(e.id)}}scene.querySelectorAll('.entity').forEach(n=>n.classList.toggle('active',ids.has(n.dataset.id)));scene.querySelectorAll('.edge').forEach(n=>n.classList.toggle('active',edges.has(n.dataset.id)));scene.querySelectorAll('.endpoint').forEach(n=>n.querySelectorAll('.port').forEach(p=>p.style.opacity=edges.has(n.dataset.id)?1:0));}
+function updateView(){svg.setAttribute('viewBox',`${view.x} ${view.y} ${view.w} ${view.h}`);document.querySelector('#zoomText').textContent=Math.round(Math.min(svg.clientWidth/view.w,svg.clientHeight/view.h)*100)+'%'}
+function fit(){const bs=MODEL.tables.filter(t=>!hidden.has(t.id)).map(t=>box(t.id));if(!bs.length)return;const minX=Math.min(...bs.map(b=>b.x))-40,minY=Math.min(...bs.map(b=>b.y))-50,maxX=Math.max(...bs.map(b=>b.x+b.w))+40,maxY=Math.max(...bs.map(b=>b.y+b.h))+40;view={x:minX,y:minY,w:maxX-minX,h:maxY-minY};updateView()}
+function zoom(f){const w=view.w*f,h=view.h*f;view={x:view.x+(view.w-w)/2,y:view.y+(view.h-h)/2,w,h};updateView()}
+function point(event){return new DOMPoint(event.clientX,event.clientY).matrixTransform(svg.getScreenCTM().inverse())}
+function details(id){const t=byId[id],aside=document.querySelector('#detail');aside.replaceChildren();const close=document.createElement('button');close.textContent='关闭 ×';close.className='close';close.onclick=()=>aside.hidden=true;aside.append(close);let h=document.createElement('h2');h.textContent=t.id+' · '+t.name;aside.append(h);let p=document.createElement('p');p.textContent=t.title+'。'+t.note;aside.append(p);p=document.createElement('p');p.textContent='键：PK 主键 · FK 外键 · UQ 唯一 · AI 自增。'+(t.constraints.length?'组合约束：'+t.constraints.join('；'):'');aside.append(p);const table=document.createElement('table');table.innerHTML='<thead><tr><th>字段 / 类型</th><th>键</th><th>可空</th><th>说明</th></tr></thead>';const tbody=document.createElement('tbody');for(const f of t.fields){const tr=document.createElement('tr');for(const value of [f.name+'\n'+f.type,f.keys.join(' · ')||'—',f.nullable?'是':'否',f.description]){const td=document.createElement('td');td.textContent=value;td.style.whiteSpace='pre-line';tr.append(td)}tbody.append(tr)}table.append(tbody);aside.append(table);aside.hidden=false;}
+function state(){return structuredClone({moves,ports,lanes,anchors})}
+function restore(s){({moves,ports,lanes,anchors}=structuredClone(s))}
+function notice(msg){document.querySelector('#notice').textContent=msg}
+svg.addEventListener('pointerdown',ev=>{if(ev.button!==0)return;document.querySelector('#menu').hidden=true;const target=ev.target.closest('[data-drag]'),owner=ev.target.closest('.entity,.edge,.endpoint'),p=point(ev);drag={kind:target?.dataset.drag||'pan',id:owner?.dataset.id,end:target?.dataset.end,start:p,screen:{x:ev.clientX,y:ev.clientY},initial:state(),last:state(),view:{...view},moved:false};if(owner){selected={kind:owner.classList.contains('entity')?'entity':'edge',id:owner.dataset.id};paint()}else{selected=null;paint()}svg.setPointerCapture(ev.pointerId);});
+svg.addEventListener('pointermove',ev=>{if(!drag)return;const p=point(ev),dx=p.x-drag.start.x,dy=p.y-drag.start.y;if(Math.hypot(ev.clientX-drag.screen.x,ev.clientY-drag.screen.y)>3)drag.moved=true;if(!drag.moved)return;
+ if(drag.kind==='pan'){const k=1/svg.getScreenCTM().a;view.x=drag.view.x-(ev.clientX-drag.screen.x)*k;view.y=drag.view.y-(ev.clientY-drag.screen.y)*k;updateView();return}
+ restore(drag.initial);const r=MODEL.relations.find(r=>r.id===drag.id);
+ if(drag.kind==='entity'){const m=moves[drag.id]||{x:0,y:0};moves[drag.id]={x:m.x+dx,y:m.y+dy}}
+ if(drag.kind==='edge'){const lane=lanes[drag.id]||{x:0,y:0},s=port(r,'s');lanes[drag.id]=s.side==='L'||s.side==='R'?{x:lane.x,y:lane.y+dy}:{x:lane.x+dx,y:lane.y+dy}}
+ if(drag.kind==='port'){const b=box(drag.end==='s'?r.parent:r.child),opts=[{side:'L',d:Math.abs(p.x-b.x),v:(p.y-b.y)/b.h},{side:'R',d:Math.abs(p.x-b.x-b.w),v:(p.y-b.y)/b.h},{side:'T',d:Math.abs(p.y-b.y),v:(p.x-b.x)/b.w},{side:'B',d:Math.abs(p.y-b.y-b.h),v:(p.x-b.x)/b.w}].sort((a,b)=>a.d-b.d);ports[r.id]={...ports[r.id],[drag.end]:{side:opts[0].side,v:Math.max(.06,Math.min(.94,opts[0].v))}};}
+ if(drag.kind==='label'){const pts=pathFor(r),w=labelFor(r,pts).w,candidates=segments(pts).filter(s=>s.len>=w+88).map(s=>{const lo=(w/2+44)/s.len,raw=s.horizontal?(p.x-s.a.x)/(s.b.x-s.a.x):(p.y-s.a.y)/(s.b.y-s.a.y),f=Math.max(lo,Math.min(1-lo,raw)),x=s.a.x+(s.b.x-s.a.x)*f,y=s.a.y+(s.b.y-s.a.y)*f;return{i:s.i,f,d:Math.hypot(x-p.x,y-p.y)}}).sort((a,b)=>a.d-b.d);if(candidates.length)anchors[r.id]=candidates[0]}
+ const result=render();if(result.ok){drag.last=state();notice('布局已更新')}else{restore(drag.last);render();notice('该位置会造成遮挡或净空不足，已保留最近有效位置')}
+});
+svg.addEventListener('pointerup',ev=>{if(!drag)return;const d=drag;drag=null;if(svg.hasPointerCapture(ev.pointerId))svg.releasePointerCapture(ev.pointerId);if(!d.moved&&d.kind==='entity')details(d.id)});
+svg.addEventListener('pointercancel',()=>{drag=null});
+svg.addEventListener('pointerover',ev=>{if(drag)return;const n=ev.target.closest('.entity,.edge,.endpoint');hover=n?{kind:n.classList.contains('entity')?'entity':'edge',id:n.dataset.id}:null;paint()});svg.addEventListener('pointerleave',()=>{hover=null;paint()});
+svg.addEventListener('contextmenu',ev=>{const n=ev.target.closest('.entity');if(!n)return;ev.preventDefault();contextId=n.dataset.id;const menu=document.querySelector('#menu');menu.style.left=Math.min(ev.clientX,innerWidth-140)+'px';menu.style.top=Math.min(ev.clientY,innerHeight-60)+'px';menu.hidden=false});
+svg.addEventListener('keydown',ev=>{const n=ev.target.closest('.entity');if(n&&(ev.key==='Enter'||ev.key===' ')){ev.preventDefault();selected={kind:'entity',id:n.dataset.id};details(n.dataset.id);paint()}});
+document.querySelector('#hide').onclick=()=>{hidden.add(contextId);document.querySelector('#menu').hidden=true;document.querySelector('#detail').hidden=true;render()};
+document.querySelector('#fields').onclick=()=>{visible=!visible;const r=render();if(!r.ok){moves={};ports={};lanes={};anchors={};render();notice('已恢复默认排布以保证收展后的几何净空')}};
+document.querySelector('#show').onclick=()=>{hidden.clear();if(!render().ok){moves={};ports={};lanes={};anchors={};render()}fit()};
+document.querySelector('#reset').onclick=()=>{moves={};ports={};lanes={};anchors={};hidden.clear();selected=null;hover=null;visible=true;render();fit();notice('已恢复默认布局')};
+document.querySelector('#fit').onclick=fit;document.querySelector('#plus').onclick=()=>zoom(.8);document.querySelector('#minus').onclick=()=>zoom(1.25);
+document.querySelector('#scale').onchange=ev=>{if(!ev.target.value)return;const s=Number(ev.target.value),w=svg.clientWidth/s,h=svg.clientHeight/s;view={x:view.x+(view.w-w)/2,y:view.y+(view.h-h)/2,w,h};updateView();ev.target.value=''};
+document.querySelector('#search').oninput=ev=>{const q=ev.target.value.trim().toLowerCase(),t=MODEL.tables.find(t=>[t.id,t.name,t.title].some(s=>s.toLowerCase().includes(q)));selected=q&&t?{kind:'entity',id:t.id}:null;paint()};
+document.addEventListener('keydown',ev=>{if(ev.key==='Escape'){document.querySelector('#detail').hidden=true;document.querySelector('#menu').hidden=true;selected=null;hover=null;paint()}});
+window.addEventListener('resize',updateView);
+window.ERD={model:MODEL,validate,snapshot:()=>({visible,tables:MODEL.tables.filter(t=>!hidden.has(t.id)).map(t=>({id:t.id,...box(t.id)})),relations:structuredClone(rendered)}),fit};
+render();fit();if(new URLSearchParams(location.search).get('qa')==='all'){document.querySelector('#fields').click();document.querySelector('#fields').click();}
+</script></body></html>

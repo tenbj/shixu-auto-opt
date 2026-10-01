@@ -1,0 +1,252 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>拾序API中文说明</title><style>body{max-width:1100px;margin:32px auto;padding:20px;background:#f6f8f2;color:#214636}pre{white-space:pre-wrap;font:15px/1.8 system-ui;overflow-wrap:anywhere}</style><h1>拾序 API 中文说明</h1><pre># 拾序 API 中文说明
+
+版本 2.0.0 · 基地址 http://127.0.0.1:8765 · UTF-8 JSON。在线交互文档 `/docs`，机器Schema `/openapi.json`。
+
+## 并发、幂等与错误
+
+所有写入携带 `request_id`（8–120字符，推荐UUID）、`expected_version`（当前全局revision）与可选 `actor`（审计标签，默认我）。请求体不接受未声明字段。每个写入是一个MySQL InnoDB事务；返回 `revision`、`resource` 和事务提交时的 `data`。失败不改变数据、审计或版本。
+
+同一request_id及完全相同内容重放返回原始成功响应；request_id相同但内容不同返回409。网络超时保持请求内容和编号重试。全局版本是工作台版本，不是单个对象版本；任何对象写入都会递增。
+
+| HTTP | 含义 | 处理 |
+|---|---|---|
+| 200 | 成功或幂等重放 | 读取返回版本 |
+| 403 | 跨站写入被拒绝 | 从同源页面或本机程序调用 |
+| 404 | 对象不存在 | 重新列表定位 |
+| 409 | 版本/状态/request_id冲突 | 重读，再决定新操作 |
+| 422 | 参数、依赖、证据或业务条件错误 | 修正后用新编号提交 |
+| 503 | 数据库不可用 | 不确认成功，恢复后同号重试 |
+
+列表返回 `{revision,items}`；详情返回 `{revision,item}`，问题详情另含关联tasks；完整工作台与导出返回 `{revision,data}`；审计返回 `{items}`。响应均不缓存。
+
+## 业务流转约束
+
+新问题只需标题，默认待梳理。triage填写nextStep和successCriteria进入待处理；start进入处理中；verify必须填写successCriteria、treatment、verificationMethod且必要行动均完成/取消；resolve只能从待验证进入，必须填resolution依据。零关联行动问题可直接提交观察验证。
+
+pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原阶段。close-issue要求closeType/reason，有未完成行动时必须传taskPolicy；重复问题要求duplicateOf。reopen/reject/retriage要求reason。取消行动必须填写reason；依赖仅限同组且不能循环，取消前置行动不视为完成。
+
+行动编号由服务端分配，排序不改变编号或依赖；改变关联会在新组分配新编号，不复用旧号。新增/重开必要行动可使待验证或已解决问题回到处理中。
+
+## 接口目录
+
+### GET /api/health
+
+检查服务与数据库状态。MCP：`get_system_status`。
+
+### GET /api/workspace
+
+读取完整工作台与并发版本。MCP：`get_workspace`。
+
+### GET /api/issues
+
+查询问题列表。MCP：`list_issues`。
+
+参数：`q`（query）；`status`（query）；`priority`（query）；`tag`（query）。
+
+### GET /api/issues/{issue_id}
+
+读取问题详情及关联行动。MCP：`get_issue`。
+
+参数：`issue_id`（path）。
+
+### POST /api/issues
+
+创建待梳理问题。MCP：`create_issue`。
+
+请求体：`IssueCreate`；必填：request_id, expected_version, title。
+
+| 字段 | 约束/默认 |
+|---|---|
+| `request_id` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 120, &quot;minLength&quot;: 8, &quot;description&quot;: &quot;同一次请求重试使用同号，内容改变须换号&quot;} |
+| `expected_version` | {&quot;type&quot;: &quot;integer&quot;, &quot;minimum&quot;: 0.0, &quot;description&quot;: &quot;GET /api/workspace 返回的全局 revision&quot;} |
+| `actor` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 80, &quot;minLength&quot;: 1, &quot;description&quot;: &quot;审计标签，不代表认证身份&quot;, &quot;default&quot;: &quot;我&quot;} |
+| `title` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 160, &quot;minLength&quot;: 1} |
+| `description` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 5000, &quot;default&quot;: &quot;&quot;} |
+| `priority` | {&quot;type&quot;: &quot;string&quot;, &quot;enum&quot;: [&quot;高&quot;, &quot;中&quot;, &quot;低&quot;], &quot;default&quot;: &quot;中&quot;} |
+| `tag` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 40, &quot;default&quot;: &quot;&quot;} |
+
+写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
+
+### PATCH /api/issues/{issue_id}
+
+编辑问题内容与属性。MCP：`update_issue`。
+
+参数：`issue_id`（path）。
+
+请求体：`IssueUpdate`；必填：request_id, expected_version。
+
+| 字段 | 约束/默认 |
+|---|---|
+| `request_id` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 120, &quot;minLength&quot;: 8, &quot;description&quot;: &quot;同一次请求重试使用同号，内容改变须换号&quot;} |
+| `expected_version` | {&quot;type&quot;: &quot;integer&quot;, &quot;minimum&quot;: 0.0, &quot;description&quot;: &quot;GET /api/workspace 返回的全局 revision&quot;} |
+| `actor` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 80, &quot;minLength&quot;: 1, &quot;description&quot;: &quot;审计标签，不代表认证身份&quot;, &quot;default&quot;: &quot;我&quot;} |
+| `title` | {&quot;anyOf&quot;: [{&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 160, &quot;minLength&quot;: 1}, {&quot;type&quot;: &quot;null&quot;}]} |
+| `description` | {&quot;anyOf&quot;: [{&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 5000}, {&quot;type&quot;: &quot;null&quot;}]} |
+| `priority` | {&quot;anyOf&quot;: [{&quot;type&quot;: &quot;string&quot;, &quot;enum&quot;: [&quot;高&quot;, &quot;中&quot;, &quot;低&quot;]}, {&quot;type&quot;: &quot;null&quot;}]} |
+| `tag` | {&quot;anyOf&quot;: [{&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 40}, {&quot;type&quot;: &quot;null&quot;}]} |
+
+写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
+
+### POST /api/issues/{issue_id}/transitions
+
+按七状态规则流转问题。MCP：`transition_issue`。
+
+参数：`issue_id`（path）。
+
+请求体：`IssueTransition`；必填：request_id, expected_version, action。
+
+| 字段 | 约束/默认 |
+|---|---|
+| `request_id` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 120, &quot;minLength&quot;: 8, &quot;description&quot;: &quot;同一次请求重试使用同号，内容改变须换号&quot;} |
+| `expected_version` | {&quot;type&quot;: &quot;integer&quot;, &quot;minimum&quot;: 0.0, &quot;description&quot;: &quot;GET /api/workspace 返回的全局 revision&quot;} |
+| `actor` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 80, &quot;minLength&quot;: 1, &quot;description&quot;: &quot;审计标签，不代表认证身份&quot;, &quot;default&quot;: &quot;我&quot;} |
+| `action` | {&quot;type&quot;: &quot;string&quot;, &quot;enum&quot;: [&quot;triage&quot;, &quot;start&quot;, &quot;verify&quot;, &quot;resolve&quot;, &quot;reject&quot;, &quot;pause&quot;, &quot;resume&quot;, &quot;close-issue&quot;, &quot;reopen&quot;, &quot;retriage&quot;]} |
+| `reason` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 5000, &quot;default&quot;: &quot;&quot;} |
+| `nextStep` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 5000, &quot;default&quot;: &quot;&quot;} |
+| `successCriteria` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 5000, &quot;default&quot;: &quot;&quot;} |
+| `treatment` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 5000, &quot;default&quot;: &quot;&quot;} |
+| `verificationMethod` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 5000, &quot;default&quot;: &quot;&quot;} |
+| `resolution` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 5000, &quot;default&quot;: &quot;&quot;} |
+| `reviewDate` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 10, &quot;default&quot;: &quot;&quot;} |
+| `closeType` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 40, &quot;default&quot;: &quot;&quot;} |
+| `duplicateOf` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 120, &quot;default&quot;: &quot;&quot;} |
+| `taskPolicy` | {&quot;type&quot;: &quot;string&quot;, &quot;enum&quot;: [&quot;&quot;, &quot;detach&quot;, &quot;cancel&quot;], &quot;default&quot;: &quot;&quot;} |
+
+写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
+
+### POST /api/issues/{issue_id}/followups
+
+追加问题跟进记录。MCP：`add_followup`。
+
+参数：`issue_id`（path）。
+
+请求体：`Followup`；必填：request_id, expected_version, content。
+
+| 字段 | 约束/默认 |
+|---|---|
+| `request_id` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 120, &quot;minLength&quot;: 8, &quot;description&quot;: &quot;同一次请求重试使用同号，内容改变须换号&quot;} |
+| `expected_version` | {&quot;type&quot;: &quot;integer&quot;, &quot;minimum&quot;: 0.0, &quot;description&quot;: &quot;GET /api/workspace 返回的全局 revision&quot;} |
+| `actor` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 80, &quot;minLength&quot;: 1, &quot;description&quot;: &quot;审计标签，不代表认证身份&quot;, &quot;default&quot;: &quot;我&quot;} |
+| `content` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 5000, &quot;minLength&quot;: 1} |
+
+写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
+
+### GET /api/tasks
+
+查询行动列表。MCP：`list_tasks`。
+
+参数：`issue_id`（query）；`status`（query）。
+
+### GET /api/tasks/{task_id}
+
+读取行动详情。MCP：`get_task`。
+
+参数：`task_id`（path）。
+
+### POST /api/tasks
+
+创建关联或独立行动。MCP：`create_task`。
+
+请求体：`TaskCreate`；必填：request_id, expected_version, title。
+
+| 字段 | 约束/默认 |
+|---|---|
+| `request_id` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 120, &quot;minLength&quot;: 8, &quot;description&quot;: &quot;同一次请求重试使用同号，内容改变须换号&quot;} |
+| `expected_version` | {&quot;type&quot;: &quot;integer&quot;, &quot;minimum&quot;: 0.0, &quot;description&quot;: &quot;GET /api/workspace 返回的全局 revision&quot;} |
+| `actor` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 80, &quot;minLength&quot;: 1, &quot;description&quot;: &quot;审计标签，不代表认证身份&quot;, &quot;default&quot;: &quot;我&quot;} |
+| `title` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 160, &quot;minLength&quot;: 1} |
+| `issueId` | {&quot;anyOf&quot;: [{&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 120}, {&quot;type&quot;: &quot;null&quot;}]} |
+| `due` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 10, &quot;default&quot;: &quot;&quot;} |
+| `required` | {&quot;type&quot;: &quot;boolean&quot;, &quot;default&quot;: true} |
+
+写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
+
+### PATCH /api/tasks/{task_id}
+
+编辑行动内容与关联。MCP：`update_task`。
+
+参数：`task_id`（path）。
+
+请求体：`TaskUpdate`；必填：request_id, expected_version。
+
+| 字段 | 约束/默认 |
+|---|---|
+| `request_id` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 120, &quot;minLength&quot;: 8, &quot;description&quot;: &quot;同一次请求重试使用同号，内容改变须换号&quot;} |
+| `expected_version` | {&quot;type&quot;: &quot;integer&quot;, &quot;minimum&quot;: 0.0, &quot;description&quot;: &quot;GET /api/workspace 返回的全局 revision&quot;} |
+| `actor` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 80, &quot;minLength&quot;: 1, &quot;description&quot;: &quot;审计标签，不代表认证身份&quot;, &quot;default&quot;: &quot;我&quot;} |
+| `title` | {&quot;anyOf&quot;: [{&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 160, &quot;minLength&quot;: 1}, {&quot;type&quot;: &quot;null&quot;}]} |
+| `issueId` | {&quot;anyOf&quot;: [{&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 120}, {&quot;type&quot;: &quot;null&quot;}]} |
+| `due` | {&quot;anyOf&quot;: [{&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 10}, {&quot;type&quot;: &quot;null&quot;}]} |
+| `required` | {&quot;anyOf&quot;: [{&quot;type&quot;: &quot;boolean&quot;}, {&quot;type&quot;: &quot;null&quot;}]} |
+
+写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
+
+### POST /api/tasks/{task_id}/transitions
+
+推进取消或重新打开行动。MCP：`transition_task`。
+
+参数：`task_id`（path）。
+
+请求体：`TaskTransition`；必填：request_id, expected_version, status。
+
+| 字段 | 约束/默认 |
+|---|---|
+| `request_id` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 120, &quot;minLength&quot;: 8, &quot;description&quot;: &quot;同一次请求重试使用同号，内容改变须换号&quot;} |
+| `expected_version` | {&quot;type&quot;: &quot;integer&quot;, &quot;minimum&quot;: 0.0, &quot;description&quot;: &quot;GET /api/workspace 返回的全局 revision&quot;} |
+| `actor` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 80, &quot;minLength&quot;: 1, &quot;description&quot;: &quot;审计标签，不代表认证身份&quot;, &quot;default&quot;: &quot;我&quot;} |
+| `status` | {&quot;type&quot;: &quot;string&quot;, &quot;enum&quot;: [&quot;待办&quot;, &quot;进行中&quot;, &quot;已完成&quot;, &quot;已取消&quot;]} |
+| `reason` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 5000, &quot;default&quot;: &quot;&quot;} |
+
+写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
+
+### POST /api/tasks/{task_id}/dependencies
+
+设置行动依赖并检查循环。MCP：`set_task_dependencies`。
+
+参数：`task_id`（path）。
+
+请求体：`Dependencies`；必填：request_id, expected_version, dependsOn。
+
+| 字段 | 约束/默认 |
+|---|---|
+| `request_id` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 120, &quot;minLength&quot;: 8, &quot;description&quot;: &quot;同一次请求重试使用同号，内容改变须换号&quot;} |
+| `expected_version` | {&quot;type&quot;: &quot;integer&quot;, &quot;minimum&quot;: 0.0, &quot;description&quot;: &quot;GET /api/workspace 返回的全局 revision&quot;} |
+| `actor` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 80, &quot;minLength&quot;: 1, &quot;description&quot;: &quot;审计标签，不代表认证身份&quot;, &quot;default&quot;: &quot;我&quot;} |
+| `dependsOn` | {&quot;items&quot;: {&quot;type&quot;: &quot;string&quot;}, &quot;type&quot;: &quot;array&quot;, &quot;maxItems&quot;: 100} |
+
+写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
+
+### POST /api/tasks/{task_id}/reorder
+
+调整同组行动显示顺序。MCP：`reorder_task`。
+
+参数：`task_id`（path）。
+
+请求体：`Reorder`；必填：request_id, expected_version, target_id。
+
+| 字段 | 约束/默认 |
+|---|---|
+| `request_id` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 120, &quot;minLength&quot;: 8, &quot;description&quot;: &quot;同一次请求重试使用同号，内容改变须换号&quot;} |
+| `expected_version` | {&quot;type&quot;: &quot;integer&quot;, &quot;minimum&quot;: 0.0, &quot;description&quot;: &quot;GET /api/workspace 返回的全局 revision&quot;} |
+| `actor` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 80, &quot;minLength&quot;: 1, &quot;description&quot;: &quot;审计标签，不代表认证身份&quot;, &quot;default&quot;: &quot;我&quot;} |
+| `target_id` | {&quot;type&quot;: &quot;string&quot;, &quot;maxLength&quot;: 120, &quot;minLength&quot;: 1} |
+| `after` | {&quot;type&quot;: &quot;boolean&quot;, &quot;default&quot;: false} |
+
+写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
+
+### GET /api/activity
+
+读取操作审计事件。MCP：`list_activity`。
+
+参数：`after`（query）；`limit`（query）。
+
+### GET /api/export
+
+导出全部问题行动与版本。MCP：`export_workspace`。
+
+## 示例与边界
+
+只读：`python examples/api_client.py`。合成写入：加 `--write-demo`。浏览器示例：服务运行后访问 `/examples/`。
+
+本版为单人工作台，支持显式配置0.0.0.0监听与内网Host允许列表；actor不是身份认证。正式存储为用户配置的MySQL专属新库，实体分表保存；SQLite仅用于隔离测试。没有删除、导入、上传、登录或离线跨设备同步API。审计分页使用after=最后一条revision继续查询。完整备份使用MySQL专属库备份，页面JSON不含幂等表。
+</pre></html>

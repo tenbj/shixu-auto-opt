@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "scope": "ZIP解压到另一临时目录，复用当前已安装依赖的Python；显式SQLite测试适配器启动、真实HTTP首页、创建与回读通过；MySQL真实联调另见mysql-report.json",
+  "dependency_install_verified_separately": false,
+  "os": "win32",
+  "python": "3.11.7",
+  "not_claimed": "不是免安装exe；未在Linux/macOS实测；最终包的运行源码与此候选相同，仅补充报告和ready合同"
+}

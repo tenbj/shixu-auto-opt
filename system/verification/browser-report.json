@@ -1,0 +1,72 @@
+{
+  "kind": "real-browser-api-mysql",
+  "mock": false,
+  "simulated_fault": "仅响应丢失场景使用网络拦截模拟",
+  "checks": [
+    {
+      "name": "首屏从真实 API 加载",
+      "passed": true
+    },
+    {
+      "name": "页面创建问题并通过 API 回读",
+      "passed": true
+    },
+    {
+      "name": "刷新持久化与搜索过滤",
+      "passed": true
+    },
+    {
+      "name": "页面梳理流转",
+      "passed": true
+    },
+    {
+      "name": "子弹窗创建关联行动",
+      "passed": true
+    },
+    {
+      "name": "页面完成行动、提交验证、确认解决",
+      "passed": true
+    },
+    {
+      "name": "跟进保存与 HTML 安全显示",
+      "passed": true
+    },
+    {
+      "name": "五个工作视图可用",
+      "passed": true
+    },
+    {
+      "name": "行动日历",
+      "passed": true
+    },
+    {
+      "name": "JSON 导出完整记录",
+      "passed": true
+    },
+    {
+      "name": "390px 布局不横向溢出",
+      "passed": true
+    },
+    {
+      "name": "4K 自适应",
+      "passed": true
+    },
+    {
+      "name": "并发冲突提示且保留表单草稿",
+      "passed": true
+    },
+    {
+      "name": "冲突后明确重试成功",
+      "passed": true
+    },
+    {
+      "name": "响应丢失使用同号重试，不重复创建（此项模拟网络故障）",
+      "passed": true
+    },
+    {
+      "name": "无 JavaScript 运行错误",
+      "passed": true
+    }
+  ],
+  "passed": true
+}

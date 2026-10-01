@@ -1,0 +1,2151 @@
+{
+  "server": "shixu",
+  "transport": "stdio",
+  "command": "python /absolute/path/system/mcp_server.py",
+  "url": null,
+  "instructions": "先 health，再 list/get 获取 revision，写入携带 request_id 和 expected_version。重试同号；409重读，422修正输入，503不得声称成功。提交验证必须填写处理说明、方法；确认解决必须填写验证依据。actor仅为审计标签。",
+  "tools": [
+    {
+      "name": "get_system_status",
+      "kind": "read",
+      "purpose": "先检查服务/数据库可用性，返回 status、revision；只读。",
+      "when_to_use": "先检查服务/数据库可用性，返回 status、revision；只读。",
+      "input": {
+        "properties": {},
+        "title": "get_system_statusArguments",
+        "type": "object"
+      },
+      "returns": "见API响应；写入返回resource/data/revision",
+      "side_effect": "无",
+      "order": "先health，再list/get版本，再写入",
+      "error_handling": "404检查ID；409重读；422修正输入；503不确认成功、同号重试",
+      "protocol": {
+        "name": "get_system_status",
+        "title": null,
+        "description": "先检查服务/数据库可用性，返回 status、revision；只读。",
+        "inputSchema": {
+          "properties": {},
+          "title": "get_system_statusArguments",
+          "type": "object"
+        },
+        "execution": null,
+        "outputSchema": null,
+        "icons": null,
+        "annotations": {
+          "title": null,
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "_meta": null
+      }
+    },
+    {
+      "name": "get_workspace",
+      "kind": "read",
+      "purpose": "读取完整工作台与全局 revision；跨资源操作前使用；只读。",
+      "when_to_use": "读取完整工作台与全局 revision；跨资源操作前使用；只读。",
+      "input": {
+        "properties": {},
+        "title": "get_workspaceArguments",
+        "type": "object"
+      },
+      "returns": "见API响应；写入返回resource/data/revision",
+      "side_effect": "无",
+      "order": "先health，再list/get版本，再写入",
+      "error_handling": "404检查ID；409重读；422修正输入；503不确认成功、同号重试",
+      "protocol": {
+        "name": "get_workspace",
+        "title": null,
+        "description": "读取完整工作台与全局 revision；跨资源操作前使用；只读。",
+        "inputSchema": {
+          "properties": {},
+          "title": "get_workspaceArguments",
+          "type": "object"
+        },
+        "execution": null,
+        "outputSchema": null,
+        "icons": null,
+        "annotations": {
+          "title": null,
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "_meta": null
+      }
+    },
+    {
+      "name": "list_issues",
+      "kind": "read",
+      "purpose": "搜索/筛选问题，返回 items、revision；先 list 再 get 详情；只读。",
+      "when_to_use": "搜索/筛选问题，返回 items、revision；先 list 再 get 详情；只读。",
+      "input": {
+        "properties": {
+          "q": {
+            "default": "",
+            "title": "Q",
+            "type": "string"
+          },
+          "status": {
+            "default": "",
+            "title": "Status",
+            "type": "string"
+          },
+          "priority": {
+            "default": "",
+            "title": "Priority",
+            "type": "string"
+          },
+          "tag": {
+            "default": "",
+            "title": "Tag",
+            "type": "string"
+          }
+        },
+        "title": "list_issuesArguments",
+        "type": "object"
+      },
+      "returns": "见API响应；写入返回resource/data/revision",
+      "side_effect": "无",
+      "order": "先health，再list/get版本，再写入",
+      "error_handling": "404检查ID；409重读；422修正输入；503不确认成功、同号重试",
+      "protocol": {
+        "name": "list_issues",
+        "title": null,
+        "description": "搜索/筛选问题，返回 items、revision；先 list 再 get 详情；只读。",
+        "inputSchema": {
+          "properties": {
+            "q": {
+              "default": "",
+              "title": "Q",
+              "type": "string"
+            },
+            "status": {
+              "default": "",
+              "title": "Status",
+              "type": "string"
+            },
+            "priority": {
+              "default": "",
+              "title": "Priority",
+              "type": "string"
+            },
+            "tag": {
+              "default": "",
+              "title": "Tag",
+              "type": "string"
+            }
+          },
+          "title": "list_issuesArguments",
+          "type": "object"
+        },
+        "execution": null,
+        "outputSchema": null,
+        "icons": null,
+        "annotations": {
+          "title": null,
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "_meta": null
+      }
+    },
+    {
+      "name": "get_issue",
+      "kind": "read",
+      "purpose": "读取问题、关联行动与最新 revision，写入前获取并发版本；404表示不存在。",
+      "when_to_use": "读取问题、关联行动与最新 revision，写入前获取并发版本；404表示不存在。",
+      "input": {
+        "properties": {
+          "issue_id": {
+            "title": "Issue Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "issue_id"
+        ],
+        "title": "get_issueArguments",
+        "type": "object"
+      },
+      "returns": "见API响应；写入返回resource/data/revision",
+      "side_effect": "无",
+      "order": "先health，再list/get版本，再写入",
+      "error_handling": "404检查ID；409重读；422修正输入；503不确认成功、同号重试",
+      "protocol": {
+        "name": "get_issue",
+        "title": null,
+        "description": "读取问题、关联行动与最新 revision，写入前获取并发版本；404表示不存在。",
+        "inputSchema": {
+          "properties": {
+            "issue_id": {
+              "title": "Issue Id",
+              "type": "string"
+            }
+          },
+          "required": [
+            "issue_id"
+          ],
+          "title": "get_issueArguments",
+          "type": "object"
+        },
+        "execution": null,
+        "outputSchema": null,
+        "icons": null,
+        "annotations": {
+          "title": null,
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "_meta": null
+      }
+    },
+    {
+      "name": "create_issue",
+      "kind": "write",
+      "purpose": "创建待梳理问题。标题必填；写数据库与审计。返回 resource、revision、data；409重读，422修正，503不确认成功。",
+      "when_to_use": "创建待梳理问题。标题必填；写数据库与审计。返回 resource、revision、data；409重读，422修正，503不确认成功。",
+      "input": {
+        "$defs": {
+          "IssueCreate": {
+            "additionalProperties": false,
+            "properties": {
+              "request_id": {
+                "description": "同一次请求重试使用同号，内容改变须换号",
+                "maxLength": 120,
+                "minLength": 8,
+                "title": "Request Id",
+                "type": "string"
+              },
+              "expected_version": {
+                "description": "GET /api/workspace 返回的全局 revision",
+                "minimum": 0,
+                "title": "Expected Version",
+                "type": "integer"
+              },
+              "actor": {
+                "default": "我",
+                "description": "审计标签，不代表认证身份",
+                "maxLength": 80,
+                "minLength": 1,
+                "title": "Actor",
+                "type": "string"
+              },
+              "title": {
+                "maxLength": 160,
+                "minLength": 1,
+                "title": "Title",
+                "type": "string"
+              },
+              "description": {
+                "default": "",
+                "maxLength": 5000,
+                "title": "Description",
+                "type": "string"
+              },
+              "priority": {
+                "default": "中",
+                "enum": [
+                  "高",
+                  "中",
+                  "低"
+                ],
+                "title": "Priority",
+                "type": "string"
+              },
+              "tag": {
+                "default": "",
+                "maxLength": 40,
+                "title": "Tag",
+                "type": "string"
+              }
+            },
+            "required": [
+              "request_id",
+              "expected_version",
+              "title"
+            ],
+            "title": "IssueCreate",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "body": {
+            "$ref": "#/$defs/IssueCreate"
+          }
+        },
+        "required": [
+          "body"
+        ],
+        "title": "create_issueArguments",
+        "type": "object"
+      },
+      "returns": "见API响应；写入返回resource/data/revision",
+      "side_effect": "经API写MySQL实体表并追加审计；具体关联状态变化见工具描述",
+      "order": "先health，再list/get版本，再写入",
+      "error_handling": "404检查ID；409重读；422修正输入；503不确认成功、同号重试",
+      "protocol": {
+        "name": "create_issue",
+        "title": null,
+        "description": "创建待梳理问题。标题必填；写数据库与审计。返回 resource、revision、data；409重读，422修正，503不确认成功。",
+        "inputSchema": {
+          "$defs": {
+            "IssueCreate": {
+              "additionalProperties": false,
+              "properties": {
+                "request_id": {
+                  "description": "同一次请求重试使用同号，内容改变须换号",
+                  "maxLength": 120,
+                  "minLength": 8,
+                  "title": "Request Id",
+                  "type": "string"
+                },
+                "expected_version": {
+                  "description": "GET /api/workspace 返回的全局 revision",
+                  "minimum": 0,
+                  "title": "Expected Version",
+                  "type": "integer"
+                },
+                "actor": {
+                  "default": "我",
+                  "description": "审计标签，不代表认证身份",
+                  "maxLength": 80,
+                  "minLength": 1,
+                  "title": "Actor",
+                  "type": "string"
+                },
+                "title": {
+                  "maxLength": 160,
+                  "minLength": 1,
+                  "title": "Title",
+                  "type": "string"
+                },
+                "description": {
+                  "default": "",
+                  "maxLength": 5000,
+                  "title": "Description",
+                  "type": "string"
+                },
+                "priority": {
+                  "default": "中",
+                  "enum": [
+                    "高",
+                    "中",
+                    "低"
+                  ],
+                  "title": "Priority",
+                  "type": "string"
+                },
+                "tag": {
+                  "default": "",
+                  "maxLength": 40,
+                  "title": "Tag",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "request_id",
+                "expected_version",
+                "title"
+              ],
+              "title": "IssueCreate",
+              "type": "object"
+            }
+          },
+          "properties": {
+            "body": {
+              "$ref": "#/$defs/IssueCreate"
+            }
+          },
+          "required": [
+            "body"
+          ],
+          "title": "create_issueArguments",
+          "type": "object"
+        },
+        "execution": null,
+        "outputSchema": null,
+        "icons": null,
+        "annotations": {
+          "title": null,
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "_meta": null
+      }
+    },
+    {
+      "name": "update_issue",
+      "kind": "write",
+      "purpose": "编辑标题、背景、分类或优先级，不直接修改状态。先get取revision；同请求重试同号。",
+      "when_to_use": "编辑标题、背景、分类或优先级，不直接修改状态。先get取revision；同请求重试同号。",
+      "input": {
+        "$defs": {
+          "IssueUpdate": {
+            "additionalProperties": false,
+            "properties": {
+              "request_id": {
+                "description": "同一次请求重试使用同号，内容改变须换号",
+                "maxLength": 120,
+                "minLength": 8,
+                "title": "Request Id",
+                "type": "string"
+              },
+              "expected_version": {
+                "description": "GET /api/workspace 返回的全局 revision",
+                "minimum": 0,
+                "title": "Expected Version",
+                "type": "integer"
+              },
+              "actor": {
+                "default": "我",
+                "description": "审计标签，不代表认证身份",
+                "maxLength": 80,
+                "minLength": 1,
+                "title": "Actor",
+                "type": "string"
+              },
+              "title": {
+                "anyOf": [
+                  {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Title"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "maxLength": 5000,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Description"
+              },
+              "priority": {
+                "anyOf": [
+                  {
+                    "enum": [
+                      "高",
+                      "中",
+                      "低"
+                    ],
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Priority"
+              },
+              "tag": {
+                "anyOf": [
+                  {
+                    "maxLength": 40,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Tag"
+              }
+            },
+            "required": [
+              "request_id",
+              "expected_version"
+            ],
+            "title": "IssueUpdate",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "issue_id": {
+            "title": "Issue Id",
+            "type": "string"
+          },
+          "body": {
+            "$ref": "#/$defs/IssueUpdate"
+          }
+        },
+        "required": [
+          "issue_id",
+          "body"
+        ],
+        "title": "update_issueArguments",
+        "type": "object"
+      },
+      "returns": "见API响应；写入返回resource/data/revision",
+      "side_effect": "经API写MySQL实体表并追加审计；具体关联状态变化见工具描述",
+      "order": "先health，再list/get版本，再写入",
+      "error_handling": "404检查ID；409重读；422修正输入；503不确认成功、同号重试",
+      "protocol": {
+        "name": "update_issue",
+        "title": null,
+        "description": "编辑标题、背景、分类或优先级，不直接修改状态。先get取revision；同请求重试同号。",
+        "inputSchema": {
+          "$defs": {
+            "IssueUpdate": {
+              "additionalProperties": false,
+              "properties": {
+                "request_id": {
+                  "description": "同一次请求重试使用同号，内容改变须换号",
+                  "maxLength": 120,
+                  "minLength": 8,
+                  "title": "Request Id",
+                  "type": "string"
+                },
+                "expected_version": {
+                  "description": "GET /api/workspace 返回的全局 revision",
+                  "minimum": 0,
+                  "title": "Expected Version",
+                  "type": "integer"
+                },
+                "actor": {
+                  "default": "我",
+                  "description": "审计标签，不代表认证身份",
+                  "maxLength": 80,
+                  "minLength": 1,
+                  "title": "Actor",
+                  "type": "string"
+                },
+                "title": {
+                  "anyOf": [
+                    {
+                      "maxLength": 160,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Title"
+                },
+                "description": {
+                  "anyOf": [
+                    {
+                      "maxLength": 5000,
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Description"
+                },
+                "priority": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "高",
+                        "中",
+                        "低"
+                      ],
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Priority"
+                },
+                "tag": {
+                  "anyOf": [
+                    {
+                      "maxLength": 40,
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Tag"
+                }
+              },
+              "required": [
+                "request_id",
+                "expected_version"
+              ],
+              "title": "IssueUpdate",
+              "type": "object"
+            }
+          },
+          "properties": {
+            "issue_id": {
+              "title": "Issue Id",
+              "type": "string"
+            },
+            "body": {
+              "$ref": "#/$defs/IssueUpdate"
+            }
+          },
+          "required": [
+            "issue_id",
+            "body"
+          ],
+          "title": "update_issueArguments",
+          "type": "object"
+        },
+        "execution": null,
+        "outputSchema": null,
+        "icons": null,
+        "annotations": {
+          "title": null,
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "_meta": null
+      }
+    },
+    {
+      "name": "transition_issue",
+      "kind": "write",
+      "purpose": "七状态流转：triage/start/verify/resolve/reject/pause/resume/close-issue/reopen/retriage。verify必填successCriteria/treatment/verificationMethod；resolve必填resolution依据；暂缓/关闭/重开须原因。关闭须处置未完成行动。写入并审计，409先重读，422补充条件，503不声称成功。",
+      "when_to_use": "七状态流转：triage/start/verify/resolve/reject/pause/resume/close-issue/reopen/retriage。verify必填successCriteria/treatment/verificationMethod；resolve必填resolution依据；暂缓/关闭/重开须原因。关闭须处置未完成行动。写入并审计，409先重读，422补充条件，503不声称成功。",
+      "input": {
+        "$defs": {
+          "IssueTransition": {
+            "additionalProperties": false,
+            "properties": {
+              "request_id": {
+                "description": "同一次请求重试使用同号，内容改变须换号",
+                "maxLength": 120,
+                "minLength": 8,
+                "title": "Request Id",
+                "type": "string"
+              },
+              "expected_version": {
+                "description": "GET /api/workspace 返回的全局 revision",
+                "minimum": 0,
+                "title": "Expected Version",
+                "type": "integer"
+              },
+              "actor": {
+                "default": "我",
+                "description": "审计标签，不代表认证身份",
+                "maxLength": 80,
+                "minLength": 1,
+                "title": "Actor",
+                "type": "string"
+              },
+              "action": {
+                "enum": [
+                  "triage",
+                  "start",
+                  "verify",
+                  "resolve",
+                  "reject",
+                  "pause",
+                  "resume",
+                  "close-issue",
+                  "reopen",
+                  "retriage"
+                ],
+                "title": "Action",
+                "type": "string"
+              },
+              "reason": {
+                "default": "",
+                "maxLength": 5000,
+                "title": "Reason",
+                "type": "string"
+              },
+              "nextStep": {
+                "default": "",
+                "maxLength": 5000,
+                "title": "Nextstep",
+                "type": "string"
+              },
+              "successCriteria": {
+                "default": "",
+                "maxLength": 5000,
+                "title": "Successcriteria",
+                "type": "string"
+              },
+              "treatment": {
+                "default": "",
+                "maxLength": 5000,
+                "title": "Treatment",
+                "type": "string"
+              },
+              "verificationMethod": {
+                "default": "",
+                "maxLength": 5000,
+                "title": "Verificationmethod",
+                "type": "string"
+              },
+              "resolution": {
+                "default": "",
+                "maxLength": 5000,
+                "title": "Resolution",
+                "type": "string"
+              },
+              "reviewDate": {
+                "default": "",
+                "maxLength": 10,
+                "title": "Reviewdate",
+                "type": "string"
+              },
+              "closeType": {
+                "default": "",
+                "maxLength": 40,
+                "title": "Closetype",
+                "type": "string"
+              },
+              "duplicateOf": {
+                "default": "",
+                "maxLength": 120,
+                "title": "Duplicateof",
+                "type": "string"
+              },
+              "taskPolicy": {
+                "default": "",
+                "enum": [
+                  "",
+                  "detach",
+                  "cancel"
+                ],
+                "title": "Taskpolicy",
+                "type": "string"
+              }
+            },
+            "required": [
+              "request_id",
+              "expected_version",
+              "action"
+            ],
+            "title": "IssueTransition",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "issue_id": {
+            "title": "Issue Id",
+            "type": "string"
+          },
+          "body": {
+            "$ref": "#/$defs/IssueTransition"
+          }
+        },
+        "required": [
+          "issue_id",
+          "body"
+        ],
+        "title": "transition_issueArguments",
+        "type": "object"
+      },
+      "returns": "见API响应；写入返回resource/data/revision",
+      "side_effect": "经API写MySQL实体表并追加审计；具体关联状态变化见工具描述",
+      "order": "先health，再list/get版本，再写入",
+      "error_handling": "404检查ID；409重读；422修正输入；503不确认成功、同号重试",
+      "protocol": {
+        "name": "transition_issue",
+        "title": null,
+        "description": "七状态流转：triage/start/verify/resolve/reject/pause/resume/close-issue/reopen/retriage。verify必填successCriteria/treatment/verificationMethod；resolve必填resolution依据；暂缓/关闭/重开须原因。关闭须处置未完成行动。写入并审计，409先重读，422补充条件，503不声称成功。",
+        "inputSchema": {
+          "$defs": {
+            "IssueTransition": {
+              "additionalProperties": false,
+              "properties": {
+                "request_id": {
+                  "description": "同一次请求重试使用同号，内容改变须换号",
+                  "maxLength": 120,
+                  "minLength": 8,
+                  "title": "Request Id",
+                  "type": "string"
+                },
+                "expected_version": {
+                  "description": "GET /api/workspace 返回的全局 revision",
+                  "minimum": 0,
+                  "title": "Expected Version",
+                  "type": "integer"
+                },
+                "actor": {
+                  "default": "我",
+                  "description": "审计标签，不代表认证身份",
+                  "maxLength": 80,
+                  "minLength": 1,
+                  "title": "Actor",
+                  "type": "string"
+                },
+                "action": {
+                  "enum": [
+                    "triage",
+                    "start",
+                    "verify",
+                    "resolve",
+                    "reject",
+                    "pause",
+                    "resume",
+                    "close-issue",
+                    "reopen",
+                    "retriage"
+                  ],
+                  "title": "Action",
+                  "type": "string"
+                },
+                "reason": {
+                  "default": "",
+                  "maxLength": 5000,
+                  "title": "Reason",
+                  "type": "string"
+                },
+                "nextStep": {
+                  "default": "",
+                  "maxLength": 5000,
+                  "title": "Nextstep",
+                  "type": "string"
+                },
+                "successCriteria": {
+                  "default": "",
+                  "maxLength": 5000,
+                  "title": "Successcriteria",
+                  "type": "string"
+                },
+                "treatment": {
+                  "default": "",
+                  "maxLength": 5000,
+                  "title": "Treatment",
+                  "type": "string"
+                },
+                "verificationMethod": {
+                  "default": "",
+                  "maxLength": 5000,
+                  "title": "Verificationmethod",
+                  "type": "string"
+                },
+                "resolution": {
+                  "default": "",
+                  "maxLength": 5000,
+                  "title": "Resolution",
+                  "type": "string"
+                },
+                "reviewDate": {
+                  "default": "",
+                  "maxLength": 10,
+                  "title": "Reviewdate",
+                  "type": "string"
+                },
+                "closeType": {
+                  "default": "",
+                  "maxLength": 40,
+                  "title": "Closetype",
+                  "type": "string"
+                },
+                "duplicateOf": {
+                  "default": "",
+                  "maxLength": 120,
+                  "title": "Duplicateof",
+                  "type": "string"
+                },
+                "taskPolicy": {
+                  "default": "",
+                  "enum": [
+                    "",
+                    "detach",
+                    "cancel"
+                  ],
+                  "title": "Taskpolicy",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "request_id",
+                "expected_version",
+                "action"
+              ],
+              "title": "IssueTransition",
+              "type": "object"
+            }
+          },
+          "properties": {
+            "issue_id": {
+              "title": "Issue Id",
+              "type": "string"
+            },
+            "body": {
+              "$ref": "#/$defs/IssueTransition"
+            }
+          },
+          "required": [
+            "issue_id",
+            "body"
+          ],
+          "title": "transition_issueArguments",
+          "type": "object"
+        },
+        "execution": null,
+        "outputSchema": null,
+        "icons": null,
+        "annotations": {
+          "title": null,
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "_meta": null
+      }
+    },
+    {
+      "name": "add_followup",
+      "kind": "write",
+      "purpose": "追加1至5000字跟进；不改变问题状态。先get取revision；写入并审计。",
+      "when_to_use": "追加1至5000字跟进；不改变问题状态。先get取revision；写入并审计。",
+      "input": {
+        "$defs": {
+          "Followup": {
+            "additionalProperties": false,
+            "properties": {
+              "request_id": {
+                "description": "同一次请求重试使用同号，内容改变须换号",
+                "maxLength": 120,
+                "minLength": 8,
+                "title": "Request Id",
+                "type": "string"
+              },
+              "expected_version": {
+                "description": "GET /api/workspace 返回的全局 revision",
+                "minimum": 0,
+                "title": "Expected Version",
+                "type": "integer"
+              },
+              "actor": {
+                "default": "我",
+                "description": "审计标签，不代表认证身份",
+                "maxLength": 80,
+                "minLength": 1,
+                "title": "Actor",
+                "type": "string"
+              },
+              "content": {
+                "maxLength": 5000,
+                "minLength": 1,
+                "title": "Content",
+                "type": "string"
+              }
+            },
+            "required": [
+              "request_id",
+              "expected_version",
+              "content"
+            ],
+            "title": "Followup",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "issue_id": {
+            "title": "Issue Id",
+            "type": "string"
+          },
+          "body": {
+            "$ref": "#/$defs/Followup"
+          }
+        },
+        "required": [
+          "issue_id",
+          "body"
+        ],
+        "title": "add_followupArguments",
+        "type": "object"
+      },
+      "returns": "见API响应；写入返回resource/data/revision",
+      "side_effect": "经API写MySQL实体表并追加审计；具体关联状态变化见工具描述",
+      "order": "先health，再list/get版本，再写入",
+      "error_handling": "404检查ID；409重读；422修正输入；503不确认成功、同号重试",
+      "protocol": {
+        "name": "add_followup",
+        "title": null,
+        "description": "追加1至5000字跟进；不改变问题状态。先get取revision；写入并审计。",
+        "inputSchema": {
+          "$defs": {
+            "Followup": {
+              "additionalProperties": false,
+              "properties": {
+                "request_id": {
+                  "description": "同一次请求重试使用同号，内容改变须换号",
+                  "maxLength": 120,
+                  "minLength": 8,
+                  "title": "Request Id",
+                  "type": "string"
+                },
+                "expected_version": {
+                  "description": "GET /api/workspace 返回的全局 revision",
+                  "minimum": 0,
+                  "title": "Expected Version",
+                  "type": "integer"
+                },
+                "actor": {
+                  "default": "我",
+                  "description": "审计标签，不代表认证身份",
+                  "maxLength": 80,
+                  "minLength": 1,
+                  "title": "Actor",
+                  "type": "string"
+                },
+                "content": {
+                  "maxLength": 5000,
+                  "minLength": 1,
+                  "title": "Content",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "request_id",
+                "expected_version",
+                "content"
+              ],
+              "title": "Followup",
+              "type": "object"
+            }
+          },
+          "properties": {
+            "issue_id": {
+              "title": "Issue Id",
+              "type": "string"
+            },
+            "body": {
+              "$ref": "#/$defs/Followup"
+            }
+          },
+          "required": [
+            "issue_id",
+            "body"
+          ],
+          "title": "add_followupArguments",
+          "type": "object"
+        },
+        "execution": null,
+        "outputSchema": null,
+        "icons": null,
+        "annotations": {
+          "title": null,
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "_meta": null
+      }
+    },
+    {
+      "name": "list_tasks",
+      "kind": "read",
+      "purpose": "查询行动及revision；issue_id省略为全部、空字符串为独立行动；只读。",
+      "when_to_use": "查询行动及revision；issue_id省略为全部、空字符串为独立行动；只读。",
+      "input": {
+        "properties": {
+          "issue_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Issue Id"
+          },
+          "status": {
+            "default": "",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "title": "list_tasksArguments",
+        "type": "object"
+      },
+      "returns": "见API响应；写入返回resource/data/revision",
+      "side_effect": "无",
+      "order": "先health，再list/get版本，再写入",
+      "error_handling": "404检查ID；409重读；422修正输入；503不确认成功、同号重试",
+      "protocol": {
+        "name": "list_tasks",
+        "title": null,
+        "description": "查询行动及revision；issue_id省略为全部、空字符串为独立行动；只读。",
+        "inputSchema": {
+          "properties": {
+            "issue_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Issue Id"
+            },
+            "status": {
+              "default": "",
+              "title": "Status",
+              "type": "string"
+            }
+          },
+          "title": "list_tasksArguments",
+          "type": "object"
+        },
+        "execution": null,
+        "outputSchema": null,
+        "icons": null,
+        "annotations": {
+          "title": null,
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "_meta": null
+      }
+    },
+    {
+      "name": "get_task",
+      "kind": "read",
+      "purpose": "读取行动详情、依赖、编号与revision；推进前确认前置行动；只读。",
+      "when_to_use": "读取行动详情、依赖、编号与revision；推进前确认前置行动；只读。",
+      "input": {
+        "properties": {
+          "task_id": {
+            "title": "Task Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "task_id"
+        ],
+        "title": "get_taskArguments",
+        "type": "object"
+      },
+      "returns": "见API响应；写入返回resource/data/revision",
+      "side_effect": "无",
+      "order": "先health，再list/get版本，再写入",
+      "error_handling": "404检查ID；409重读；422修正输入；503不确认成功、同号重试",
+      "protocol": {
+        "name": "get_task",
+        "title": null,
+        "description": "读取行动详情、依赖、编号与revision；推进前确认前置行动；只读。",
+        "inputSchema": {
+          "properties": {
+            "task_id": {
+              "title": "Task Id",
+              "type": "string"
+            }
+          },
+          "required": [
+            "task_id"
+          ],
+          "title": "get_taskArguments",
+          "type": "object"
+        },
+        "execution": null,
+        "outputSchema": null,
+        "icons": null,
+        "annotations": {
+          "title": null,
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "_meta": null
+      }
+    },
+    {
+      "name": "create_task",
+      "kind": "write",
+      "purpose": "创建关联或独立待办，默认本轮必要；新增必要行动可能使待验证问题回到处理中。先读版本，写入并审计。",
+      "when_to_use": "创建关联或独立待办，默认本轮必要；新增必要行动可能使待验证问题回到处理中。先读版本，写入并审计。",
+      "input": {
+        "$defs": {
+          "TaskCreate": {
+            "additionalProperties": false,
+            "properties": {
+              "request_id": {
+                "description": "同一次请求重试使用同号，内容改变须换号",
+                "maxLength": 120,
+                "minLength": 8,
+                "title": "Request Id",
+                "type": "string"
+              },
+              "expected_version": {
+                "description": "GET /api/workspace 返回的全局 revision",
+                "minimum": 0,
+                "title": "Expected Version",
+                "type": "integer"
+              },
+              "actor": {
+                "default": "我",
+                "description": "审计标签，不代表认证身份",
+                "maxLength": 80,
+                "minLength": 1,
+                "title": "Actor",
+                "type": "string"
+              },
+              "title": {
+                "maxLength": 160,
+                "minLength": 1,
+                "title": "Title",
+                "type": "string"
+              },
+              "issueId": {
+                "anyOf": [
+                  {
+                    "maxLength": 120,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Issueid"
+              },
+              "due": {
+                "default": "",
+                "maxLength": 10,
+                "title": "Due",
+                "type": "string"
+              },
+              "required": {
+                "default": true,
+                "title": "Required",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "request_id",
+              "expected_version",
+              "title"
+            ],
+            "title": "TaskCreate",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "body": {
+            "$ref": "#/$defs/TaskCreate"
+          }
+        },
+        "required": [
+          "body"
+        ],
+        "title": "create_taskArguments",
+        "type": "object"
+      },
+      "returns": "见API响应；写入返回resource/data/revision",
+      "side_effect": "经API写MySQL实体表并追加审计；具体关联状态变化见工具描述",
+      "order": "先health，再list/get版本，再写入",
+      "error_handling": "404检查ID；409重读；422修正输入；503不确认成功、同号重试",
+      "protocol": {
+        "name": "create_task",
+        "title": null,
+        "description": "创建关联或独立待办，默认本轮必要；新增必要行动可能使待验证问题回到处理中。先读版本，写入并审计。",
+        "inputSchema": {
+          "$defs": {
+            "TaskCreate": {
+              "additionalProperties": false,
+              "properties": {
+                "request_id": {
+                  "description": "同一次请求重试使用同号，内容改变须换号",
+                  "maxLength": 120,
+                  "minLength": 8,
+                  "title": "Request Id",
+                  "type": "string"
+                },
+                "expected_version": {
+                  "description": "GET /api/workspace 返回的全局 revision",
+                  "minimum": 0,
+                  "title": "Expected Version",
+                  "type": "integer"
+                },
+                "actor": {
+                  "default": "我",
+                  "description": "审计标签，不代表认证身份",
+                  "maxLength": 80,
+                  "minLength": 1,
+                  "title": "Actor",
+                  "type": "string"
+                },
+                "title": {
+                  "maxLength": 160,
+                  "minLength": 1,
+                  "title": "Title",
+                  "type": "string"
+                },
+                "issueId": {
+                  "anyOf": [
+                    {
+                      "maxLength": 120,
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Issueid"
+                },
+                "due": {
+                  "default": "",
+                  "maxLength": 10,
+                  "title": "Due",
+                  "type": "string"
+                },
+                "required": {
+                  "default": true,
+                  "title": "Required",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "request_id",
+                "expected_version",
+                "title"
+              ],
+              "title": "TaskCreate",
+              "type": "object"
+            }
+          },
+          "properties": {
+            "body": {
+              "$ref": "#/$defs/TaskCreate"
+            }
+          },
+          "required": [
+            "body"
+          ],
+          "title": "create_taskArguments",
+          "type": "object"
+        },
+        "execution": null,
+        "outputSchema": null,
+        "icons": null,
+        "annotations": {
+          "title": null,
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "_meta": null
+      }
+    },
+    {
+      "name": "update_task",
+      "kind": "write",
+      "purpose": "编辑标题、日期、必要性、关联。变更关联须先解除依赖，可能更新问题状态和行动分组编号。先get版本。",
+      "when_to_use": "编辑标题、日期、必要性、关联。变更关联须先解除依赖，可能更新问题状态和行动分组编号。先get版本。",
+      "input": {
+        "$defs": {
+          "TaskUpdate": {
+            "additionalProperties": false,
+            "properties": {
+              "request_id": {
+                "description": "同一次请求重试使用同号，内容改变须换号",
+                "maxLength": 120,
+                "minLength": 8,
+                "title": "Request Id",
+                "type": "string"
+              },
+              "expected_version": {
+                "description": "GET /api/workspace 返回的全局 revision",
+                "minimum": 0,
+                "title": "Expected Version",
+                "type": "integer"
+              },
+              "actor": {
+                "default": "我",
+                "description": "审计标签，不代表认证身份",
+                "maxLength": 80,
+                "minLength": 1,
+                "title": "Actor",
+                "type": "string"
+              },
+              "title": {
+                "anyOf": [
+                  {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Title"
+              },
+              "issueId": {
+                "anyOf": [
+                  {
+                    "maxLength": 120,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Issueid"
+              },
+              "due": {
+                "anyOf": [
+                  {
+                    "maxLength": 10,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Due"
+              },
+              "required": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Required"
+              }
+            },
+            "required": [
+              "request_id",
+              "expected_version"
+            ],
+            "title": "TaskUpdate",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "task_id": {
+            "title": "Task Id",
+            "type": "string"
+          },
+          "body": {
+            "$ref": "#/$defs/TaskUpdate"
+          }
+        },
+        "required": [
+          "task_id",
+          "body"
+        ],
+        "title": "update_taskArguments",
+        "type": "object"
+      },
+      "returns": "见API响应；写入返回resource/data/revision",
+      "side_effect": "经API写MySQL实体表并追加审计；具体关联状态变化见工具描述",
+      "order": "先health，再list/get版本，再写入",
+      "error_handling": "404检查ID；409重读；422修正输入；503不确认成功、同号重试",
+      "protocol": {
+        "name": "update_task",
+        "title": null,
+        "description": "编辑标题、日期、必要性、关联。变更关联须先解除依赖，可能更新问题状态和行动分组编号。先get版本。",
+        "inputSchema": {
+          "$defs": {
+            "TaskUpdate": {
+              "additionalProperties": false,
+              "properties": {
+                "request_id": {
+                  "description": "同一次请求重试使用同号，内容改变须换号",
+                  "maxLength": 120,
+                  "minLength": 8,
+                  "title": "Request Id",
+                  "type": "string"
+                },
+                "expected_version": {
+                  "description": "GET /api/workspace 返回的全局 revision",
+                  "minimum": 0,
+                  "title": "Expected Version",
+                  "type": "integer"
+                },
+                "actor": {
+                  "default": "我",
+                  "description": "审计标签，不代表认证身份",
+                  "maxLength": 80,
+                  "minLength": 1,
+                  "title": "Actor",
+                  "type": "string"
+                },
+                "title": {
+                  "anyOf": [
+                    {
+                      "maxLength": 160,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Title"
+                },
+                "issueId": {
+                  "anyOf": [
+                    {
+                      "maxLength": 120,
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Issueid"
+                },
+                "due": {
+                  "anyOf": [
+                    {
+                      "maxLength": 10,
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Due"
+                },
+                "required": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Required"
+                }
+              },
+              "required": [
+                "request_id",
+                "expected_version"
+              ],
+              "title": "TaskUpdate",
+              "type": "object"
+            }
+          },
+          "properties": {
+            "task_id": {
+              "title": "Task Id",
+              "type": "string"
+            },
+            "body": {
+              "$ref": "#/$defs/TaskUpdate"
+            }
+          },
+          "required": [
+            "task_id",
+            "body"
+          ],
+          "title": "update_taskArguments",
+          "type": "object"
+        },
+        "execution": null,
+        "outputSchema": null,
+        "icons": null,
+        "annotations": {
+          "title": null,
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "_meta": null
+      }
+    },
+    {
+      "name": "transition_task",
+      "kind": "write",
+      "purpose": "推进、完成、取消、重开行动；取消须reason；前置行动必须完成。可能同时改变问题状态；409重读，422补条件。",
+      "when_to_use": "推进、完成、取消、重开行动；取消须reason；前置行动必须完成。可能同时改变问题状态；409重读，422补条件。",
+      "input": {
+        "$defs": {
+          "TaskTransition": {
+            "additionalProperties": false,
+            "properties": {
+              "request_id": {
+                "description": "同一次请求重试使用同号，内容改变须换号",
+                "maxLength": 120,
+                "minLength": 8,
+                "title": "Request Id",
+                "type": "string"
+              },
+              "expected_version": {
+                "description": "GET /api/workspace 返回的全局 revision",
+                "minimum": 0,
+                "title": "Expected Version",
+                "type": "integer"
+              },
+              "actor": {
+                "default": "我",
+                "description": "审计标签，不代表认证身份",
+                "maxLength": 80,
+                "minLength": 1,
+                "title": "Actor",
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "待办",
+                  "进行中",
+                  "已完成",
+                  "已取消"
+                ],
+                "title": "Status",
+                "type": "string"
+              },
+              "reason": {
+                "default": "",
+                "maxLength": 5000,
+                "title": "Reason",
+                "type": "string"
+              }
+            },
+            "required": [
+              "request_id",
+              "expected_version",
+              "status"
+            ],
+            "title": "TaskTransition",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "task_id": {
+            "title": "Task Id",
+            "type": "string"
+          },
+          "body": {
+            "$ref": "#/$defs/TaskTransition"
+          }
+        },
+        "required": [
+          "task_id",
+          "body"
+        ],
+        "title": "transition_taskArguments",
+        "type": "object"
+      },
+      "returns": "见API响应；写入返回resource/data/revision",
+      "side_effect": "经API写MySQL实体表并追加审计；具体关联状态变化见工具描述",
+      "order": "先health，再list/get版本，再写入",
+      "error_handling": "404检查ID；409重读；422修正输入；503不确认成功、同号重试",
+      "protocol": {
+        "name": "transition_task",
+        "title": null,
+        "description": "推进、完成、取消、重开行动；取消须reason；前置行动必须完成。可能同时改变问题状态；409重读，422补条件。",
+        "inputSchema": {
+          "$defs": {
+            "TaskTransition": {
+              "additionalProperties": false,
+              "properties": {
+                "request_id": {
+                  "description": "同一次请求重试使用同号，内容改变须换号",
+                  "maxLength": 120,
+                  "minLength": 8,
+                  "title": "Request Id",
+                  "type": "string"
+                },
+                "expected_version": {
+                  "description": "GET /api/workspace 返回的全局 revision",
+                  "minimum": 0,
+                  "title": "Expected Version",
+                  "type": "integer"
+                },
+                "actor": {
+                  "default": "我",
+                  "description": "审计标签，不代表认证身份",
+                  "maxLength": 80,
+                  "minLength": 1,
+                  "title": "Actor",
+                  "type": "string"
+                },
+                "status": {
+                  "enum": [
+                    "待办",
+                    "进行中",
+                    "已完成",
+                    "已取消"
+                  ],
+                  "title": "Status",
+                  "type": "string"
+                },
+                "reason": {
+                  "default": "",
+                  "maxLength": 5000,
+                  "title": "Reason",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "request_id",
+                "expected_version",
+                "status"
+              ],
+              "title": "TaskTransition",
+              "type": "object"
+            }
+          },
+          "properties": {
+            "task_id": {
+              "title": "Task Id",
+              "type": "string"
+            },
+            "body": {
+              "$ref": "#/$defs/TaskTransition"
+            }
+          },
+          "required": [
+            "task_id",
+            "body"
+          ],
+          "title": "transition_taskArguments",
+          "type": "object"
+        },
+        "execution": null,
+        "outputSchema": null,
+        "icons": null,
+        "annotations": {
+          "title": null,
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "_meta": null
+      }
+    },
+    {
+      "name": "set_task_dependencies",
+      "kind": "write",
+      "purpose": "设置同组前置行动，拒绝自依赖、跨组、循环及已开始行动依赖未完成项；先list/get版本，写入并审计。",
+      "when_to_use": "设置同组前置行动，拒绝自依赖、跨组、循环及已开始行动依赖未完成项；先list/get版本，写入并审计。",
+      "input": {
+        "$defs": {
+          "Dependencies": {
+            "additionalProperties": false,
+            "properties": {
+              "request_id": {
+                "description": "同一次请求重试使用同号，内容改变须换号",
+                "maxLength": 120,
+                "minLength": 8,
+                "title": "Request Id",
+                "type": "string"
+              },
+              "expected_version": {
+                "description": "GET /api/workspace 返回的全局 revision",
+                "minimum": 0,
+                "title": "Expected Version",
+                "type": "integer"
+              },
+              "actor": {
+                "default": "我",
+                "description": "审计标签，不代表认证身份",
+                "maxLength": 80,
+                "minLength": 1,
+                "title": "Actor",
+                "type": "string"
+              },
+              "dependsOn": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 100,
+                "title": "Dependson",
+                "type": "array"
+              }
+            },
+            "required": [
+              "request_id",
+              "expected_version",
+              "dependsOn"
+            ],
+            "title": "Dependencies",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "task_id": {
+            "title": "Task Id",
+            "type": "string"
+          },
+          "body": {
+            "$ref": "#/$defs/Dependencies"
+          }
+        },
+        "required": [
+          "task_id",
+          "body"
+        ],
+        "title": "set_task_dependenciesArguments",
+        "type": "object"
+      },
+      "returns": "见API响应；写入返回resource/data/revision",
+      "side_effect": "经API写MySQL实体表并追加审计；具体关联状态变化见工具描述",
+      "order": "先health，再list/get版本，再写入",
+      "error_handling": "404检查ID；409重读；422修正输入；503不确认成功、同号重试",
+      "protocol": {
+        "name": "set_task_dependencies",
+        "title": null,
+        "description": "设置同组前置行动，拒绝自依赖、跨组、循环及已开始行动依赖未完成项；先list/get版本，写入并审计。",
+        "inputSchema": {
+          "$defs": {
+            "Dependencies": {
+              "additionalProperties": false,
+              "properties": {
+                "request_id": {
+                  "description": "同一次请求重试使用同号，内容改变须换号",
+                  "maxLength": 120,
+                  "minLength": 8,
+                  "title": "Request Id",
+                  "type": "string"
+                },
+                "expected_version": {
+                  "description": "GET /api/workspace 返回的全局 revision",
+                  "minimum": 0,
+                  "title": "Expected Version",
+                  "type": "integer"
+                },
+                "actor": {
+                  "default": "我",
+                  "description": "审计标签，不代表认证身份",
+                  "maxLength": 80,
+                  "minLength": 1,
+                  "title": "Actor",
+                  "type": "string"
+                },
+                "dependsOn": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 100,
+                  "title": "Dependson",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "request_id",
+                "expected_version",
+                "dependsOn"
+              ],
+              "title": "Dependencies",
+              "type": "object"
+            }
+          },
+          "properties": {
+            "task_id": {
+              "title": "Task Id",
+              "type": "string"
+            },
+            "body": {
+              "$ref": "#/$defs/Dependencies"
+            }
+          },
+          "required": [
+            "task_id",
+            "body"
+          ],
+          "title": "set_task_dependenciesArguments",
+          "type": "object"
+        },
+        "execution": null,
+        "outputSchema": null,
+        "icons": null,
+        "annotations": {
+          "title": null,
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "_meta": null
+      }
+    },
+    {
+      "name": "reorder_task",
+      "kind": "write",
+      "purpose": "调整同组行动前后顺序，保持编号和依赖；先list/get版本，写入并审计。",
+      "when_to_use": "调整同组行动前后顺序，保持编号和依赖；先list/get版本，写入并审计。",
+      "input": {
+        "$defs": {
+          "Reorder": {
+            "additionalProperties": false,
+            "properties": {
+              "request_id": {
+                "description": "同一次请求重试使用同号，内容改变须换号",
+                "maxLength": 120,
+                "minLength": 8,
+                "title": "Request Id",
+                "type": "string"
+              },
+              "expected_version": {
+                "description": "GET /api/workspace 返回的全局 revision",
+                "minimum": 0,
+                "title": "Expected Version",
+                "type": "integer"
+              },
+              "actor": {
+                "default": "我",
+                "description": "审计标签，不代表认证身份",
+                "maxLength": 80,
+                "minLength": 1,
+                "title": "Actor",
+                "type": "string"
+              },
+              "target_id": {
+                "maxLength": 120,
+                "minLength": 1,
+                "title": "Target Id",
+                "type": "string"
+              },
+              "after": {
+                "default": false,
+                "title": "After",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "request_id",
+              "expected_version",
+              "target_id"
+            ],
+            "title": "Reorder",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "task_id": {
+            "title": "Task Id",
+            "type": "string"
+          },
+          "body": {
+            "$ref": "#/$defs/Reorder"
+          }
+        },
+        "required": [
+          "task_id",
+          "body"
+        ],
+        "title": "reorder_taskArguments",
+        "type": "object"
+      },
+      "returns": "见API响应；写入返回resource/data/revision",
+      "side_effect": "经API写MySQL实体表并追加审计；具体关联状态变化见工具描述",
+      "order": "先health，再list/get版本，再写入",
+      "error_handling": "404检查ID；409重读；422修正输入；503不确认成功、同号重试",
+      "protocol": {
+        "name": "reorder_task",
+        "title": null,
+        "description": "调整同组行动前后顺序，保持编号和依赖；先list/get版本，写入并审计。",
+        "inputSchema": {
+          "$defs": {
+            "Reorder": {
+              "additionalProperties": false,
+              "properties": {
+                "request_id": {
+                  "description": "同一次请求重试使用同号，内容改变须换号",
+                  "maxLength": 120,
+                  "minLength": 8,
+                  "title": "Request Id",
+                  "type": "string"
+                },
+                "expected_version": {
+                  "description": "GET /api/workspace 返回的全局 revision",
+                  "minimum": 0,
+                  "title": "Expected Version",
+                  "type": "integer"
+                },
+                "actor": {
+                  "default": "我",
+                  "description": "审计标签，不代表认证身份",
+                  "maxLength": 80,
+                  "minLength": 1,
+                  "title": "Actor",
+                  "type": "string"
+                },
+                "target_id": {
+                  "maxLength": 120,
+                  "minLength": 1,
+                  "title": "Target Id",
+                  "type": "string"
+                },
+                "after": {
+                  "default": false,
+                  "title": "After",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "request_id",
+                "expected_version",
+                "target_id"
+              ],
+              "title": "Reorder",
+              "type": "object"
+            }
+          },
+          "properties": {
+            "task_id": {
+              "title": "Task Id",
+              "type": "string"
+            },
+            "body": {
+              "$ref": "#/$defs/Reorder"
+            }
+          },
+          "required": [
+            "task_id",
+            "body"
+          ],
+          "title": "reorder_taskArguments",
+          "type": "object"
+        },
+        "execution": null,
+        "outputSchema": null,
+        "icons": null,
+        "annotations": {
+          "title": null,
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "_meta": null
+      }
+    },
+    {
+      "name": "list_activity",
+      "kind": "read",
+      "purpose": "按revision增序读取最多500条审计事件；用于验证操作发生过；只读。",
+      "when_to_use": "按revision增序读取最多500条审计事件；用于验证操作发生过；只读。",
+      "input": {
+        "properties": {
+          "after": {
+            "default": 0,
+            "title": "After",
+            "type": "integer"
+          },
+          "limit": {
+            "default": 100,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "title": "list_activityArguments",
+        "type": "object"
+      },
+      "returns": "见API响应；写入返回resource/data/revision",
+      "side_effect": "无",
+      "order": "先health，再list/get版本，再写入",
+      "error_handling": "404检查ID；409重读；422修正输入；503不确认成功、同号重试",
+      "protocol": {
+        "name": "list_activity",
+        "title": null,
+        "description": "按revision增序读取最多500条审计事件；用于验证操作发生过；只读。",
+        "inputSchema": {
+          "properties": {
+            "after": {
+              "default": 0,
+              "title": "After",
+              "type": "integer"
+            },
+            "limit": {
+              "default": 100,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          "title": "list_activityArguments",
+          "type": "object"
+        },
+        "execution": null,
+        "outputSchema": null,
+        "icons": null,
+        "annotations": {
+          "title": null,
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "_meta": null
+      }
+    },
+    {
+      "name": "export_workspace",
+      "kind": "read",
+      "purpose": "导出全部问题行动及状态历史；返回revision与data，不写磁盘；只读。",
+      "when_to_use": "导出全部问题行动及状态历史；返回revision与data，不写磁盘；只读。",
+      "input": {
+        "properties": {},
+        "title": "export_workspaceArguments",
+        "type": "object"
+      },
+      "returns": "见API响应；写入返回resource/data/revision",
+      "side_effect": "无",
+      "order": "先health，再list/get版本，再写入",
+      "error_handling": "404检查ID；409重读；422修正输入；503不确认成功、同号重试",
+      "protocol": {
+        "name": "export_workspace",
+        "title": null,
+        "description": "导出全部问题行动及状态历史；返回revision与data，不写磁盘；只读。",
+        "inputSchema": {
+          "properties": {},
+          "title": "export_workspaceArguments",
+          "type": "object"
+        },
+        "execution": null,
+        "outputSchema": null,
+        "icons": null,
+        "annotations": {
+          "title": null,
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "_meta": null
+      }
+    }
+  ]
+}

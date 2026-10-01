@@ -1,0 +1,197 @@
+{
+  "schema_version": "1.0",
+  "project_name": "拾序系统",
+  "status": "ready",
+  "prototype": {
+    "sha256": "0d8b1ebc6207bf9bf3942ab46ea655ba5ea79e024aa2a6b5a7691f8dc44fba71",
+    "title": "拾序 · 个人工作台",
+    "private_copy": "private/prototype.html",
+    "source_modified": false,
+    "path": "../prototype.html（原型仓库位置；分发包不附带源原型）"
+  },
+  "operations": [
+    {
+      "id": "health",
+      "method": "GET",
+      "path": "/api/health",
+      "mcp_tool": "get_system_status",
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "workspace",
+      "method": "GET",
+      "path": "/api/workspace",
+      "mcp_tool": "get_workspace",
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "issues",
+      "method": "GET",
+      "path": "/api/issues",
+      "mcp_tool": "list_issues",
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "issue",
+      "method": "GET",
+      "path": "/api/issues/{issue_id}",
+      "mcp_tool": "get_issue",
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "issue_create",
+      "method": "POST",
+      "path": "/api/issues",
+      "mcp_tool": "create_issue",
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "issue_update",
+      "method": "PATCH",
+      "path": "/api/issues/{issue_id}",
+      "mcp_tool": "update_issue",
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "issue_transition",
+      "method": "POST",
+      "path": "/api/issues/{issue_id}/transitions",
+      "mcp_tool": "transition_issue",
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "issue_followup",
+      "method": "POST",
+      "path": "/api/issues/{issue_id}/followups",
+      "mcp_tool": "add_followup",
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "tasks",
+      "method": "GET",
+      "path": "/api/tasks",
+      "mcp_tool": "list_tasks",
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "task",
+      "method": "GET",
+      "path": "/api/tasks/{task_id}",
+      "mcp_tool": "get_task",
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "task_create",
+      "method": "POST",
+      "path": "/api/tasks",
+      "mcp_tool": "create_task",
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "task_update",
+      "method": "PATCH",
+      "path": "/api/tasks/{task_id}",
+      "mcp_tool": "update_task",
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "task_transition",
+      "method": "POST",
+      "path": "/api/tasks/{task_id}/transitions",
+      "mcp_tool": "transition_task",
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "task_dependencies",
+      "method": "POST",
+      "path": "/api/tasks/{task_id}/dependencies",
+      "mcp_tool": "set_task_dependencies",
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "task_reorder",
+      "method": "POST",
+      "path": "/api/tasks/{task_id}/reorder",
+      "mcp_tool": "reorder_task",
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "activity",
+      "method": "GET",
+      "path": "/api/activity",
+      "mcp_tool": "list_activity",
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "export",
+      "method": "GET",
+      "path": "/api/export",
+      "mcp_tool": "export_workspace",
+      "python_example": "examples/api_client.py"
+    }
+  ],
+  "checks": [
+    {
+      "name": "business",
+      "status": "passed",
+      "evidence": "verification/api-report.json"
+    },
+    {
+      "name": "api",
+      "status": "passed",
+      "evidence": "verification/api-report.json"
+    },
+    {
+      "name": "mcp",
+      "status": "passed",
+      "evidence": "verification/mcp-report.json"
+    },
+    {
+      "name": "browser",
+      "status": "passed",
+      "evidence": "verification/browser-report.json"
+    },
+    {
+      "name": "persistence",
+      "status": "passed",
+      "evidence": "verification/persistence-report.json"
+    },
+    {
+      "name": "portable",
+      "status": "passed",
+      "evidence": "verification/portable-report.json"
+    },
+    {
+      "name": "release_scan",
+      "status": "passed",
+      "evidence": "verification/release-scan.json"
+    },
+    {
+      "name": "ai_task",
+      "status": "not_run",
+      "evidence": "",
+      "reason": "已完成固定SDK序列，不等同于AI自主选择工具验收"
+    },
+    {
+      "name": "mysql",
+      "status": "passed",
+      "evidence": "verification/mysql-report.json"
+    }
+  ],
+  "limits": [
+    "单机服务连接专属MySQL实体库，不等同生产就绪；无账号认证、多人权限或高可用",
+    "全局revision适合个人规模，未做大数据负载验收",
+    "未导入原型浏览器中的真实记录；已将当前系统SQLite记录只读迁入新MySQL库，原SQLite保留",
+    "当前用户MySQL实例未启用TLS；凭据仅存仓库外私有配置，ZIP不含连接凭据",
+    "MCP使用stdio；未自动注册客户端；AI自主任务验收未执行",
+    "仅Windows/Python3.11实测；便携验证指ZIP解压换目录复用已安装依赖运行，不是免安装exe",
+    "支持0.0.0.0监听与明确Host允许列表；内网访问面向可信网络，同源写入校验继续启用",
+    "许可证未选择；生产凭据、本机数据库和真实工作台访问截图不入包"
+  ],
+  "storage": {
+    "production": "mysql-entity-tables",
+    "schema": "data/mysql-schema.sql",
+    "tables": 9,
+    "test_adapter": "SQLite仅用于隔离测试与无凭据分发包检查"
+  }
+}

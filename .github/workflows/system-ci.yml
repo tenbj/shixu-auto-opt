@@ -1,0 +1,26 @@
+name: 验证拾序系统
+on:
+  push:
+  pull_request:
+jobs:
+  verify:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: 定位系统目录
+        shell: pwsh
+        run: |
+          if (Test-Path system/requirements-dev.txt) { 'SYSTEM_DIR=system' >> $env:GITHUB_ENV } else { 'SYSTEM_DIR=.' >> $env:GITHUB_ENV }
+      - run: python -m pip install -r requirements-dev.txt
+        working-directory: ${{ env.SYSTEM_DIR }}
+      - run: python -m playwright install chromium
+        working-directory: ${{ env.SYSTEM_DIR }}
+      - run: python scripts/check.py
+        working-directory: ${{ env.SYSTEM_DIR }}
+      - run: python scripts/generate_docs.py
+        working-directory: ${{ env.SYSTEM_DIR }}
+      - run: python scripts/build_release.py
+        working-directory: ${{ env.SYSTEM_DIR }}

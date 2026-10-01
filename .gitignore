@@ -15,3 +15,6 @@ __pycache__/
 .DS_Store
 Thumbs.db
 拾序记录-*.json
+
+# Local access verification may contain the real workspace.
+system/verification/frp-public.*

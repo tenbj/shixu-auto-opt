@@ -1,0 +1,44 @@
+{
+  "checks": [
+    "20 consecutive field toggles; exact layout restored",
+    "Full field details, linked highlighting, context hide and restore",
+    "Entity, boundary endpoint, orthogonal edge and anchored label all moved with valid geometry",
+    "50%, 100%, 200% zoom; viewport resize and fit",
+    "Architecture: five semantic bands, SVG text within canvas, responsive layout"
+  ],
+  "expanded": {
+    "ok": true,
+    "errors": [],
+    "crossings": 0,
+    "intrusions": 0,
+    "labelOverlaps": 0,
+    "unique": true,
+    "integrity": true,
+    "crowfeet": true,
+    "tables": 9,
+    "relations": 6
+  },
+  "collapsed": {
+    "ok": true,
+    "errors": [],
+    "crossings": 0,
+    "intrusions": 0,
+    "labelOverlaps": 0,
+    "unique": true,
+    "integrity": true,
+    "crowfeet": true,
+    "tables": 9,
+    "relations": 6
+  },
+  "browser_errors": [],
+  "external_requests": [],
+  "live_schema": {
+    "status": "pass",
+    "tables": 9,
+    "columns": 62,
+    "foreign_keys": 6,
+    "business_rows_read": 0,
+    "writes": 0
+  },
+  "status": "pass"
+}

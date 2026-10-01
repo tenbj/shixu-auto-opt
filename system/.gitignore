@@ -1,0 +1,11 @@
+.env
+.env.*
+!.env.example
+private/
+runtime/
+__pycache__/
+.pytest_cache/
+.venv/
+dist/
+*.sqlite3*
+verification/frp-public.*
