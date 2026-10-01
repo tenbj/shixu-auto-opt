@@ -249,7 +249,7 @@
     ]
   },
   "product": "拾序 · 个人工作台",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "runtime": "offline personal browser prototype",
   "limitations": [
     "本地数据，无账号或跨设备同步",
