@@ -1,5 +1,5 @@
 {
-  "version": "1.4.0",
+  "version": "1.6.0",
   "runtime": "offline-localStorage; no HTTP requests",
   "interactions": [
     {
@@ -63,7 +63,10 @@
         "edit-attributes": "打开预填属性表单",
         "workflow-guide": "打开问题整体流转图",
         "issue-guide": "打开流转图并保留详情返回入口",
-        "guide-tab": "切换流转图"
+        "guide-tab": "切换流转图",
+        "mobile-more": "打开更多功能",
+        "mobile-task-menu": "打开行动操作菜单",
+        "mobile-go-analysis": "关闭菜单并切换统计"
       },
       "branches": {
         "workflow-form": "editing",
@@ -85,7 +88,8 @@
         "REQ-012",
         "REQ-013",
         "REQ-014",
-        "REQ-015"
+        "REQ-015",
+        "REQ-016"
       ]
     },
     {
@@ -147,6 +151,28 @@
         "REQ-012",
         "REQ-013",
         "REQ-015"
+      ]
+    },
+    {
+      "id": "EVT-BOARD-FILTER",
+      "component_id": "board-filter-control",
+      "trigger": "change",
+      "from_state": "ready",
+      "to_state": "ready",
+      "action": "按关联问题筛选手机行动列表；桌面按问题状态筛选",
+      "requirement_ids": [
+        "REQ-016"
+      ]
+    },
+    {
+      "id": "EVT-MOBILE-PROBLEM",
+      "component_id": "mobile-problem-control",
+      "trigger": "change",
+      "from_state": "ready",
+      "to_state": "ready",
+      "action": "更新selectedTaskIssue并渲染手机行动；不复用桌面状态筛选事件",
+      "requirement_ids": [
+        "REQ-016"
       ]
     }
   ],
