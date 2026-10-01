@@ -83,12 +83,13 @@ def main():
                 '验证分别见 verification/api-report.json、browser-report.json、mcp-report.json、persistence-report.json；AI自主任务未验收。']
     (ROOT / 'docs/需求与能力映射.md').write_text('\n'.join(mapping)+'\n', encoding='utf-8')
     contract = json.loads((ROOT / 'project-contract.json').read_text(encoding='utf-8'))
-    source = ROOT.parent / 'prototype' / 'prototype.html'
+    # Application docs validate their frozen design input, independently of newer prototypes.
+    source = ROOT.parent / 'prototype' / 'reference' / 'application-v2.0.0-source.html'
     if source.exists():
         actual = hashlib.sha256(source.read_bytes()).hexdigest()
         if actual != contract['prototype']['sha256']:
             raise RuntimeError('源原型hash变化，停止生成合同')
-    contract['prototype']['path'] = '../prototype/prototype.html（原型仓库位置；分发包不附带源原型）'
+    contract['prototype']['path'] = '../prototype/reference/application-v2.0.0-source.html（应用固定来源快照；分发包不附带源原型）'
     contract['prototype']['source_modified'] = False
     contract['operations'] = operations
     checks = {'business':'api-report.json', 'api':'api-report.json', 'mcp':'mcp-report.json', 'browser':'browser-report.json', 'persistence':'persistence-report.json', 'portable':'portable-report.json', 'release_scan':'release-scan.json'}
