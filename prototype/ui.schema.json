@@ -1,5 +1,5 @@
 {
-  "version": "1.4.0",
+  "version": "1.6.0",
   "page": {
     "id": "personal-workspace",
     "states": [
@@ -91,7 +91,8 @@
         "REQ-012",
         "REQ-013",
         "REQ-014",
-        "REQ-015"
+        "REQ-015",
+        "REQ-016"
       ],
       "variants": {
         "nav": "切换 today/issues/tasks/review 页面",
@@ -128,7 +129,10 @@
         "edit-attributes": "编辑优先级和分类",
         "workflow-guide": "全局流转图",
         "issue-guide": "从详情打开流转图，可返回详情",
-        "guide-tab": "切换问题/行动流转图"
+        "guide-tab": "切换问题/行动流转图",
+        "mobile-more": "打开帮助、导出与统计菜单",
+        "mobile-task-menu": "打开行动编辑、依赖、调序和取消菜单",
+        "mobile-go-analysis": "关闭菜单并进入统计分析"
       }
     },
     {
@@ -149,7 +153,8 @@
         "REQ-009",
         "REQ-010",
         "REQ-011",
-        "REQ-013"
+        "REQ-013",
+        "REQ-016"
       ]
     },
     {
@@ -194,6 +199,36 @@
         "REQ-009",
         "REQ-010",
         "REQ-011"
+      ]
+    },
+    {
+      "id": "board-filter-control",
+      "type": "select",
+      "selector": "[data-event-id=\"EVT-BOARD-FILTER\"]",
+      "events": [
+        "EVT-BOARD-FILTER"
+      ],
+      "states": [
+        "ready",
+        "empty"
+      ],
+      "requirement_ids": [
+        "REQ-016"
+      ]
+    },
+    {
+      "id": "mobile-problem-control",
+      "type": "select",
+      "selector": "[data-event-id=\"EVT-MOBILE-PROBLEM\"]",
+      "events": [
+        "EVT-MOBILE-PROBLEM"
+      ],
+      "states": [
+        "ready",
+        "empty"
+      ],
+      "requirement_ids": [
+        "REQ-016"
       ]
     }
   ],
@@ -356,5 +391,14 @@
     ],
     "mobile": "local horizontal scrolling",
     "read_only": true
+  },
+  "mobile_presentation": {
+    "breakpoint": 700,
+    "navigation": "fixed-bottom-five-items",
+    "tasks": "card-list",
+    "issue_selection": "select",
+    "calendar": "month-agenda",
+    "detail": "fullscreen-dialog",
+    "storage_key": "shixu-mobile-prototype-v1"
   }
 }

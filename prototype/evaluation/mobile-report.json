@@ -1,0 +1,122 @@
+{
+  "version": "1.6.0",
+  "environment": "isolated Chromium; local prototype only",
+  "checks": [
+    {
+      "name": "360px：首页首项行动及操作完整可见",
+      "passed": true
+    },
+    {
+      "name": "360px：五个页面不横向溢出，可见按钮高度至少44px",
+      "passed": true
+    },
+    {
+      "name": "360px：问题选择、状态筛选与空态正确",
+      "passed": true
+    },
+    {
+      "name": "360px：日程无横滚且月份切换有效",
+      "passed": true
+    },
+    {
+      "name": "360px：全屏详情、嵌套跟进保存及返回正确",
+      "passed": true
+    },
+    {
+      "name": "360px：行动开始、完成与刷新持久保存",
+      "passed": true
+    },
+    {
+      "name": "360px：新建与长标题搜索，不横向溢出",
+      "passed": true
+    },
+    {
+      "name": "390px：首页首项行动及操作完整可见",
+      "passed": true
+    },
+    {
+      "name": "390px：五个页面不横向溢出，可见按钮高度至少44px",
+      "passed": true
+    },
+    {
+      "name": "390px：问题选择、状态筛选与空态正确",
+      "passed": true
+    },
+    {
+      "name": "390px：日程无横滚且月份切换有效",
+      "passed": true
+    },
+    {
+      "name": "390px：全屏详情、嵌套跟进保存及返回正确",
+      "passed": true
+    },
+    {
+      "name": "390px：行动开始、完成与刷新持久保存",
+      "passed": true
+    },
+    {
+      "name": "390px：新建与长标题搜索，不横向溢出",
+      "passed": true
+    },
+    {
+      "name": "430px：首页首项行动及操作完整可见",
+      "passed": true
+    },
+    {
+      "name": "430px：五个页面不横向溢出，可见按钮高度至少44px",
+      "passed": true
+    },
+    {
+      "name": "430px：问题选择、状态筛选与空态正确",
+      "passed": true
+    },
+    {
+      "name": "430px：日程无横滚且月份切换有效",
+      "passed": true
+    },
+    {
+      "name": "430px：全屏详情、嵌套跟进保存及返回正确",
+      "passed": true
+    },
+    {
+      "name": "430px：行动开始、完成与刷新持久保存",
+      "passed": true
+    },
+    {
+      "name": "430px：新建与长标题搜索，不横向溢出",
+      "passed": true
+    },
+    {
+      "name": "1440px：桌面分栏表格与月历保留",
+      "passed": true
+    },
+    {
+      "name": "全程无JavaScript运行错误",
+      "passed": true
+    }
+  ],
+  "measurements": [
+    {
+      "width": 360,
+      "firstCardTop": 405.234375,
+      "firstCardBottom": 641.21875,
+      "documentWidth": 360
+    },
+    {
+      "width": 390,
+      "firstCardTop": 368.84375,
+      "firstCardBottom": 604.828125,
+      "documentWidth": 390
+    },
+    {
+      "width": 430,
+      "firstCardTop": 368.84375,
+      "firstCardBottom": 604.828125,
+      "documentWidth": 430
+    }
+  ],
+  "limitations": [
+    "未验证iOS Safari、真实软键盘和系统安全区"
+  ],
+  "passed": true
+}

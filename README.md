@@ -8,7 +8,7 @@
 
 | 目录 | 用途 | 使用说明 |
 |---|---|---|
-| [prototype/](prototype/) | v1.5.0 交互原型、需求、设计合同与验证材料 | [原型说明](prototype/README.md)，直接用浏览器打开 [prototype.html](prototype/prototype.html) |
+| [prototype/](prototype/) | v1.6.0 交互原型、需求、设计合同与验证材料 | [原型说明](prototype/README.md)，直接用浏览器打开 [prototype.html](prototype/prototype.html) |
 | [application/](application/) | v2.0.1 可运行应用、HTTP API、MCP、测试与部署文档 | [应用安装与运行](application/README.md) |
 
 应用使用 Python 3.11+ 与独立 MySQL 8.0，页面、17 个 API 操作与 17 个 MCP 工具共用后端规则。默认入口 http://127.0.0.1:8765/，API 文档 `/docs`，MCP 使用 stdio。
@@ -24,3 +24,5 @@
 原型记录保存在浏览器本地，应用记录保存到 MySQL，两者不会自动互相迁移。原型文件位置变化可能影响原有浏览器记录的访问，可在旧入口导出 JSON 留存。
 
 已发布的历史 ZIP 保持原有目录结构；当前源码采用上述并列目录。
+
+移动端预览：[mobile-preview.html](prototype/mobile-preview.html)，可切换360/390/430px并直接点击体验；新版仅在原型目录，应用未同步。

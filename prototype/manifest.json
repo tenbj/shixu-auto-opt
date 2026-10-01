@@ -82,6 +82,31 @@
       "id": "workflow-diagram-report",
       "path": "evaluation/workflow-diagram-report.json",
       "layer": "evaluation"
+    },
+    {
+      "id": "mobile-style-source",
+      "path": "assets/mobile-design.css",
+      "layer": "human"
+    },
+    {
+      "id": "mobile-interaction-source",
+      "path": "assets/mobile-design.js",
+      "layer": "machine"
+    },
+    {
+      "id": "mobile-check",
+      "path": "evaluation/mobile-report.json",
+      "layer": "evaluation"
+    },
+    {
+      "id": "mobile-preview",
+      "path": "mobile-preview.html",
+      "layer": "human"
+    },
+    {
+      "id": "mobile-regression",
+      "path": "evaluation/mobile_check.py",
+      "layer": "evaluation"
     }
   ],
   "input": {
@@ -89,17 +114,18 @@
     "target_users": [
       "个人工作者"
     ],
-    "product_context": "个人工作台；保持现有视觉和快捷记录，新问题默认待梳理。",
+    "product_context": "个人工作台；移动端行动优先，保留桌面布局和七状态业务规则。",
     "target_platform": "web",
     "constraints": [
       "单文件离线可打开",
       "本版不实现多人同步、账号与云端服务"
     ],
     "assumptions": [
-      "桌面优先并适配手机",
       "示例均为虚构数据",
       "浏览器本地保存并提供JSON导出",
-      "问题可关联多个待办，待办可以独立创建"
+      "问题可关联多个待办，待办可以独立创建",
+      "手机独立呈现，桌面沿用既有布局",
+      "原型使用独立localStorage键，不访问线上API"
     ],
     "requirements": [
       {
@@ -245,11 +271,24 @@
           "详细条件可展开查看，手机图表局部横向滚动",
           "复盘页说明来源用途和边界，仅展示已解决问题的验证结论"
         ]
+      },
+      {
+        "id": "REQ-016",
+        "statement": "移动端以行动为核心的响应式呈现",
+        "acceptance_criteria": [
+          "360/390/430px首页首项行动位于首屏",
+          "五项底部导航可用且不遮挡最后内容",
+          "行动标题、日期、状态和主要操作无需横向滚动",
+          "按问题选择、状态筛选与日程列表可交互",
+          "手机详情和表单全屏，嵌套编辑可返回并保存",
+          "主要触控区域至少44px，输入字体16px",
+          "桌面保留原有分栏表格与月历，业务流转约束不变"
+        ]
       }
     ]
   },
   "product": "拾序 · 个人工作台",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "runtime": "offline personal browser prototype",
   "limitations": [
     "本地数据，无账号或跨设备同步",
