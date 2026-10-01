@@ -1,6 +1,6 @@
 # 拾序 API 中文说明
 
-版本 2.0.0 · 基地址 http://127.0.0.1:8765 · UTF-8 JSON。在线交互文档 `/docs`，机器Schema `/openapi.json`。
+版本 2.0.1 · 基地址 http://127.0.0.1:8765 · UTF-8 JSON。在线交互文档 `/docs`，机器Schema `/openapi.json`。
 
 ## 并发、幂等与错误
 

@@ -3,7 +3,7 @@ from pathlib import Path
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
-source = ROOT.parent / 'prototype.html'
+source = ROOT.parent / 'prototype' / 'prototype.html'
 if not source.exists():
     raise SystemExit('本脚本仅用于原型仓库开发；分发包直接使用 static/index.html。')
 html = source.read_text(encoding='utf-8-sig')

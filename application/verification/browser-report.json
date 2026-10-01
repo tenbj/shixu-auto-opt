@@ -1,5 +1,5 @@
 {
-  "kind": "real-browser-api-mysql",
+  "kind": "real-browser-api-sqlite-test",
   "mock": false,
   "simulated_fault": "仅响应丢失场景使用网络拦截模拟",
   "checks": [

@@ -1,8 +1,8 @@
 {
   "passed": true,
-  "backend": "mysql",
+  "backend": "sqlite-test",
   "scope": "旧进程树退出且端口不再响应，重新启动得到不同PID，数据库完整工作台回读相等",
-  "revision": 50,
-  "issues": 14,
-  "tasks": 6
+  "revision": 23,
+  "issues": 5,
+  "tasks": 3
 }

@@ -11,7 +11,7 @@ from app.models import (IssueCreate, IssueUpdate, IssueTransition, Followup, Tas
 BASE = os.getenv('SHIXU_API_URL', 'http://127.0.0.1:8765').rstrip('/')
 if urlparse(BASE).hostname not in ['127.0.0.1', 'localhost', '::1']:
     raise ValueError('本地版本 MCP 只连接回环地址')
-server = MCPServer('shixu', version='2.0.0', instructions='先 health，再 list/get 获取 revision，写入携带 request_id 和 expected_version。重试同号；409重读，422修正输入，503不得声称成功。提交验证必须填写处理说明、方法；确认解决必须填写验证依据。actor仅为审计标签。')
+server = MCPServer('shixu', version='2.0.1', instructions='先 health，再 list/get 获取 revision，写入携带 request_id 和 expected_version。重试同号；409重读，422修正输入，503不得声称成功。提交验证必须填写处理说明、方法；确认解决必须填写验证依据。actor仅为审计标签。')
 READ = ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False)
 WRITE = ToolAnnotations(readOnlyHint=False, destructiveHint=False, idempotentHint=True, openWorldHint=False)
 

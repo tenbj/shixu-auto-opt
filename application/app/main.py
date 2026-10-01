@@ -21,7 +21,7 @@ from .models import (IssueCreate, IssueUpdate, IssueTransition, Followup, TaskCr
 
 
 def create_app(db_path=None):
-    app = FastAPI(title='拾序系统 API', version='2.0.0', description='单人本地工作台；写入使用全局版本与持久化幂等请求。')
+    app = FastAPI(title='拾序系统 API', version='2.0.1', description='单人本地工作台；写入使用全局版本与持久化幂等请求。')
     load_environment()
     if db_path is not None or os.getenv('SHIXU_BACKEND') == 'sqlite':
         app.state.store = Store(db_path or os.getenv('SHIXU_DB', str(ROOT / 'runtime' / 'test.sqlite3')))
@@ -64,7 +64,7 @@ def create_app(db_path=None):
     @app.get('/api/health', summary='检查服务与数据库状态')
     def health():
         state = app.state.store.read()
-        return {'status': 'ok', 'version': '2.0.0', 'revision': state['revision'], 'mode': 'local-single-user',
+        return {'status': 'ok', 'version': '2.0.1', 'revision': state['revision'], 'mode': 'local-single-user',
                 'backend': getattr(app.state.store, 'backend', 'sqlite-test'),
                 'database': getattr(app.state.store, 'database', None),
                 'pid': os.getpid(), 'instance': os.getenv('SHIXU_INSTANCE', '')}
