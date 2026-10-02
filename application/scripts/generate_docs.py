@@ -17,7 +17,7 @@ from mcp_server import server
 MAPPING = dict(health='get_system_status', workspace='get_workspace', issues='list_issues', issue='get_issue',
                issue_create='create_issue', issue_update='update_issue', issue_transition='transition_issue', issue_followup='add_followup',
                tasks='list_tasks', task='get_task', task_create='create_task', task_update='update_task', task_transition='transition_task',
-               task_dependencies='set_task_dependencies', task_reorder='reorder_task', activity='list_activity', export='export_workspace')
+               task_dependencies='set_task_dependencies', task_reorder='reorder_task', activity='list_activity', export='export_workspace', trash='list_trash', issue_delete='delete_issue', issue_restore='restore_issue', task_delete='delete_task', task_restore='restore_task')
 
 
 def write_json(path, value):
@@ -39,7 +39,7 @@ def main():
                                     order='先health，再list/get版本，再写入', error_handling='404检查ID；409重读；422修正输入；503不确认成功、同号重试', protocol=entry))
     write_json('docs/MCP工具目录.json', catalog)
     operations = []
-    doc = ['# 拾序 API 中文说明', '', '版本 2.1.0 · 基地址 http://127.0.0.1:8765 · UTF-8 JSON。在线交互文档 `/docs`，机器Schema `/openapi.json`。', '',
+    doc = ['# 拾序 API 中文说明', '', '版本 2.2.1 · 基地址 http://127.0.0.1:8765 · UTF-8 JSON。在线交互文档 `/docs`，机器Schema `/openapi.json`。', '',
            '## 并发、幂等与错误', '',
            '所有写入携带 `request_id`（8–120字符，推荐UUID）、`expected_version`（当前全局revision）与可选 `actor`（审计标签，默认我）。请求体不接受未声明字段。每个写入是一个MySQL InnoDB事务；返回 `revision`、`resource` 和事务提交时的 `data`。失败不改变数据、审计或版本。', '',
            '同一request_id及完全相同内容重放返回原始成功响应；request_id相同但内容不同返回409。网络超时保持请求内容和编号重试。全局版本是工作台版本，不是单个对象版本；任何对象写入都会递增。', '',
@@ -74,29 +74,29 @@ def main():
                 doc += ['', '写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。', '']
             mapping.append('| '+definition['summary']+' | `'+method+' '+route.path+'` | `'+MAPPING[route.name]+'` | `examples/api_client.py` |')
     doc += ['## 示例与边界', '', '只读：`python examples/api_client.py`。合成写入：加 `--write-demo`。浏览器示例：服务运行后访问 `/examples/`。', '',
-            '本版为单人工作台，支持显式配置0.0.0.0监听与内网Host允许列表；actor不是身份认证。正式存储为用户配置的MySQL专属新库，实体分表保存；SQLite仅用于隔离测试。没有删除、导入、上传、登录或离线跨设备同步API。审计分页使用after=最后一条revision继续查询。完整备份使用MySQL专属库备份，页面JSON不含幂等表。']
+            '本版为单人工作台，支持显式配置0.0.0.0监听与内网Host允许列表；actor不是身份认证。正式存储为用户配置的MySQL专属新库，实体分表保存；SQLite仅用于隔离测试。提供回收站软删除与恢复，依赖关系移除也是软删除，数据库9表DELETE触发器与运行时SQL防护阻止物理删除。没有永久删除、导入、上传、登录或离线跨设备同步API。完整工作台/导出包含回收站，普通列表和详情仅限有效记录。恢复必要行动可重开验证，删除问题/恢复问题均原子处理同批关联行动。审计分页使用after=最后一条revision继续查询。完整备份使用MySQL专属库备份，页面JSON不含幂等表。']
     text = '\n'.join(doc) + '\n'
     (ROOT / 'docs/API中文说明.md').write_text(text, encoding='utf-8')
     (ROOT / 'docs/API中文说明.html').write_text('<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>拾序API中文说明</title><style>body{max-width:1100px;margin:32px auto;padding:20px;background:#f6f8f2;color:#214636}pre{white-space:pre-wrap;font:15px/1.8 system-ui;overflow-wrap:anywhere}</style><h1>拾序 API 中文说明</h1><pre>'+html.escape(text)+'</pre></html>', encoding='utf-8')
-    mapping += ['', '数据层：MySQL issues/tasks/task_dependencies/issue_followups/issue_history/issue_logs保存实体；workspace_meta保存版本与编号；activity/idempotency_requests保存审计与幂等。所有业务修改在同一InnoDB事务提交，行锁保护全局版本。', '',
+    mapping += ['', '所有业务删除均为软删除；依赖移除保留原行并标记deleted_at。9表DELETE触发器和运行时SQL防护禁止物理删除。', '', '数据层：MySQL issues/tasks/task_dependencies/issue_followups/issue_history/issue_logs保存实体；workspace_meta保存版本与编号；activity/idempotency_requests保存审计与幂等。所有业务修改在同一InnoDB事务提交，行锁保护全局版本。', '',
                 '未实现原型记录自动导入，源HTML与其localStorage均未改动。所有可写入口由后端规则校验，旧原型脚本不具有写库权限。', '',
                 '验证分别见 verification/api-report.json、browser-report.json、mcp-report.json、persistence-report.json；AI自主任务未验收。']
     (ROOT / 'docs/需求与能力映射.md').write_text('\n'.join(mapping)+'\n', encoding='utf-8')
     contract = json.loads((ROOT / 'project-contract.json').read_text(encoding='utf-8'))
     # Application docs validate their frozen design input, independently of newer prototypes.
-    source = ROOT.parent / 'prototype' / 'reference' / 'application-v2.1.0-source.html'
+    source = ROOT / 'reference' / 'trash-compact-source.html'
     if source.exists():
         actual = hashlib.sha256(source.read_bytes()).hexdigest()
         if actual != contract['prototype']['sha256']:
             raise RuntimeError('源原型hash变化，停止生成合同')
-    contract['prototype']['path'] = '../prototype/reference/application-v2.1.0-source.html（应用固定来源快照；分发包不附带源原型）'
+    contract['prototype']['path'] = 'reference/trash-compact-source.html（冻结试改原型）'
     contract['prototype']['source_modified'] = False
     contract['operations'] = operations
-    checks = {'business':'api-report.json', 'api':'api-report.json', 'mcp':'mcp-report.json', 'browser':'browser-report.json', 'persistence':'persistence-report.json', 'portable':'portable-report.json', 'release_scan':'release-scan.json'}
+    checks = {'business':'api-report.json', 'api':'api-report.json', 'mcp':'mcp-report.json', 'browser':'browser-report.json', 'persistence':'persistence-report.json', 'portable':'portable-report.json', 'release_scan':'release-scan.json', 'trash_browser':'trash-browser-report.json', 'diagrams':'diagrams/report.json'}
     contract['checks'] = []
     for name, file in checks.items():
         path = ROOT / 'verification' / file
-        passed = path.exists() and json.loads(path.read_text(encoding='utf-8')).get('passed') is True
+        passed = path.exists() and json.loads(path.read_text(encoding='utf-8')).get('passed', json.loads(path.read_text(encoding='utf-8')).get('status') == 'pass') is True
         contract['checks'].append(dict(name=name, status='passed' if passed else 'not_run', evidence='verification/'+file if path.exists() else ''))
     contract['checks'].append(dict(name='ai_task', status='not_run', evidence='', reason='已完成固定SDK序列，不等同于AI自主选择工具验收'))
     contract['storage'] = {'production':'mysql-entity-tables', 'schema':'data/mysql-schema.sql', 'tables':9, 'test_adapter':'SQLite仅用于隔离测试与无凭据分发包检查'}
@@ -111,10 +111,12 @@ def main():
                            '仅Windows/Python3.11实测；便携验证指ZIP解压换目录复用已安装依赖运行，不是免安装exe',
                            '支持0.0.0.0监听与明确Host允许列表；内网访问面向可信网络，同源写入校验继续启用',
                            '许可证未选择；生产凭据、本机数据库和真实工作台访问截图不入包']
+    retention = ROOT / 'verification/retention-report.json'
+    contract['checks'].append(dict(name='retention_mysql',status='passed' if retention.exists() and json.loads(retention.read_text(encoding='utf-8')).get('passed') else 'not_run',evidence='verification/retention-report.json' if retention.exists() else ''))
     contract['status'] = 'ready' if all(c['status']=='passed' for c in contract['checks'] if c['name']!='ai_task') else 'draft'
     contract.pop('next_action', None)
     write_json('project-contract.json', contract)
-    print('Generated OpenAPI, 17-tool catalog, Chinese docs and contract: '+contract['status'])
+    print('Generated OpenAPI, 22-tool catalog, Chinese docs and contract: '+contract['status'])
 
 
 if __name__ == '__main__':

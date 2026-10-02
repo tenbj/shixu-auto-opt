@@ -3,7 +3,7 @@ from pathlib import Path
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
-source = ROOT.parent / 'prototype' / 'reference' / 'application-v2.1.0-source.html'
+source = ROOT / 'reference' / 'trash-compact-source.html'
 if not source.exists():
     raise SystemExit('本脚本仅用于原型仓库开发；分发包直接使用 static/index.html。')
 html = source.read_text(encoding='utf-8-sig')
@@ -17,7 +17,9 @@ def section(start, end, replacement):
 
 section('const seed=', 'const ISSUE_STATES=', '')
 section('try{const saved=localStorage.getItem(KEY)', 'const btn=', "db={version:1,schemaVersion:2,issues:[],tasks:[],nextIssueNumber:1,nextTaskNumbers:{}};\nlet revision=0,loaded=false,busy=false,pendingWrite=null;")
-section('function save(){', 'const issue=id=>', "function changed(message){render();toast(message)}")
+section('function save(){', '// Soft deletion', "function changed(message){render();toast(message)}")
+section('function deleteRecord(', 'function restoration(', '')
+section('function restoreRecord(', 'function closeTrashDialogs(', '')
 section('function setTaskDependencies(', 'function dependenciesForm(', '')
 section('function reorderTask(', 'let pointerSort=', '''async function reorderTask(id,targetId,after=false){
  if(id===targetId)return false;
@@ -36,7 +38,8 @@ section("document.addEventListener('submit'", '// MOBILE-DESIGN-START', '''docum
  if(e.target.dataset.eventId!=='EVT-SUBMIT')return;e.preventDefault();
  const f=e.target,v=Object.fromEntries(new FormData(f)),id=f.dataset.id;
  let route='',method='POST',values={},returnId=null;
- if(f.id==='attributes-form'){route=`/api/issues/${id}`;method='PATCH';values={priority:v.priority,tag:v.tag};if(f.dataset.return==='detail')returnId=id}
+ if(f.id==='trash-form'){const kind=f.dataset.kind==='issue'?'issues':'tasks';route=`/api/${kind}/${id}/${f.dataset.restore==='true'?'restore':'trash'}`;values={}}
+ else if(f.id==='attributes-form'){route=`/api/issues/${id}`;method='PATCH';values={priority:v.priority,tag:v.tag};if(f.dataset.return==='detail')returnId=id}
  else if(f.id==='background-form'){route=`/api/issues/${id}`;method='PATCH';values={description:v.description};returnId=id}
  else if(f.id==='followup-form'){route=`/api/issues/${id}/followups`;values={content:v.content};returnId=id}
  else if(f.id==='workflow-form'){route=`/api/issues/${id}/transitions`;values={action:f.dataset.transition,...v};returnId=id}
@@ -47,7 +50,7 @@ section("document.addEventListener('submit'", '// MOBILE-DESIGN-START', '''docum
    values=kind==='issues'?{title:v.title,description:v.description,priority:v.priority,tag:v.tag}:{title:v.title,issueId:v.issueId||null,due:v.due||'',required:v.required!=='later'};
  }else return;
  const button=f.querySelector('[type=submit]');if(button)button.disabled=true;
- try{await mutate(route,method,values);const nested=!!document.querySelector('#child-modal[open]');changed('已保存到服务端');closeDialog(true);if(returnId&&!nested)detail(returnId)}
+ try{await mutate(route,method,values);const nested=!!document.querySelector('#child-modal[open]');changed('已保存到服务端');if(f.id==='trash-form')closeTrashDialogs();else closeDialog(true);if(returnId&&!nested)detail(returnId)}
  catch(e){const error=f.querySelector('#form-error');if(error)error.textContent=e.message;else toast(e.message)}
  finally{if(button)button.disabled=false}
 });
@@ -94,6 +97,7 @@ html = html.replace('交互原型 · 初始内容为演示数据，可自由编�
 html = html.replace('<div class="topbar-right">', '<div class="topbar-right"><span id="sync-state" role="status" style="font-size:11px">连接中…</span><button id="sync-button" class="subtle">刷新数据</button>')
 html = html.replace("const KEY='shixu-mobile-prototype-v1'", "const KEY='shixu-system-v2'")
 html = html.replace('if(numberingMigrated&&!storageBlocked)save();', '')
+html = html.replace('仅保存在当前浏览器；不永久删除，也不自动清空。', '由服务端保存；不永久删除，也不自动清空。')
 html = html.replace('导出原型记录', '导出工作台记录')
 html = html.replace("${btn('查看统计分析','mobile-go-analysis')}", "${btn('刷新服务端数据','system-refresh')}${btn('查看统计分析','mobile-go-analysis')}")
 html = html.replace('当前为原型体验，记录只保存在此浏览器。', '记录由服务端保存，与桌面和 AI 共用工作台。')

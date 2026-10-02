@@ -6,12 +6,12 @@ from mcp.server import MCPServer
 from mcp.server.mcpserver.exceptions import ToolError
 from mcp.types import ToolAnnotations
 from app.models import (IssueCreate, IssueUpdate, IssueTransition, Followup, TaskCreate,
-                        TaskUpdate, TaskTransition, Dependencies, Reorder)
+                        TaskUpdate, TaskTransition, Dependencies, Reorder, Write)
 
 BASE = os.getenv('SHIXU_API_URL', 'http://127.0.0.1:8765').rstrip('/')
 if urlparse(BASE).hostname not in ['127.0.0.1', 'localhost', '::1']:
     raise ValueError('本地版本 MCP 只连接回环地址')
-server = MCPServer('shixu', version='2.0.1', instructions='先 health，再 list/get 获取 revision，写入携带 request_id 和 expected_version。重试同号；409重读，422修正输入，503不得声称成功。提交验证必须填写处理说明、方法；确认解决必须填写验证依据。actor仅为审计标签。')
+server = MCPServer('shixu', version='2.2.1', instructions='先 health，再 list/get 获取 revision，写入携带 request_id 和 expected_version。重试同号；409重读，422修正输入，503不得声称成功。提交验证必须填写处理说明、方法；确认解决必须填写验证依据。actor仅为审计标签。')
 READ = ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False)
 WRITE = ToolAnnotations(readOnlyHint=False, destructiveHint=False, idempotentHint=True, openWorldHint=False)
 
@@ -138,6 +138,36 @@ async def list_activity(after: int = 0, limit: int = 100) -> dict:
 async def export_workspace() -> dict:
     """导出全部问题行动及状态历史；返回revision与data，不写磁盘；只读。"""
     return await call('GET', '/api/export')
+
+
+@server.tool(annotations=READ)
+async def list_trash() -> dict:
+    """读取回收站问题与行动以及revision。恢复前检查批次与依赖；只读。"""
+    return await call('GET', '/api/trash')
+
+
+@server.tool(annotations=WRITE)
+async def delete_issue(issue_id: str, body: Write) -> dict:
+    """移入回收站，保留编号历史；问题同时删除有效关联行动；外部依赖阻挡删除。先读版本，request_id幂等；409重读或补前置，503不得声称成功。"""
+    return await call('POST', '/api/issues/' + key(issue_id) + '/trash', payload(body))
+
+
+@server.tool(annotations=WRITE)
+async def restore_issue(issue_id: str, body: Write) -> dict:
+    """恢复原记录；问题仅恢复同批行动，单删行动须关联问题有效且前置可用；必要行动可能重开验证。先读版本，request_id幂等；409重读或补前置，503不得声称成功。"""
+    return await call('POST', '/api/issues/' + key(issue_id) + '/restore', payload(body))
+
+
+@server.tool(annotations=WRITE)
+async def delete_task(task_id: str, body: Write) -> dict:
+    """移入回收站，保留编号历史；问题同时删除有效关联行动；外部依赖阻挡删除。先读版本，request_id幂等；409重读或补前置，503不得声称成功。"""
+    return await call('POST', '/api/tasks/' + key(task_id) + '/trash', payload(body))
+
+
+@server.tool(annotations=WRITE)
+async def restore_task(task_id: str, body: Write) -> dict:
+    """恢复原记录；问题仅恢复同批行动，单删行动须关联问题有效且前置可用；必要行动可能重开验证。先读版本，request_id幂等；409重读或补前置，503不得声称成功。"""
+    return await call('POST', '/api/tasks/' + key(task_id) + '/restore', payload(body))
 
 
 if __name__ == '__main__':

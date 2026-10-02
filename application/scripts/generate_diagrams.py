@@ -8,17 +8,18 @@ OUT = ROOT / 'static' / 'diagrams'
 OUT.mkdir(parents=True, exist_ok=True)
 
 INFO = {
-    'issues': ('IS', '问题', 750, 70, ['id','number','title','status','priority','duplicate_of'], '七状态问题工作流；duplicate_of 是逻辑自引用，非数据库外键。'),
-    'tasks': ('TA', '行动', 750, 710, ['id','issue_id','title','status','due','number_group','sequence_number'], '可独立存在或归属一个问题；同组编号唯一；依赖由领域规则检查循环。'),
+    'issues': ('IS', '问题', 750, 70, ['id','number','title','status','deleted_at','deletion_batch'], '七状态问题工作流；软删除保留全部历史与编号。同批恢复；duplicate_of / deleted_with_issue 是逻辑引用，非数据库外键。'),
+    'tasks': ('TA', '行动', 750, 710, ['id','issue_id','title','status','deleted_at','deletion_batch','deleted_with_issue'], '软删除保留行动与依赖；随问题删除须同批恢复。deleted_with_issue 为逻辑引用，无新增外键。'),
     'issue_followups': ('FU', '跟进记录', 50, 70, ['id','issue_id','content','event_at'], '按问题追加跟进，actor 只是审计标签。'),
     'issue_history': ('HI', '状态历史', 50, 710, ['id','issue_id','position_number','from_status','to_status'], '问题内的状态变迁按 position_number 唯一排序。'),
     'issue_logs': ('LG', '问题日志', 1450, 70, ['issue_id','position_number','content'], '问题 ID 与位置序号组成联合主键。'),
-    'task_dependencies': ('TD', '行动依赖', 1450, 710, ['task_id','dependency_id','position_number'], 'task_id 是当前行动，dependency_id 是前置行动；一对任务只能出现一次。'),
+    'task_dependencies': ('TD', '行动依赖', 1450, 710, ['task_id','dependency_id','position_number','deleted_at'], 'task_id 是当前行动，dependency_id 是前置行动；同一对任务保留原行；deleted_at标记已移除关系，可重新激活。'),
     'workspace_meta': ('WM', '工作台元数据', 50, 1120, ['id','application_id','revision','next_issue_number'], 'id=1 单行；保存全局版本及编号计数，写事务对该行加锁。无物理外键。'),
     'activity': ('AC', '操作审计', 750, 1120, ['revision','event_at','operation','resource_id'], '按 revision 记录操作；resource_id 为多态逻辑引用，非物理外键。'),
     'idempotency_requests': ('IR', '幂等请求', 1450, 1120, ['request_id','fingerprint','response'], '持久化请求指纹和响应；相同请求重试返回原结果。无物理外键。'),
 }
 DESCRIPTIONS = {
+ 'deleted_at':'软删除时间；NULL 为有效记录', 'deletion_batch':'删除批次 UUID；问题与当次关联行动一致', 'deleted_with_issue':'随删除问题的逻辑标识；非 FK；恢复时清空',
  'id':'实体标识；元数据表固定为 1', 'number':'固定问题编号', 'title':'标题', 'description':'问题背景',
  'priority':'优先级','tag':'分类标签','status':'当前状态，由领域规则约束', 'resolution':'验证结论',
  'next_step':'下一步','success_criteria':'成功标准','treatment':'处理说明','verification_method':'验证方法',

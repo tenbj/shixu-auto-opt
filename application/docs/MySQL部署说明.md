@@ -41,3 +41,11 @@ MySQL 是正式数据源。每次请求从数据库读取实体，执行规则�
 `scripts/migrate_sqlite_to_mysql.py --source runtime/shixu.sqlite3` 仅允许目标 MySQL 工作台完全为空时运行，否则拒绝覆盖；迁移不是日常启动步骤。当前机器已完成，不应再运行。
 
 页面 JSON 导出包含业务对象；完整恢复应使用 MySQL 专属库的备份策略，恢复操作同样只面向专属新库。应用不包含 DROP DATABASE、删除旧库或跨库查询逻辑。
+
+## 从2.1升级到2.2
+
+停止API后执行 python scripts/migrate_trash.py，再重新启动。脚本核对应用身份与shixu专属库，仅追加issues/tasks各3个可空软删除字段和deleted_at索引，可重复运行；业务数据、历史、编号和依赖不删除。正式库迁移前须保留完整备份；DDL自动提交，发生中断可检查报告并重新运行补齐。迁移完成后普通列表不包含回收站，workspace/export仍保留全部记录。
+
+## 2.2.1 禁止物理删除
+
+依赖表新增deleted_at及索引。移除关联保留原行，当前依赖只读取deleted_at IS NULL；重新添加用原主键激活，不删除再插入。migrate_trash.py同时安装9个BEFORE DELETE触发器，任何业务表DELETE都会由数据库拒绝；初始化账户须有TRIGGER权限。应用数据库游标拒绝DELETE/TRUNCATE/DROP/REPLACE语句。没有永久清空入口。数据库管理员的人工DDL维护属于应用外操作，不由页面/API提供。SQLite隔离适配器也有禁止DELETE触发器。

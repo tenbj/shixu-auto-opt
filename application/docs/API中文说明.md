@@ -1,6 +1,6 @@
 # 拾序 API 中文说明
 
-版本 2.1.0 · 基地址 http://127.0.0.1:8765 · UTF-8 JSON。在线交互文档 `/docs`，机器Schema `/openapi.json`。
+版本 2.2.1 · 基地址 http://127.0.0.1:8765 · UTF-8 JSON。在线交互文档 `/docs`，机器Schema `/openapi.json`。
 
 ## 并发、幂等与错误
 
@@ -234,6 +234,74 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 
 写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
 
+### GET /api/trash
+
+读取回收站问题与行动。MCP：`list_trash`。
+
+### POST /api/issues/{issue_id}/trash
+
+软删除问题及关联行动。MCP：`delete_issue`。
+
+参数：`issue_id`（path）。
+
+请求体：`Write`；必填：request_id, expected_version。
+
+| 字段 | 约束/默认 |
+|---|---|
+| `request_id` | {"type": "string", "maxLength": 120, "minLength": 8, "description": "同一次请求重试使用同号，内容改变须换号"} |
+| `expected_version` | {"type": "integer", "minimum": 0.0, "description": "GET /api/workspace 返回的全局 revision"} |
+| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "我"} |
+
+写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
+
+### POST /api/issues/{issue_id}/restore
+
+恢复问题及同批行动。MCP：`restore_issue`。
+
+参数：`issue_id`（path）。
+
+请求体：`Write`；必填：request_id, expected_version。
+
+| 字段 | 约束/默认 |
+|---|---|
+| `request_id` | {"type": "string", "maxLength": 120, "minLength": 8, "description": "同一次请求重试使用同号，内容改变须换号"} |
+| `expected_version` | {"type": "integer", "minimum": 0.0, "description": "GET /api/workspace 返回的全局 revision"} |
+| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "我"} |
+
+写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
+
+### POST /api/tasks/{task_id}/trash
+
+软删除行动并检查依赖。MCP：`delete_task`。
+
+参数：`task_id`（path）。
+
+请求体：`Write`；必填：request_id, expected_version。
+
+| 字段 | 约束/默认 |
+|---|---|
+| `request_id` | {"type": "string", "maxLength": 120, "minLength": 8, "description": "同一次请求重试使用同号，内容改变须换号"} |
+| `expected_version` | {"type": "integer", "minimum": 0.0, "description": "GET /api/workspace 返回的全局 revision"} |
+| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "我"} |
+
+写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
+
+### POST /api/tasks/{task_id}/restore
+
+恢复独立删除的行动。MCP：`restore_task`。
+
+参数：`task_id`（path）。
+
+请求体：`Write`；必填：request_id, expected_version。
+
+| 字段 | 约束/默认 |
+|---|---|
+| `request_id` | {"type": "string", "maxLength": 120, "minLength": 8, "description": "同一次请求重试使用同号，内容改变须换号"} |
+| `expected_version` | {"type": "integer", "minimum": 0.0, "description": "GET /api/workspace 返回的全局 revision"} |
+| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "我"} |
+
+写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
+
 ### GET /api/activity
 
 读取操作审计事件。MCP：`list_activity`。
@@ -248,4 +316,4 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 
 只读：`python examples/api_client.py`。合成写入：加 `--write-demo`。浏览器示例：服务运行后访问 `/examples/`。
 
-本版为单人工作台，支持显式配置0.0.0.0监听与内网Host允许列表；actor不是身份认证。正式存储为用户配置的MySQL专属新库，实体分表保存；SQLite仅用于隔离测试。没有删除、导入、上传、登录或离线跨设备同步API。审计分页使用after=最后一条revision继续查询。完整备份使用MySQL专属库备份，页面JSON不含幂等表。
+本版为单人工作台，支持显式配置0.0.0.0监听与内网Host允许列表；actor不是身份认证。正式存储为用户配置的MySQL专属新库，实体分表保存；SQLite仅用于隔离测试。提供回收站软删除与恢复，依赖关系移除也是软删除，数据库9表DELETE触发器与运行时SQL防护阻止物理删除。没有永久删除、导入、上传、登录或离线跨设备同步API。完整工作台/导出包含回收站，普通列表和详情仅限有效记录。恢复必要行动可重开验证，删除问题/恢复问题均原子处理同批关联行动。审计分页使用after=最后一条revision继续查询。完整备份使用MySQL专属库备份，页面JSON不含幂等表。

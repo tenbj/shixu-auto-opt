@@ -26,6 +26,10 @@ CREATE TABLE issues (
   close_reason TEXT NOT NULL,
   close_type VARCHAR(40) NOT NULL,
   duplicate_of VARCHAR(36) NOT NULL,
+  deleted_at VARCHAR(40) NULL,
+  deletion_batch VARCHAR(36) NULL,
+  deleted_with_issue VARCHAR(36) NULL,
+  INDEX idx_issue_deleted(deleted_at),
   INDEX idx_issue_status(status),
   INDEX idx_issue_tag(tag)
 ) ENGINE=InnoDB;
@@ -42,6 +46,10 @@ CREATE TABLE tasks (
   order_index BIGINT NOT NULL,
   number_group VARCHAR(40) NOT NULL,
   sequence_number BIGINT NOT NULL,
+  deleted_at VARCHAR(40) NULL,
+  deletion_batch VARCHAR(36) NULL,
+  deleted_with_issue VARCHAR(36) NULL,
+  INDEX idx_task_deleted(deleted_at),
   UNIQUE KEY unique_task_number(number_group,sequence_number),
   FOREIGN KEY(issue_id) REFERENCES issues(id),
   INDEX idx_task_status(status)
@@ -51,6 +59,8 @@ CREATE TABLE task_dependencies (
   task_id VARCHAR(36) NOT NULL,
   dependency_id VARCHAR(36) NOT NULL,
   position_number INT NOT NULL,
+  deleted_at VARCHAR(40) NULL,
+  INDEX idx_dependency_deleted(deleted_at),
   PRIMARY KEY(task_id,dependency_id),
   FOREIGN KEY(task_id) REFERENCES tasks(id),
   FOREIGN KEY(dependency_id) REFERENCES tasks(id)
@@ -101,3 +111,14 @@ CREATE TABLE idempotency_requests (
   fingerprint CHAR(64) NOT NULL,
   response JSON NOT NULL
 ) ENGINE=InnoDB;
+
+-- 数据库层禁止物理DELETE；业务记录通过删除时间标识失效。
+CREATE TRIGGER shixu_no_delete_workspace_meta BEFORE DELETE ON workspace_meta FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Physical deletion is disabled';
+CREATE TRIGGER shixu_no_delete_issues BEFORE DELETE ON issues FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Physical deletion is disabled';
+CREATE TRIGGER shixu_no_delete_tasks BEFORE DELETE ON tasks FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Physical deletion is disabled';
+CREATE TRIGGER shixu_no_delete_task_dependencies BEFORE DELETE ON task_dependencies FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Physical deletion is disabled';
+CREATE TRIGGER shixu_no_delete_issue_followups BEFORE DELETE ON issue_followups FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Physical deletion is disabled';
+CREATE TRIGGER shixu_no_delete_issue_history BEFORE DELETE ON issue_history FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Physical deletion is disabled';
+CREATE TRIGGER shixu_no_delete_issue_logs BEFORE DELETE ON issue_logs FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Physical deletion is disabled';
+CREATE TRIGGER shixu_no_delete_activity BEFORE DELETE ON activity FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Physical deletion is disabled';
+CREATE TRIGGER shixu_no_delete_idempotency_requests BEFORE DELETE ON idempotency_requests FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Physical deletion is disabled';

@@ -11,7 +11,7 @@ def main():
     parser.add_argument('--write-demo', action='store_true')
     args = parser.parse_args()
     with httpx.Client(base_url=args.url, timeout=15, trust_env=False) as client:
-        for path in ['/api/health', '/api/issues', '/openapi.json']:
+        for path in ['/api/health', '/api/issues', '/api/trash', '/openapi.json']:
             result = client.get(path).raise_for_status().json()
             print(path, 'OK', len(result))
         if args.write_demo:
@@ -19,7 +19,11 @@ def main():
             body = dict(title='合成演示：验证 API 接入', description='由 --write-demo 显式创建，不修改已有记录',
                         expected_version=revision, request_id=str(uuid4()), actor='Python示例')
             result = client.post('/api/issues', json=body).raise_for_status().json()
-            print(json.dumps({'id': result['resource']['id'], 'revision': result['revision']}, ensure_ascii=False))
+            issue_id = result['resource']['id']
+            for operation in ['trash', 'restore']:
+                result = client.post('/api/issues/'+issue_id+'/'+operation, json=dict(
+                    expected_version=result['revision'], request_id=str(uuid4()), actor='Python示例')).raise_for_status().json()
+            print(json.dumps({'id': issue_id, 'revision': result['revision'], 'delete_restore': 'passed'}, ensure_ascii=False))
 
 
 if __name__ == '__main__':

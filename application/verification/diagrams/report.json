@@ -32,13 +32,6 @@
   },
   "browser_errors": [],
   "external_requests": [],
-  "live_schema": {
-    "status": "pass",
-    "tables": 9,
-    "columns": 62,
-    "foreign_keys": 6,
-    "business_rows_read": 0,
-    "writes": 0
-  },
-  "status": "pass"
+  "status": "pass",
+  "passed": true
 }

@@ -20,6 +20,9 @@ class Store:
                 CREATE TABLE IF NOT EXISTS workspace (id INTEGER PRIMARY KEY CHECK(id=1), revision INTEGER NOT NULL, payload TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS activity (revision INTEGER PRIMARY KEY, at TEXT NOT NULL, actor TEXT NOT NULL, operation TEXT NOT NULL, resource_id TEXT, payload TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS requests (request_id TEXT PRIMARY KEY, fingerprint TEXT NOT NULL, response TEXT NOT NULL);
+                CREATE TRIGGER IF NOT EXISTS no_delete_workspace BEFORE DELETE ON workspace BEGIN SELECT RAISE(ABORT, 'Physical deletion is disabled'); END;
+                CREATE TRIGGER IF NOT EXISTS no_delete_activity BEFORE DELETE ON activity BEGIN SELECT RAISE(ABORT, 'Physical deletion is disabled'); END;
+                CREATE TRIGGER IF NOT EXISTS no_delete_requests BEFORE DELETE ON requests BEGIN SELECT RAISE(ABORT, 'Physical deletion is disabled'); END;
                 PRAGMA user_version=1;
             ''')
             connection.execute('INSERT OR IGNORE INTO workspace VALUES (1,0,?)', (dumps(domain.empty_state()),))

@@ -173,7 +173,7 @@ def run(url):
             expect(mobile.locator('#app .mobile-task-card')).to_have_count(1)
             passed(f'{width}px 日程按日期分组且问题筛选生效')
             mobile.locator('#app .mobile-task-card [data-action=mobile-task-menu]').click()
-            mobile.locator('#modal [data-action=edit-task]').click()
+            mobile.locator('.compact-menu [data-action=edit-task]').click()
             mobile.locator('#record-form [name=title]').fill(f'手机{width}px已编辑行动')
             mobile.locator('#record-form [type=submit]').click()
             expect(mobile.locator('#modal')).not_to_be_visible()

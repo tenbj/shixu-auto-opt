@@ -10,14 +10,23 @@ from . import domain
 from .store import dumps
 from .config import load_environment
 
+class RetainingCursor(pymysql.cursors.DictCursor):
+    """运行时拒绝物理删除、清空或替换记录的SQL。"""
+    def execute(self, query, args=None):
+        statement = query.decode() if isinstance(query, bytes) else query
+        statement = re.sub(r'/\*.*?\*/|--[^\n]*', '', statement, flags=re.S).lstrip()
+        if re.match(r'(DELETE|TRUNCATE|DROP|REPLACE)\b', statement, re.I):
+            raise RuntimeError('禁止物理删除数据库记录；请使用软删除标识')
+        return super().execute(query, args)
+
 APP_ID = 'shixu-system-entities-v2'
 ISSUE_FIELDS = {'id': 'id', 'number': 'number', 'title': 'title', 'description': 'description', 'priority': 'priority',
                 'tag': 'tag', 'status': 'status', 'resolution': 'resolution', 'nextStep': 'next_step',
                 'successCriteria': 'success_criteria', 'treatment': 'treatment', 'verificationMethod': 'verification_method',
                 'pauseReason': 'pause_reason', 'reviewDate': 'review_date', 'pausedFrom': 'paused_from',
-                'closeReason': 'close_reason', 'closeType': 'close_type', 'duplicateOf': 'duplicate_of'}
+                'closeReason': 'close_reason', 'closeType': 'close_type', 'duplicateOf': 'duplicate_of', 'deletedAt': 'deleted_at', 'deletionBatch': 'deletion_batch', 'deletedWithIssue': 'deleted_with_issue'}
 TASK_FIELDS = {'id': 'id', 'title': 'title', 'issueId': 'issue_id', 'due': 'due', 'status': 'status', 'required': 'required_action',
-               'cancelReason': 'cancel_reason', 'order': 'order_index', 'numberGroup': 'number_group', 'sequence': 'sequence_number'}
+               'cancelReason': 'cancel_reason', 'order': 'order_index', 'numberGroup': 'number_group', 'sequence': 'sequence_number', 'deletedAt': 'deleted_at', 'deletionBatch': 'deletion_batch', 'deletedWithIssue': 'deleted_with_issue'}
 
 
 def settings(database=None):
@@ -31,7 +40,7 @@ def settings(database=None):
     options = dict(host=os.environ['DB_HOST'], port=int(os.getenv('DB_PORT', '3306')), user=os.environ['DB_USER'],
                    password=os.environ['DB_PASSWORD'], database=name, charset=os.getenv('DB_CHARSET', 'utf8mb4'),
                    connect_timeout=10, read_timeout=20, write_timeout=20, autocommit=False,
-                   cursorclass=pymysql.cursors.DictCursor, local_infile=False)
+                   cursorclass=RetainingCursor, local_infile=False)
     if os.getenv('DB_SSL', 'true').lower() in ['true', '1', 'yes']:
         options['ssl'] = ssl.create_default_context(cafile=os.getenv('DB_SSL_CA') or None)
     else:
@@ -96,7 +105,7 @@ class MySQLStore:
         for task in state['tasks']:
             task['required'] = bool(task['required'])
             task['dependsOn'] = []
-        cur.execute('SELECT * FROM task_dependencies ORDER BY task_id,position_number')
+        cur.execute('SELECT * FROM task_dependencies WHERE deleted_at IS NULL ORDER BY task_id,position_number')
         for row in cur.fetchall():
             tasks[row['task_id']]['dependsOn'].append(row['dependency_id'])
         return dict(revision=meta['revision'], data=state)
@@ -115,14 +124,15 @@ class MySQLStore:
         columns = ','.join('`'+column+'`' for column in fields.values())
         placeholders = ','.join(['%s'] * len(fields))
         updates = ','.join('`'+column+'`=VALUES(`'+column+'`)' for key, column in fields.items() if key != 'id')
-        cur.execute(f'INSERT INTO `{table}` ({columns}) VALUES ({placeholders}) ON DUPLICATE KEY UPDATE {updates}', tuple(item[key] for key in fields))
+        cur.execute(f'INSERT INTO `{table}` ({columns}) VALUES ({placeholders}) ON DUPLICATE KEY UPDATE {updates}', tuple(item.get(key) for key in fields))
 
     def _persist(self, cur, state, previous):
         old_issues = {p['id']: p for p in previous['issues']}
         old_tasks = {t['id']: t for t in previous['tasks']}
+        domain.require(set(old_issues) <= {p['id'] for p in state['issues']} and set(old_tasks) <= {t['id'] for t in state['tasks']}, '业务记录只能软删除，不得移除实体', 409)
         for issue in reversed(state['issues']):
             old = old_issues.get(issue['id'], {})
-            if any(old.get(key) != issue[key] for key in ISSUE_FIELDS):
+            if any(old.get(key) != issue.get(key) for key in ISSUE_FIELDS):
                 self._upsert(cur, 'issues', ISSUE_FIELDS, issue)
             for position, content in enumerate(issue['logs']):
                 if position >= len(old.get('logs', [])):
@@ -138,13 +148,13 @@ class MySQLStore:
                                 (entry['id'], issue['id'], entry['content'], entry['at'], entry['actor']))
         for task in reversed(state['tasks']):
             old = old_tasks.get(task['id'], {})
-            if any(old.get(key) != task[key] for key in TASK_FIELDS):
+            if any(old.get(key) != task.get(key) for key in TASK_FIELDS):
                 self._upsert(cur, 'tasks', TASK_FIELDS, task)
         for task in state['tasks']:
             if task['dependsOn'] != old_tasks.get(task['id'], {}).get('dependsOn', []):
-                cur.execute('DELETE FROM task_dependencies WHERE task_id=%s', (task['id'],))
+                cur.execute('UPDATE task_dependencies SET deleted_at=%s WHERE task_id=%s AND deleted_at IS NULL', (domain.now(), task['id']))
                 if task['dependsOn']:
-                    cur.executemany('INSERT INTO task_dependencies VALUES (%s,%s,%s)',
+                    cur.executemany('INSERT INTO task_dependencies (task_id,dependency_id,position_number,deleted_at) VALUES (%s,%s,%s,NULL) ON DUPLICATE KEY UPDATE position_number=VALUES(position_number),deleted_at=NULL',
                                     [(task['id'], key, index) for index, key in enumerate(task['dependsOn'])])
         cur.execute('UPDATE workspace_meta SET next_issue_number=%s,next_task_numbers=%s WHERE id=1',
                     (state['nextIssueNumber'], dumps(state['nextTaskNumbers'])))

@@ -1,0 +1,32 @@
+{
+  "database": "dedicated-application-database (name redacted)",
+  "added": [
+    "task_dependencies.deleted_at",
+    "idx_dependency_deleted",
+    "shixu_no_delete_workspace_meta",
+    "shixu_no_delete_issues",
+    "shixu_no_delete_tasks",
+    "shixu_no_delete_task_dependencies",
+    "shixu_no_delete_issue_followups",
+    "shixu_no_delete_issue_history",
+    "shixu_no_delete_issue_logs",
+    "shixu_no_delete_activity",
+    "shixu_no_delete_idempotency_requests"
+  ],
+  "existing": [
+    "issues.deleted_at",
+    "issues.deletion_batch",
+    "issues.deleted_with_issue",
+    "tasks.deleted_at",
+    "tasks.deletion_batch",
+    "tasks.deleted_with_issue"
+  ],
+  "rows": {
+    "issues": 3,
+    "tasks": 3
+  },
+  "delete_guards": 9,
+  "passed": true,
+  "business_data_unchanged": true,
+  "tables_compared": 9
+}

@@ -1,0 +1,22 @@
+{
+  "database": "dedicated-application-database (name redacted)",
+  "added": [
+    "issues.deleted_at",
+    "issues.deletion_batch",
+    "issues.deleted_with_issue",
+    "idx_issue_deleted",
+    "tasks.deleted_at",
+    "tasks.deletion_batch",
+    "tasks.deleted_with_issue",
+    "idx_task_deleted"
+  ],
+  "existing": [],
+  "rows": {
+    "issues": 3,
+    "tasks": 3
+  },
+  "passed": true,
+  "business_data_unchanged": true,
+  "tables_compared": 9,
+  "backup_private": true
+}
