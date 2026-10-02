@@ -1,0 +1,2 @@
+# Frozen prototype hashes must survive Windows checkout unchanged.
+application/reference/*.html -text
