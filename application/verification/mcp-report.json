@@ -103,6 +103,36 @@
       "expected_error": false
     },
     {
+      "tool": "delete_issue",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "list_trash",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "restore_issue",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "set_task_dependencies",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "delete_task",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "restore_task",
+      "passed": true,
+      "expected_error": false
+    },
+    {
       "tool": "list_tasks",
       "passed": true,
       "expected_error": false
@@ -135,7 +165,12 @@
     "set_task_dependencies",
     "reorder_task",
     "list_activity",
-    "export_workspace"
+    "export_workspace",
+    "list_trash",
+    "delete_issue",
+    "restore_issue",
+    "delete_task",
+    "restore_task"
   ],
   "backend": "mysql",
   "passed": true

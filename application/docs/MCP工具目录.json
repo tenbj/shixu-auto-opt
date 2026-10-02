@@ -2146,6 +2146,554 @@
         },
         "_meta": null
       }
+    },
+    {
+      "name": "list_trash",
+      "kind": "read",
+      "purpose": "读取回收站问题与行动以及revision。恢复前检查批次与依赖；只读。",
+      "when_to_use": "读取回收站问题与行动以及revision。恢复前检查批次与依赖；只读。",
+      "input": {
+        "properties": {},
+        "title": "list_trashArguments",
+        "type": "object"
+      },
+      "returns": "见API响应；写入返回resource/data/revision",
+      "side_effect": "无",
+      "order": "先health，再list/get版本，再写入",
+      "error_handling": "404检查ID；409重读；422修正输入；503不确认成功、同号重试",
+      "protocol": {
+        "name": "list_trash",
+        "title": null,
+        "description": "读取回收站问题与行动以及revision。恢复前检查批次与依赖；只读。",
+        "inputSchema": {
+          "properties": {},
+          "title": "list_trashArguments",
+          "type": "object"
+        },
+        "execution": null,
+        "outputSchema": null,
+        "icons": null,
+        "annotations": {
+          "title": null,
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "_meta": null
+      }
+    },
+    {
+      "name": "delete_issue",
+      "kind": "write",
+      "purpose": "移入回收站，保留编号历史；问题同时删除有效关联行动；外部依赖阻挡删除。先读版本，request_id幂等；409重读或补前置，503不得声称成功。",
+      "when_to_use": "移入回收站，保留编号历史；问题同时删除有效关联行动；外部依赖阻挡删除。先读版本，request_id幂等；409重读或补前置，503不得声称成功。",
+      "input": {
+        "$defs": {
+          "Write": {
+            "additionalProperties": false,
+            "properties": {
+              "request_id": {
+                "description": "同一次请求重试使用同号，内容改变须换号",
+                "maxLength": 120,
+                "minLength": 8,
+                "title": "Request Id",
+                "type": "string"
+              },
+              "expected_version": {
+                "description": "GET /api/workspace 返回的全局 revision",
+                "minimum": 0,
+                "title": "Expected Version",
+                "type": "integer"
+              },
+              "actor": {
+                "default": "我",
+                "description": "审计标签，不代表认证身份",
+                "maxLength": 80,
+                "minLength": 1,
+                "title": "Actor",
+                "type": "string"
+              }
+            },
+            "required": [
+              "request_id",
+              "expected_version"
+            ],
+            "title": "Write",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "issue_id": {
+            "title": "Issue Id",
+            "type": "string"
+          },
+          "body": {
+            "$ref": "#/$defs/Write"
+          }
+        },
+        "required": [
+          "issue_id",
+          "body"
+        ],
+        "title": "delete_issueArguments",
+        "type": "object"
+      },
+      "returns": "见API响应；写入返回resource/data/revision",
+      "side_effect": "经API写MySQL实体表并追加审计；具体关联状态变化见工具描述",
+      "order": "先health，再list/get版本，再写入",
+      "error_handling": "404检查ID；409重读；422修正输入；503不确认成功、同号重试",
+      "protocol": {
+        "name": "delete_issue",
+        "title": null,
+        "description": "移入回收站，保留编号历史；问题同时删除有效关联行动；外部依赖阻挡删除。先读版本，request_id幂等；409重读或补前置，503不得声称成功。",
+        "inputSchema": {
+          "$defs": {
+            "Write": {
+              "additionalProperties": false,
+              "properties": {
+                "request_id": {
+                  "description": "同一次请求重试使用同号，内容改变须换号",
+                  "maxLength": 120,
+                  "minLength": 8,
+                  "title": "Request Id",
+                  "type": "string"
+                },
+                "expected_version": {
+                  "description": "GET /api/workspace 返回的全局 revision",
+                  "minimum": 0,
+                  "title": "Expected Version",
+                  "type": "integer"
+                },
+                "actor": {
+                  "default": "我",
+                  "description": "审计标签，不代表认证身份",
+                  "maxLength": 80,
+                  "minLength": 1,
+                  "title": "Actor",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "request_id",
+                "expected_version"
+              ],
+              "title": "Write",
+              "type": "object"
+            }
+          },
+          "properties": {
+            "issue_id": {
+              "title": "Issue Id",
+              "type": "string"
+            },
+            "body": {
+              "$ref": "#/$defs/Write"
+            }
+          },
+          "required": [
+            "issue_id",
+            "body"
+          ],
+          "title": "delete_issueArguments",
+          "type": "object"
+        },
+        "execution": null,
+        "outputSchema": null,
+        "icons": null,
+        "annotations": {
+          "title": null,
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "_meta": null
+      }
+    },
+    {
+      "name": "restore_issue",
+      "kind": "write",
+      "purpose": "恢复原记录；问题仅恢复同批行动，单删行动须关联问题有效且前置可用；必要行动可能重开验证。先读版本，request_id幂等；409重读或补前置，503不得声称成功。",
+      "when_to_use": "恢复原记录；问题仅恢复同批行动，单删行动须关联问题有效且前置可用；必要行动可能重开验证。先读版本，request_id幂等；409重读或补前置，503不得声称成功。",
+      "input": {
+        "$defs": {
+          "Write": {
+            "additionalProperties": false,
+            "properties": {
+              "request_id": {
+                "description": "同一次请求重试使用同号，内容改变须换号",
+                "maxLength": 120,
+                "minLength": 8,
+                "title": "Request Id",
+                "type": "string"
+              },
+              "expected_version": {
+                "description": "GET /api/workspace 返回的全局 revision",
+                "minimum": 0,
+                "title": "Expected Version",
+                "type": "integer"
+              },
+              "actor": {
+                "default": "我",
+                "description": "审计标签，不代表认证身份",
+                "maxLength": 80,
+                "minLength": 1,
+                "title": "Actor",
+                "type": "string"
+              }
+            },
+            "required": [
+              "request_id",
+              "expected_version"
+            ],
+            "title": "Write",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "issue_id": {
+            "title": "Issue Id",
+            "type": "string"
+          },
+          "body": {
+            "$ref": "#/$defs/Write"
+          }
+        },
+        "required": [
+          "issue_id",
+          "body"
+        ],
+        "title": "restore_issueArguments",
+        "type": "object"
+      },
+      "returns": "见API响应；写入返回resource/data/revision",
+      "side_effect": "经API写MySQL实体表并追加审计；具体关联状态变化见工具描述",
+      "order": "先health，再list/get版本，再写入",
+      "error_handling": "404检查ID；409重读；422修正输入；503不确认成功、同号重试",
+      "protocol": {
+        "name": "restore_issue",
+        "title": null,
+        "description": "恢复原记录；问题仅恢复同批行动，单删行动须关联问题有效且前置可用；必要行动可能重开验证。先读版本，request_id幂等；409重读或补前置，503不得声称成功。",
+        "inputSchema": {
+          "$defs": {
+            "Write": {
+              "additionalProperties": false,
+              "properties": {
+                "request_id": {
+                  "description": "同一次请求重试使用同号，内容改变须换号",
+                  "maxLength": 120,
+                  "minLength": 8,
+                  "title": "Request Id",
+                  "type": "string"
+                },
+                "expected_version": {
+                  "description": "GET /api/workspace 返回的全局 revision",
+                  "minimum": 0,
+                  "title": "Expected Version",
+                  "type": "integer"
+                },
+                "actor": {
+                  "default": "我",
+                  "description": "审计标签，不代表认证身份",
+                  "maxLength": 80,
+                  "minLength": 1,
+                  "title": "Actor",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "request_id",
+                "expected_version"
+              ],
+              "title": "Write",
+              "type": "object"
+            }
+          },
+          "properties": {
+            "issue_id": {
+              "title": "Issue Id",
+              "type": "string"
+            },
+            "body": {
+              "$ref": "#/$defs/Write"
+            }
+          },
+          "required": [
+            "issue_id",
+            "body"
+          ],
+          "title": "restore_issueArguments",
+          "type": "object"
+        },
+        "execution": null,
+        "outputSchema": null,
+        "icons": null,
+        "annotations": {
+          "title": null,
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "_meta": null
+      }
+    },
+    {
+      "name": "delete_task",
+      "kind": "write",
+      "purpose": "移入回收站，保留编号历史；问题同时删除有效关联行动；外部依赖阻挡删除。先读版本，request_id幂等；409重读或补前置，503不得声称成功。",
+      "when_to_use": "移入回收站，保留编号历史；问题同时删除有效关联行动；外部依赖阻挡删除。先读版本，request_id幂等；409重读或补前置，503不得声称成功。",
+      "input": {
+        "$defs": {
+          "Write": {
+            "additionalProperties": false,
+            "properties": {
+              "request_id": {
+                "description": "同一次请求重试使用同号，内容改变须换号",
+                "maxLength": 120,
+                "minLength": 8,
+                "title": "Request Id",
+                "type": "string"
+              },
+              "expected_version": {
+                "description": "GET /api/workspace 返回的全局 revision",
+                "minimum": 0,
+                "title": "Expected Version",
+                "type": "integer"
+              },
+              "actor": {
+                "default": "我",
+                "description": "审计标签，不代表认证身份",
+                "maxLength": 80,
+                "minLength": 1,
+                "title": "Actor",
+                "type": "string"
+              }
+            },
+            "required": [
+              "request_id",
+              "expected_version"
+            ],
+            "title": "Write",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "task_id": {
+            "title": "Task Id",
+            "type": "string"
+          },
+          "body": {
+            "$ref": "#/$defs/Write"
+          }
+        },
+        "required": [
+          "task_id",
+          "body"
+        ],
+        "title": "delete_taskArguments",
+        "type": "object"
+      },
+      "returns": "见API响应；写入返回resource/data/revision",
+      "side_effect": "经API写MySQL实体表并追加审计；具体关联状态变化见工具描述",
+      "order": "先health，再list/get版本，再写入",
+      "error_handling": "404检查ID；409重读；422修正输入；503不确认成功、同号重试",
+      "protocol": {
+        "name": "delete_task",
+        "title": null,
+        "description": "移入回收站，保留编号历史；问题同时删除有效关联行动；外部依赖阻挡删除。先读版本，request_id幂等；409重读或补前置，503不得声称成功。",
+        "inputSchema": {
+          "$defs": {
+            "Write": {
+              "additionalProperties": false,
+              "properties": {
+                "request_id": {
+                  "description": "同一次请求重试使用同号，内容改变须换号",
+                  "maxLength": 120,
+                  "minLength": 8,
+                  "title": "Request Id",
+                  "type": "string"
+                },
+                "expected_version": {
+                  "description": "GET /api/workspace 返回的全局 revision",
+                  "minimum": 0,
+                  "title": "Expected Version",
+                  "type": "integer"
+                },
+                "actor": {
+                  "default": "我",
+                  "description": "审计标签，不代表认证身份",
+                  "maxLength": 80,
+                  "minLength": 1,
+                  "title": "Actor",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "request_id",
+                "expected_version"
+              ],
+              "title": "Write",
+              "type": "object"
+            }
+          },
+          "properties": {
+            "task_id": {
+              "title": "Task Id",
+              "type": "string"
+            },
+            "body": {
+              "$ref": "#/$defs/Write"
+            }
+          },
+          "required": [
+            "task_id",
+            "body"
+          ],
+          "title": "delete_taskArguments",
+          "type": "object"
+        },
+        "execution": null,
+        "outputSchema": null,
+        "icons": null,
+        "annotations": {
+          "title": null,
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "_meta": null
+      }
+    },
+    {
+      "name": "restore_task",
+      "kind": "write",
+      "purpose": "恢复原记录；问题仅恢复同批行动，单删行动须关联问题有效且前置可用；必要行动可能重开验证。先读版本，request_id幂等；409重读或补前置，503不得声称成功。",
+      "when_to_use": "恢复原记录；问题仅恢复同批行动，单删行动须关联问题有效且前置可用；必要行动可能重开验证。先读版本，request_id幂等；409重读或补前置，503不得声称成功。",
+      "input": {
+        "$defs": {
+          "Write": {
+            "additionalProperties": false,
+            "properties": {
+              "request_id": {
+                "description": "同一次请求重试使用同号，内容改变须换号",
+                "maxLength": 120,
+                "minLength": 8,
+                "title": "Request Id",
+                "type": "string"
+              },
+              "expected_version": {
+                "description": "GET /api/workspace 返回的全局 revision",
+                "minimum": 0,
+                "title": "Expected Version",
+                "type": "integer"
+              },
+              "actor": {
+                "default": "我",
+                "description": "审计标签，不代表认证身份",
+                "maxLength": 80,
+                "minLength": 1,
+                "title": "Actor",
+                "type": "string"
+              }
+            },
+            "required": [
+              "request_id",
+              "expected_version"
+            ],
+            "title": "Write",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "task_id": {
+            "title": "Task Id",
+            "type": "string"
+          },
+          "body": {
+            "$ref": "#/$defs/Write"
+          }
+        },
+        "required": [
+          "task_id",
+          "body"
+        ],
+        "title": "restore_taskArguments",
+        "type": "object"
+      },
+      "returns": "见API响应；写入返回resource/data/revision",
+      "side_effect": "经API写MySQL实体表并追加审计；具体关联状态变化见工具描述",
+      "order": "先health，再list/get版本，再写入",
+      "error_handling": "404检查ID；409重读；422修正输入；503不确认成功、同号重试",
+      "protocol": {
+        "name": "restore_task",
+        "title": null,
+        "description": "恢复原记录；问题仅恢复同批行动，单删行动须关联问题有效且前置可用；必要行动可能重开验证。先读版本，request_id幂等；409重读或补前置，503不得声称成功。",
+        "inputSchema": {
+          "$defs": {
+            "Write": {
+              "additionalProperties": false,
+              "properties": {
+                "request_id": {
+                  "description": "同一次请求重试使用同号，内容改变须换号",
+                  "maxLength": 120,
+                  "minLength": 8,
+                  "title": "Request Id",
+                  "type": "string"
+                },
+                "expected_version": {
+                  "description": "GET /api/workspace 返回的全局 revision",
+                  "minimum": 0,
+                  "title": "Expected Version",
+                  "type": "integer"
+                },
+                "actor": {
+                  "default": "我",
+                  "description": "审计标签，不代表认证身份",
+                  "maxLength": 80,
+                  "minLength": 1,
+                  "title": "Actor",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "request_id",
+                "expected_version"
+              ],
+              "title": "Write",
+              "type": "object"
+            }
+          },
+          "properties": {
+            "task_id": {
+              "title": "Task Id",
+              "type": "string"
+            },
+            "body": {
+              "$ref": "#/$defs/Write"
+            }
+          },
+          "required": [
+            "task_id",
+            "body"
+          ],
+          "title": "restore_taskArguments",
+          "type": "object"
+        },
+        "execution": null,
+        "outputSchema": null,
+        "icons": null,
+        "annotations": {
+          "title": null,
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "_meta": null
+      }
     }
   ]
 }

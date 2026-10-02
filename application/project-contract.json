@@ -3,12 +3,12 @@
   "project_name": "拾序系统",
   "status": "ready",
   "prototype": {
-    "sha256": "64e50a3d86cbb3ceda3969aedcc7957f6e9c213512978fa46726a4d6cf539aa9",
-    "title": "拾序 · 个人工作台",
+    "path": "reference/trash-compact-source.html（冻结试改原型）",
+    "sha256": "02abbebca95b07cb95921d461cabe66543beaac8918b5ec649d0991f91539270",
+    "title": "拾序紧凑菜单与回收站试改原型",
     "source_modified": false,
-    "path": "../prototype/reference/application-v2.1.0-source.html（应用固定来源快照；分发包不附带源原型）",
-    "reference_snapshot": "../prototype/reference/application-v2.1.0-source.html（开发仓库来源快照；不入应用分发包）",
-    "version": "1.6.0"
+    "version": "trash-compact-20261002",
+    "reference_snapshot": "reference/trash-compact-source.html"
   },
   "operations": [
     {
@@ -117,6 +117,41 @@
       "python_example": "examples/api_client.py"
     },
     {
+      "id": "trash",
+      "method": "GET",
+      "path": "/api/trash",
+      "mcp_tool": "list_trash",
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "issue_delete",
+      "method": "POST",
+      "path": "/api/issues/{issue_id}/trash",
+      "mcp_tool": "delete_issue",
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "issue_restore",
+      "method": "POST",
+      "path": "/api/issues/{issue_id}/restore",
+      "mcp_tool": "restore_issue",
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "task_delete",
+      "method": "POST",
+      "path": "/api/tasks/{task_id}/trash",
+      "mcp_tool": "delete_task",
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "task_restore",
+      "method": "POST",
+      "path": "/api/tasks/{task_id}/restore",
+      "mcp_tool": "restore_task",
+      "python_example": "examples/api_client.py"
+    },
+    {
       "id": "activity",
       "method": "GET",
       "path": "/api/activity",
@@ -168,6 +203,16 @@
       "evidence": "verification/release-scan.json"
     },
     {
+      "name": "trash_browser",
+      "status": "passed",
+      "evidence": "verification/trash-browser-report.json"
+    },
+    {
+      "name": "diagrams",
+      "status": "passed",
+      "evidence": "verification/diagrams/report.json"
+    },
+    {
       "name": "ai_task",
       "status": "not_run",
       "evidence": "",
@@ -177,6 +222,11 @@
       "name": "mysql",
       "status": "passed",
       "evidence": "verification/mysql-report.json"
+    },
+    {
+      "name": "retention_mysql",
+      "status": "passed",
+      "evidence": "verification/retention-report.json"
     }
   ],
   "limits": [
@@ -194,5 +244,6 @@
     "schema": "data/mysql-schema.sql",
     "tables": 9,
     "test_adapter": "SQLite仅用于隔离测试与无凭据分发包检查"
-  }
+  },
+  "version": "2.2.1"
 }

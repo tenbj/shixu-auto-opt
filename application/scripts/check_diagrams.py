@@ -65,7 +65,7 @@ def main():
         report['checks'].append('20 consecutive field toggles; exact layout restored')
 
         page.locator('.entity[data-id="IS"]').click()
-        assert page.locator('#detail tbody tr').count()==18
+        assert page.locator('#detail tbody tr').count()==21
         assert '非 FK' in page.locator('#detail').inner_text()
         page.locator('#detail .close').click()
         page.locator('.entity[data-id="TA"]').hover()
@@ -132,6 +132,7 @@ def main():
         if '--live-schema' in sys.argv:
             report['live_schema']=metadata_check(model)
         report['status']='pass'
+        report['passed']=True
         (OUT/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
         print(json.dumps(report,ensure_ascii=False,indent=2))
         browser.close()

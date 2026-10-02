@@ -1,4 +1,4 @@
-"""拾序业务规则。所有修改在 Store 的 SQLite 事务中执行。"""
+"""拾序业务规则。所有修改由共用存储适配器在写事务中执行。"""
 from datetime import datetime, date, timezone, timedelta
 from uuid import uuid4
 
@@ -46,14 +46,31 @@ def empty_state():
     return dict(version=1, schemaVersion=2, nextIssueNumber=1, nextTaskNumbers={}, issues=[], tasks=[])
 
 
-def get(state, kind, identifier):
+def raw_get(state, kind, identifier):
     item = next((x for x in state[kind] if x['id'] == identifier), None)
     require(item is not None, '记录不存在', 404)
     return item
 
 
+def live_issues(state):
+    return [x for x in state['issues'] if not x.get('deletedAt')]
+
+
+def live_tasks(state):
+    ids = {x['id'] for x in live_issues(state)}
+    return [x for x in state['tasks'] if not x.get('deletedAt') and (not x['issueId'] or x['issueId'] in ids)]
+
+
+def get(state, kind, identifier):
+    item = raw_get(state, kind, identifier)
+    require(not item.get('deletedAt'), '记录在回收站，请先恢复', 409)
+    if kind == 'tasks' and item.get('issueId'):
+        require(not raw_get(state, 'issues', item['issueId']).get('deletedAt'), '关联问题在回收站', 409)
+    return item
+
+
 def linked(state, identifier):
-    return [x for x in state['tasks'] if x['issueId'] == identifier]
+    return [x for x in live_tasks(state) if x['issueId'] == identifier]
 
 
 def incomplete(task):
@@ -171,11 +188,11 @@ def transition_issue(state, issue, values, actor):
 
 
 def has_edges(state, task):
-    return bool(task['dependsOn'] or any(task['id'] in t['dependsOn'] for t in state['tasks']))
+    return bool(task['dependsOn'] or any(task['id'] in t['dependsOn'] for t in live_tasks(state)))
 
 
 def started_dependents(state, task):
-    return any(task['id'] in t['dependsOn'] and t['status'] in ['进行中', '已完成'] for t in state['tasks'])
+    return any(task['id'] in t['dependsOn'] and t['status'] in ['进行中', '已完成'] for t in live_tasks(state))
 
 
 def create_task(state, values, actor):
@@ -260,7 +277,7 @@ def dependencies(state, task, values, actor):
         visiting.remove(key)
         visited.add(key)
 
-    for item in state['tasks']:
+    for item in live_tasks(state):
         visit(item['id'])
     if task['status'] in ['进行中', '已完成']:
         require(all(get(state, 'tasks', key)['status'] == '已完成' for key in deps), '进行中或已完成行动不能依赖未完成行动')
@@ -270,7 +287,7 @@ def dependencies(state, task, values, actor):
 def reorder(state, task, values, actor):
     target = get(state, 'tasks', values['target_id'])
     require(task['id'] != target['id'] and task['issueId'] == target['issueId'], '只能在同一分组内排序')
-    group = sorted([t for t in state['tasks'] if t['issueId'] == task['issueId'] and t['id'] != task['id']], key=lambda t: t['order'])
+    group = sorted([t for t in live_tasks(state) if t['issueId'] == task['issueId'] and t['id'] != task['id']], key=lambda t: t['order'])
     at = group.index(target) + int(values['after'])
     group.insert(at, task)
     for index, item in enumerate(group):
@@ -284,7 +301,70 @@ def followup(state, issue, values, actor):
     return entry
 
 
+def delete_record(state, kind, identifier, actor):
+    obj = get(state, kind, identifier)
+    children = linked(state, identifier) if kind == 'issues' else [obj]
+    ids = {t['id'] for t in children}
+    blockers = [t for t in live_tasks(state) if t['id'] not in ids and ids.intersection(t['dependsOn'])]
+    require(not blockers, '仍被有效行动依赖：' + '、'.join(t['title'] for t in blockers), 409)
+    batch, at = str(uuid4()), now()
+    for row in ([obj] + children if kind == 'issues' else [obj]):
+        row.update(deletedAt=at, deletionBatch=batch, deletedWithIssue=identifier if kind == 'issues' else None)
+    parent = obj if kind == 'issues' else (raw_get(state, 'issues', obj['issueId']) if obj['issueId'] else None)
+    log(parent, '移入回收站：' + obj['title'] + '；批次 ' + batch)
+    return obj
+
+
+def restore_record(state, kind, identifier, actor):
+    obj = raw_get(state, kind, identifier)
+    require(bool(obj.get('deletedAt')), '记录不在回收站', 409)
+    require(kind == 'issues' or not obj.get('deletedWithIssue'), '请从问题条目整批恢复', 409)
+    rows = [t for t in state['tasks'] if t.get('deletedAt') and t.get('deletedWithIssue') == identifier
+            and t.get('deletionBatch') == obj.get('deletionBatch')] if kind == 'issues' else [obj]
+    issues = live_issues(state) + ([obj] if kind == 'issues' else [])
+    issue_index = {p['id']: p for p in issues}
+    tasks = live_tasks(state) + rows
+    task_index = {t['id']: t for t in tasks}
+    if kind == 'issues' and obj.get('duplicateOf'):
+        require(obj['duplicateOf'] in issue_index, '请先恢复重复关联的原问题', 409)
+    for t in rows:
+        parent = issue_index.get(t['issueId'])
+        require(not t['issueId'] or parent, '请先恢复关联问题', 409)
+        require(kind == 'issues' or not parent or parent['status'] not in ['已暂缓','已关闭'],
+                '请先恢复处理或重新打开关联问题', 409)
+        for key in t['dependsOn']:
+            require(key in task_index, '请先恢复缺失的前置行动', 409)
+            require(task_index[key]['issueId'] == t['issueId'] and key != t['id'], '前置行动分组不一致', 409)
+            require(t['status'] not in ['进行中','已完成'] or task_index[key]['status'] == '已完成',
+                    '进行中或已完成行动的前置尚未完成', 409)
+    visiting, visited = set(), set()
+    def visit(key):
+        require(key not in visiting, '恢复将形成循环依赖', 409)
+        if key in visited: return
+        visiting.add(key)
+        for child in task_index[key]['dependsOn']:
+            require(child in task_index, '请先恢复缺失的前置行动', 409)
+            visit(child)
+        visiting.remove(key); visited.add(key)
+    for t in tasks: visit(t['id'])
+    for row in ([obj] + rows if kind == 'issues' else rows):
+        row.update(deletedAt=None, deletionBatch=None, deletedWithIssue=None)
+    for parent in issues:
+        necessary = any(t['issueId'] == parent['id'] and t['required'] and incomplete(t) for t in rows)
+        if necessary and parent['status'] in ['待验证','已解决']:
+            transition(parent, '处理中', '恢复未完成必要行动，需要再次验证', actor)
+        elif necessary and parent['status'] == '已暂缓' and parent['pausedFrom'] == '待验证':
+            parent['pausedFrom'] = '处理中'
+            log(parent, '恢复必要行动，暂缓恢复阶段改为处理中')
+    parent = obj if kind == 'issues' else issue_index.get(obj['issueId'])
+    log(parent, '从回收站恢复：' + obj['title'])
+    return obj
+
+
 def apply(state, operation, identifier, values, actor):
+    if operation in ['delete_issue','delete_task','restore_issue','restore_task']:
+        kind = 'issues' if operation.endswith('_issue') else 'tasks'
+        return (delete_record if operation.startswith('delete_') else restore_record)(state, kind, identifier, actor)
     if operation == 'create_issue':
         return create_issue(state, values, actor)
     if operation == 'create_task':

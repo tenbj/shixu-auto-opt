@@ -18,7 +18,7 @@ async def run(url, write_demo=False, report=None):
     async with Client(params) as client:
         tools = await client.list_tools()
         evidence['tools'] = [tool.name for tool in tools.tools]
-        assert len(evidence['tools']) == 17
+        assert len(evidence['tools']) == 22
 
         async def call(name, arguments=None, error=False):
             result = await client.call_tool(name, arguments or {})
@@ -64,6 +64,13 @@ async def run(url, write_demo=False, report=None):
             await write('transition_task', {'status': '已完成'}, task_id=second['id'])
             await write('transition_issue', {'action': 'verify', 'successCriteria': '工具都可以回读', 'treatment': '通过stdio调用全部工具', 'verificationMethod': 'SDK断言与HTTP真实回读'}, issue_id=identifier)
             await write('transition_issue', {'action': 'resolve', 'resolution': 'SDK固定序列断言通过；不代表AI自主任务通过'}, issue_id=identifier)
+            await write('delete_issue', {}, issue_id=identifier)
+            trash = await call('list_trash')
+            assert any(p['id'] == identifier for p in trash['issues'])
+            await write('restore_issue', {}, issue_id=identifier)
+            await write('set_task_dependencies', {'dependsOn': []}, task_id=second['id'])
+            await write('delete_task', {}, task_id=first['id'])
+            await write('restore_task', {}, task_id=first['id'])
         await call('list_tasks')
         await call('list_activity')
         await call('export_workspace')

@@ -45,6 +45,11 @@ python scripts/configure_mcp.py --format toml
 | set_task_dependencies | 明确先后约束 | task_id、body.dependsOn | 同上 | 修改依赖图 |
 | reorder_task | 调整显示顺序 | task_id、body.target_id/after | 同上 | 顺序变化，编号/依赖不变 |
 | list_activity | 检查哪些操作发生过 | after/limit | items | 无 |
+| list_trash | 查看已删除的问题和行动 | 无 | issues、tasks、revision | 无 |
+| delete_issue | 问题移入回收站 | issue_id、body | resource、data、revision | 软删除问题及当次有效关联行动 |
+| restore_issue | 恢复整批问题 | issue_id、body | 同上 | 恢复同批行动，校验有效依赖与父问题 |
+| delete_task | 单独删除行动 | task_id、body | 同上 | 软删除，保留编号和历史 |
+| restore_task | 单独恢复行动 | task_id、body | 同上 | 校验父问题、依赖；必要行动可能退回验证 |
 | export_workspace | 取得完整导出数据 | 无 | revision、data | 无；不自动写文件 |
 
 所有写工具均带 `request_id`、`expected_version`、`actor`；都适用 409/422/503 处理规则。机器可读的实际参数 schema、描述和副作用来自 [MCP工具目录.json](MCP工具目录.json)。
@@ -63,3 +68,7 @@ python scripts/configure_mcp.py --format toml
 > 进入拾序 system 目录，用独立 Python 环境安装 requirements.txt，启动 scripts/service.py start，检查 /api/health。运行 scripts/configure_mcp.py 获取 stdio 配置，根据我的客户端注册该 MCP，不写入密钥。重新连接后 list_tools，先检查健康与列表。若我要求演示写入，只创建新的演示对象，不修改历史真实记录；每步读取版本，重试保持 request_id，填写真实验证依据。最后回读对象与审计，不把固定 SDK 测试当作 AI 自主验收。
 
 本项目提供 `python examples/mcp_client.py` 只读检查；加 `--write-demo` 才创建合成问题与行动。该脚本是固定序列协议测试，AI 自主任务验收仍待执行。
+
+## 数据保留约束
+
+删除问题、行动及移除前置关系均为软删除。不能通过任何工具永久删除或清空数据库记录；deleted_at标识失效，恢复/重新添加激活原记录。跟进、历史、日志和审计不提供删除工具。

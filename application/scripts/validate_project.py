@@ -1,5 +1,6 @@
 """校验交付合同、API覆盖和证据引用；不替代实际运行测试。"""
 from __future__ import annotations
+import hashlib
 import argparse
 import json
 from pathlib import Path
@@ -10,7 +11,7 @@ REQUIRED=['README.md','CHANGELOG.md','LICENSE','.gitignore','.env.example',
           'docs/openapi.json','docs/AI接入与调用指南.md','docs/MCP工具目录.json',
           'examples/api_client.py','examples/mcp_client.py','scripts/configure_mcp.py',
           'scripts/build_release.py','.github/workflows/ci.yml']
-CHECKS={'business','api','mcp','browser','persistence','portable','release_scan'}
+CHECKS={'business','api','mcp','browser','persistence','portable','release_scan','trash_browser','diagrams','retention_mysql'}
 
 
 def safe_path(root, value):
@@ -34,6 +35,9 @@ def validate(root):
         if not contract.get('project_name'):errors.append('缺少项目名称')
         if not re.fullmatch('[0-9a-f]{64}',contract.get('prototype',{}).get('sha256','')):errors.append('缺少有效原型SHA256')
         if contract.get('prototype',{}).get('source_modified') is not False:errors.append('原型保留状态必须明确为false')
+        snapshot=contract.get('prototype',{}).get('reference_snapshot','')
+        if not snapshot or not safe_path(root,snapshot).is_file() or hashlib.sha256(safe_path(root,snapshot).read_bytes()).hexdigest()!=contract['prototype']['sha256']:
+            errors.append('冻结源原型与hash不一致')
         ops=contract.get('operations',[])
         if not ops:errors.append('没有业务操作映射')
         openapi=json.loads((root/'docs/openapi.json').read_text(encoding='utf-8')) if (root/'docs/openapi.json').exists() else {}

@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from pydantic import BaseModel, ConfigDict, Field, StrictBool
-from .domain import DomainError, get
+from .domain import DomainError, get, live_issues, live_tasks
 from .store import Store
 from .config import load_environment
 from .mysql_store import MySQLStore
@@ -17,11 +17,11 @@ from .mysql_store import MySQLStore
 ROOT = Path(__file__).resolve().parents[1]
 
 
-from .models import (IssueCreate, IssueUpdate, IssueTransition, Followup, TaskCreate, TaskUpdate, TaskTransition, Dependencies, Reorder)
+from .models import (Write, IssueCreate, IssueUpdate, IssueTransition, Followup, TaskCreate, TaskUpdate, TaskTransition, Dependencies, Reorder)
 
 
 def create_app(db_path=None):
-    app = FastAPI(title='拾序系统 API', version='2.1.0', description='单人本地工作台；写入使用全局版本与持久化幂等请求。')
+    app = FastAPI(title='拾序系统 API', version='2.2.1', description='单人本地工作台；写入使用全局版本与持久化幂等请求。')
     load_environment()
     if db_path is not None or os.getenv('SHIXU_BACKEND') == 'sqlite':
         app.state.store = Store(db_path or os.getenv('SHIXU_DB', str(ROOT / 'runtime' / 'test.sqlite3')))
@@ -64,7 +64,7 @@ def create_app(db_path=None):
     @app.get('/api/health', summary='检查服务与数据库状态')
     def health():
         state = app.state.store.read()
-        return {'status': 'ok', 'version': '2.1.0', 'revision': state['revision'], 'mode': 'local-single-user',
+        return {'status': 'ok', 'version': '2.2.1', 'revision': state['revision'], 'mode': 'local-single-user',
                 'backend': getattr(app.state.store, 'backend', 'sqlite-test'),
                 'database': getattr(app.state.store, 'database', None),
                 'pid': os.getpid(), 'instance': os.getenv('SHIXU_INSTANCE', '')}
@@ -76,7 +76,7 @@ def create_app(db_path=None):
     @app.get('/api/issues', summary='查询问题列表')
     def issues(q: str = '', status: str = '', priority: str = '', tag: str = ''):
         snapshot = app.state.store.read()
-        rows = [p for p in snapshot['data']['issues'] if (not q or q.casefold() in (p['title'] + p['description']).casefold())
+        rows = [p for p in live_issues(snapshot['data']) if (not q or q.casefold() in (p['title'] + p['description']).casefold())
                 and (not status or p['status'] == status) and (not priority or p['priority'] == priority) and (not tag or p['tag'] == tag)]
         return {'revision': snapshot['revision'], 'items': rows}
 
@@ -84,7 +84,7 @@ def create_app(db_path=None):
     def issue(issue_id: str):
         snapshot = app.state.store.read()
         return {'revision': snapshot['revision'], 'item': get(snapshot['data'], 'issues', issue_id),
-                'tasks': [t for t in snapshot['data']['tasks'] if t['issueId'] == issue_id]}
+                'tasks': [t for t in live_tasks(snapshot['data']) if t['issueId'] == issue_id]}
 
     @app.post('/api/issues', summary='创建待梳理问题')
     def issue_create(body: IssueCreate):
@@ -105,7 +105,7 @@ def create_app(db_path=None):
     @app.get('/api/tasks', summary='查询行动列表')
     def tasks(issue_id: str | None = None, status: str = ''):
         snapshot = app.state.store.read()
-        rows = [t for t in snapshot['data']['tasks'] if (issue_id is None or t['issueId'] == (issue_id or None)) and (not status or t['status'] == status)]
+        rows = [t for t in live_tasks(snapshot['data']) if (issue_id is None or t['issueId'] == (issue_id or None)) and (not status or t['status'] == status)]
         return {'revision': snapshot['revision'], 'items': sorted(rows, key=lambda t: t['order'])}
 
     @app.get('/api/tasks/{task_id}', summary='读取行动详情')
@@ -132,6 +132,28 @@ def create_app(db_path=None):
     @app.post('/api/tasks/{task_id}/reorder', summary='调整同组行动显示顺序')
     def task_reorder(task_id: str, body: Reorder):
         return write('reorder', task_id, body)
+
+    @app.get('/api/trash', summary='读取回收站问题与行动')
+    def trash():
+        snapshot = app.state.store.read()
+        return {'revision': snapshot['revision'], 'issues': [p for p in snapshot['data']['issues'] if p.get('deletedAt')],
+                'tasks': [t for t in snapshot['data']['tasks'] if t.get('deletedAt')]}
+
+    @app.post('/api/issues/{issue_id}/trash', summary='软删除问题及关联行动')
+    def issue_delete(issue_id: str, body: Write):
+        return write('delete_issue', issue_id, body)
+
+    @app.post('/api/issues/{issue_id}/restore', summary='恢复问题及同批行动')
+    def issue_restore(issue_id: str, body: Write):
+        return write('restore_issue', issue_id, body)
+
+    @app.post('/api/tasks/{task_id}/trash', summary='软删除行动并检查依赖')
+    def task_delete(task_id: str, body: Write):
+        return write('delete_task', task_id, body)
+
+    @app.post('/api/tasks/{task_id}/restore', summary='恢复独立删除的行动')
+    def task_restore(task_id: str, body: Write):
+        return write('restore_task', task_id, body)
 
     @app.get('/api/activity', summary='读取操作审计事件')
     def activity(after: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=500)):

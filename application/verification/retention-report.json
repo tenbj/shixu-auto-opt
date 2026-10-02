@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "backend": "mysql",
+  "guards": 9,
+  "checks": [
+    "移除前置保留同一行并标记删除时间",
+    "有效依赖过滤已删除关联",
+    "重新添加激活原行",
+    "数据库自身触发器拒绝DELETE",
+    "软删除问题保留行动和依赖，恢复有效原关系"
+  ],
+  "business_production_writes": 0
+}
