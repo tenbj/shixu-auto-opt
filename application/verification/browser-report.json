@@ -1,5 +1,5 @@
 {
-  "kind": "real-browser-api-sqlite-test",
+  "kind": "real-browser-api-mysql",
   "mock": false,
   "simulated_fault": "仅响应丢失场景使用网络拦截模拟",
   "checks": [
@@ -61,6 +61,66 @@
     },
     {
       "name": "响应丢失使用同号重试，不重复创建（此项模拟网络故障）",
+      "passed": true
+    },
+    {
+      "name": "360px 五视图和底部导航无横向溢出",
+      "passed": true
+    },
+    {
+      "name": "360px 创建问题、梳理和子表单创建行动并返回详情",
+      "passed": true
+    },
+    {
+      "name": "360px 行动卡片开始、完成写入真实API",
+      "passed": true
+    },
+    {
+      "name": "360px 日程按日期分组且问题筛选生效",
+      "passed": true
+    },
+    {
+      "name": "360px 编辑、服务端导出、刷新持久化且不用原型存储",
+      "passed": true
+    },
+    {
+      "name": "390px 五视图和底部导航无横向溢出",
+      "passed": true
+    },
+    {
+      "name": "390px 创建问题、梳理和子表单创建行动并返回详情",
+      "passed": true
+    },
+    {
+      "name": "390px 行动卡片开始、完成写入真实API",
+      "passed": true
+    },
+    {
+      "name": "390px 日程按日期分组且问题筛选生效",
+      "passed": true
+    },
+    {
+      "name": "390px 编辑、服务端导出、刷新持久化且不用原型存储",
+      "passed": true
+    },
+    {
+      "name": "430px 五视图和底部导航无横向溢出",
+      "passed": true
+    },
+    {
+      "name": "430px 创建问题、梳理和子表单创建行动并返回详情",
+      "passed": true
+    },
+    {
+      "name": "430px 行动卡片开始、完成写入真实API",
+      "passed": true
+    },
+    {
+      "name": "430px 日程按日期分组且问题筛选生效",
+      "passed": true
+    },
+    {
+      "name": "430px 编辑、服务端导出、刷新持久化且不用原型存储",
       "passed": true
     },
     {

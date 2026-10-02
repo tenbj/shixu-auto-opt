@@ -3,11 +3,12 @@
   "project_name": "拾序系统",
   "status": "ready",
   "prototype": {
-    "sha256": "0d8b1ebc6207bf9bf3942ab46ea655ba5ea79e024aa2a6b5a7691f8dc44fba71",
+    "sha256": "64e50a3d86cbb3ceda3969aedcc7957f6e9c213512978fa46726a4d6cf539aa9",
     "title": "拾序 · 个人工作台",
     "source_modified": false,
-    "path": "../prototype/reference/application-v2.0.0-source.html（应用固定来源快照；分发包不附带源原型）",
-    "reference_snapshot": "../prototype/reference/application-v2.0.0-source.html（开发仓库来源快照；不入应用分发包）"
+    "path": "../prototype/reference/application-v2.1.0-source.html（应用固定来源快照；分发包不附带源原型）",
+    "reference_snapshot": "../prototype/reference/application-v2.1.0-source.html（开发仓库来源快照；不入应用分发包）",
+    "version": "1.6.0"
   },
   "operations": [
     {

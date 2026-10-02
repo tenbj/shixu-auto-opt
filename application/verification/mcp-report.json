@@ -137,6 +137,6 @@
     "list_activity",
     "export_workspace"
   ],
-  "backend": "sqlite-test",
+  "backend": "mysql",
   "passed": true
 }
