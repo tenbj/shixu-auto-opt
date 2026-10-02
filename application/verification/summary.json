@@ -1,10 +1,10 @@
 {
   "passed": true,
   "business_api_tests": 25,
-  "browser_checks": 16,
+  "browser_checks": 31,
   "mcp_tools": 17,
-  "integration_backend": "sqlite-test",
-  "mysql_checks": 0,
+  "integration_backend": "mysql",
+  "mysql_checks": 5,
   "persistence": "passed",
   "ai_autonomous": "not_run",
   "environment": {

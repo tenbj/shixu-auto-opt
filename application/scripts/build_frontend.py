@@ -3,7 +3,7 @@ from pathlib import Path
 import re
 
 ROOT = Path(__file__).resolve().parents[1]
-source = ROOT.parent / 'prototype' / 'prototype.html'
+source = ROOT.parent / 'prototype' / 'reference' / 'application-v2.1.0-source.html'
 if not source.exists():
     raise SystemExit('本脚本仅用于原型仓库开发；分发包直接使用 static/index.html。')
 html = source.read_text(encoding='utf-8-sig')
@@ -32,7 +32,7 @@ section('function changeTask(', 'function cancelTaskForm(', '''async function ch
  try{await mutate(`/api/tasks/${t.id}/transitions`,'POST',{status});changed('行动状态已保存');if(document.querySelector('#modal').open&&t.issueId)detail(t.issueId)}catch(e){toast(e.message)}
 }''')
 section('function submitRecord(', "document.addEventListener('click'", '')
-section("document.addEventListener('submit'", '</script>', '''document.addEventListener('submit',async e=>{
+section("document.addEventListener('submit'", '// MOBILE-DESIGN-START', '''document.addEventListener('submit',async e=>{
  if(e.target.dataset.eventId!=='EVT-SUBMIT')return;e.preventDefault();
  const f=e.target,v=Object.fromEntries(new FormData(f)),id=f.dataset.id;
  let route='',method='POST',values={},returnId=null;
@@ -52,33 +52,35 @@ section("document.addEventListener('submit'", '</script>', '''document.addEventL
  finally{if(button)button.disabled=false}
 });
 
+function syncStatus(message){document.querySelector('#sync-state').textContent=message;const mobile=document.querySelector('#mobile-sync-state');if(mobile)mobile.textContent=message}
 function showConnection(message){const el=document.querySelector('#storage-warning');el.replaceChildren(document.createTextNode(message+' '));el.classList.remove('hidden');const b=document.createElement('button');b.textContent='重新连接';b.onclick=()=>loadWorkspace();el.append(b)}
 async function request(route,options={}){
  const response=await fetch(route,{...options,headers:{'Content-Type':'application/json',...options.headers},signal:AbortSignal.timeout(15000)});
  const result=await response.json();if(!response.ok){const e=new Error(typeof result.detail==='string'?result.detail:'输入不符合要求，请检查必填内容和长度');e.status=response.status;throw e}return result;
 }
 async function loadWorkspace(){
- try{const result=await request('/api/workspace');db=result.data;revision=result.revision;loaded=true;document.querySelector('#storage-warning').classList.add('hidden');render();document.querySelector('#sync-state').textContent='已同步 · '+revision}
- catch(e){loaded=false;showConnection('连接服务失败，尚未加载记录。');document.querySelector('#app').textContent='服务暂时不可用，请恢复连接后重试。'}
+ try{const result=await request('/api/workspace');db=result.data;revision=result.revision;loaded=true;document.querySelector('#storage-warning').classList.add('hidden');render();syncStatus('已同步 · '+revision)}
+ catch(e){loaded=false;showConnection('连接服务失败，尚未加载记录。');syncStatus('连接失败');document.querySelector('#app').textContent='服务暂时不可用，请恢复连接后重试。'}
 }
 async function mutate(route,method,values){
  if(!loaded)throw Error('请先连接服务');if(busy)throw Error('正在保存，请稍候');
  const signature=JSON.stringify([route,method,values]);
  if(pendingWrite&&pendingWrite.signature!==signature)throw Error('上一笔请求结果未确认，请先重试原操作，避免重复或丢失记录。');
  if(!pendingWrite)pendingWrite={signature,body:{...values,request_id:uid(),expected_version:revision,actor:'我'}};
- busy=true;document.querySelector('#sync-state').textContent='保存中…';
+ busy=true;syncStatus('保存中…');
  try{
    const result=await request(route,{method,body:JSON.stringify(pendingWrite.body)});
    pendingWrite=null;db=result.data;revision=result.revision;render();document.querySelector('#storage-warning').classList.add('hidden');
-   document.querySelector('#sync-state').textContent='已同步 · '+revision;return result;
+   syncStatus('已同步 · '+revision);return result;
  }catch(e){
    if(e.status&&e.status<500)pendingWrite=null;
    if(e.status===409){await loadWorkspace();e.message+='；已刷新工作台，请检查当前内容再提交。'}
    else if(!e.status||e.status>=500){showConnection('本次保存结果尚未确认，请恢复连接后重试相同操作。');e.message='保存结果未确认；请重试相同操作（保留幂等编号）。'}
-   document.querySelector('#sync-state').textContent='保存未完成';throw e;
+   syncStatus('保存未完成');throw e;
  }finally{busy=false}
 }
 document.querySelector('#sync-button').onclick=()=>loadWorkspace();
+document.addEventListener('click',e=>{if(e.target.closest('[data-action="system-refresh"]')){closeDialog();loadWorkspace()}});
 loadWorkspace();
 ''')
 html = html.replace("function workflowForm(", "async function workflowForm(")
@@ -90,9 +92,14 @@ html = html.replace('if(reorderTask(', 'if(await reorderTask(').replace('target&
 html = html.replace('个人工作台 · 本地体验版<br>数据仅保存在当前浏览器', '个人工作台 · 系统版<br>数据由服务端持久保存')
 html = html.replace('交互原型 · 初始内容为演示数据，可自由编辑。', '拾序 · 记录已接入服务端，页面与 AI 共用同一工作台。')
 html = html.replace('<div class="topbar-right">', '<div class="topbar-right"><span id="sync-state" role="status" style="font-size:11px">连接中…</span><button id="sync-button" class="subtle">刷新数据</button>')
-html = html.replace('const KEY=\'shixu-personal-v1\'', 'const KEY=\'shixu-system-v2\'')
+html = html.replace("const KEY='shixu-mobile-prototype-v1'", "const KEY='shixu-system-v2'")
+html = html.replace('if(numberingMigrated&&!storageBlocked)save();', '')
+html = html.replace('导出原型记录', '导出工作台记录')
+html = html.replace("${btn('查看统计分析','mobile-go-analysis')}", "${btn('刷新服务端数据','system-refresh')}${btn('查看统计分析','mobile-go-analysis')}")
+html = html.replace('当前为原型体验，记录只保存在此浏览器。', '记录由服务端保存，与桌面和 AI 共用工作台。')
+html = html.replace('拾序</div>${mobileAttrs', '拾序<span id="mobile-sync-state" role="status" class="mobile-sync-state">连接中…</span></div>${mobileAttrs')
 html = html.replace("new Date().toLocaleString('zh-CN')", "new Date().toLocaleString('zh-CN',{timeZone:'Asia/Shanghai'})")
 html = html.replace('const date=d=>{const x=new Date();x.setDate(x.getDate()+d);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,\'0\')}-${String(x.getDate()).padStart(2,\'0\')}`}', "const date=d=>{const x=new Date(Date.now()+d*86400000);return new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}).format(x)}")
-html = html.replace('</style>', '@media(max-width:700px){.topbar-right{flex-wrap:wrap;gap:6px}.topbar{align-items:flex-start}.topbar-right #sync-state{width:100%;text-align:right}}\n</style>')
+html = html.replace('</style>', '@media(max-width:700px){.mobile-sync-state{font-size:11px;font-weight:400;letter-spacing:0;color:var(--muted)}.mobile-brand{gap:8px}.banner{margin-bottom:16px}}\n</style>')
 (ROOT / 'static' / 'index.html').write_text(html, encoding='utf-8')
 print('Generated static/index.html; prototype unchanged')

@@ -3,7 +3,7 @@
   "info": {
     "title": "拾序系统 API",
     "description": "单人本地工作台；写入使用全局版本与持久化幂等请求。",
-    "version": "2.0.1"
+    "version": "2.1.0"
   },
   "paths": {
     "/api/health": {

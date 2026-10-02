@@ -114,7 +114,7 @@ def main():
     (ROOT / 'verification/release-scan.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
     directory = ROOT / 'dist'
     directory.mkdir(exist_ok=True)
-    target = directory / 'shixu-system-2.0.1.zip'
+    target = directory / 'shixu-system-2.1.0.zip'
     archive(target, files())
     digest = hashlib.sha256(target.read_bytes()).hexdigest()
     (directory / 'SHA256SUMS.txt').write_text(digest + '  ' + target.name + '\n', encoding='utf-8')
