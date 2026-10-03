@@ -1,0 +1,78 @@
+{
+  "checked_at": "2026-10-03T07:21:38.646162+00:00",
+  "status": "passed",
+  "passed": true,
+  "prototype_sha256": "922e5068eceba00909ad67f4aa7856baeb9ab6d710ca05f8ec344af72e811001",
+  "config_sha256": "a3f8befe7d1c6b51f76fbe3bcd3c985a6aeb41cafa138cb21ebfbc5bed236e97",
+  "results": [
+    {
+      "width": 360,
+      "height": 844,
+      "passed": true,
+      "scenarios": [
+        {
+          "id": "generic-profile",
+          "passed": true
+        },
+        {
+          "id": "create-ai-action",
+          "passed": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "passed": true,
+      "scenarios": [
+        {
+          "id": "generic-profile",
+          "passed": true
+        },
+        {
+          "id": "create-ai-action",
+          "passed": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "width": 430,
+      "height": 844,
+      "passed": true,
+      "scenarios": [
+        {
+          "id": "generic-profile",
+          "passed": true
+        },
+        {
+          "id": "create-ai-action",
+          "passed": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "height": 1000,
+      "passed": true,
+      "scenarios": [
+        {
+          "id": "generic-profile",
+          "passed": true
+        },
+        {
+          "id": "create-ai-action",
+          "passed": true
+        }
+      ],
+      "errors": []
+    }
+  ],
+  "errors": [],
+  "engine_sha256": "6617c1acda7652009e45f8794995a4c33424d65d4769ddf3404237e66561225e",
+  "scope": "本地自包含HTML、Chromium视口/触摸模拟；不代表iOS、软键盘或真机验收",
+  "browser_version": "131.0.6778.33",
+  "host_timeout_ms": 30000
+}

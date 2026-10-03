@@ -107,12 +107,28 @@
       "id": "mobile-regression",
       "path": "evaluation/mobile_check.py",
       "layer": "evaluation"
+    },
+    {
+      "id": "responsive-evidence",
+      "path": "evaluation/responsive-report.json",
+      "layer": "evaluation"
+    },
+    {
+      "id": "creator-check",
+      "path": "evaluation/creator_check.py",
+      "layer": "evaluation"
+    },
+    {
+      "id": "creator-report",
+      "path": "evaluation/creator-report.json",
+      "layer": "evaluation"
     }
   ],
   "input": {
     "intent": "设计个人问题痛点与待办工作台，让记录的问题转为行动并得到验证闭环",
     "target_users": [
-      "个人工作者"
+      "个人或家庭成员",
+      "AI录入工具"
     ],
     "product_context": "个人工作台；移动端行动优先，保留桌面布局和七状态业务规则。",
     "target_platform": "web",
@@ -125,7 +141,9 @@
       "浏览器本地保存并提供JSON导出",
       "问题可关联多个待办，待办可以独立创建",
       "手机独立呈现，桌面沿用既有布局",
-      "原型使用独立localStorage键，不访问线上API"
+      "原型使用独立localStorage键，不访问线上API",
+      "身份选择仅用于原型演示；正式服务须由认证和AI连接绑定身份",
+      "通用可配置身份；默认Codex/GPT-6/OpenAI演示，只留一个未知问题；模型依据会话声明"
     ],
     "requirements": [
       {
@@ -284,6 +302,17 @@
           "主要触控区域至少44px，输入字体16px",
           "桌面保留原有分栏表格与月历，业务流转约束不变"
         ]
+      },
+      {
+        "id": "REQ-017",
+        "statement": "问题与行动创建身份及AI来源",
+        "acceptance_criteria": [
+          "任意名称的人或AI身份，可新增/编辑/切换，默认自动填入",
+          "工具与模型名称/ID、提供方独立记录",
+          "列表及详情展示创建快照，双筛选",
+          "编辑和身份设置不改历史信息；JSON导出包含配置",
+          "仅一条未知演示，其余按Codex/GPT-6/OpenAI创建"
+        ]
       }
     ]
   },
@@ -294,5 +323,8 @@
     "本地数据，无账号或跨设备同步",
     "API与SQL仅为工程合同",
     "JSON可导出，未提供导入UI"
+  ],
+  "capabilities": [
+    "responsive-web-v1"
   ]
 }
