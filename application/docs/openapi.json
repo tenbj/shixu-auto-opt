@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "拾序系统 API",
-    "description": "单人本地工作台；写入使用全局版本与持久化幂等请求。",
-    "version": "2.2.1"
+    "description": "共享记录工作台；写入使用全局版本与持久化幂等请求。",
+    "version": "2.3.0"
   },
   "paths": {
     "/api/health": {
@@ -32,6 +32,103 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/identities": {
+      "get": {
+        "summary": "查询通用人类与AI记录身份",
+        "operationId": "identities_api_identities_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "创建记录身份与默认工具模型",
+        "operationId": "identity_create_api_identities_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdentityCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/identities/{identity_id}": {
+      "patch": {
+        "summary": "修改身份名称与新建默认值，保留历史快照",
+        "operationId": "identity_update_api_identities__identity_id__patch",
+        "parameters": [
+          {
+            "name": "identity_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Identity Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdentityUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -81,6 +178,36 @@
               "type": "string",
               "default": "",
               "title": "Tag"
+            }
+          },
+          {
+            "name": "creator",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Creator"
+            }
+          },
+          {
+            "name": "created_via",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Created Via"
+            }
+          },
+          {
+            "name": "model",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Model"
             }
           }
         ],
@@ -345,6 +472,36 @@
               "type": "string",
               "default": "",
               "title": "Status"
+            }
+          },
+          {
+            "name": "creator",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Creator"
+            }
+          },
+          {
+            "name": "created_via",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Created Via"
+            }
+          },
+          {
+            "name": "model",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Model"
             }
           }
         ],
@@ -901,6 +1058,47 @@
   },
   "components": {
     "schemas": {
+      "CreationInput": {
+        "properties": {
+          "identityId": {
+            "type": "string",
+            "maxLength": 36,
+            "minLength": 1,
+            "title": "Identityid",
+            "description": "实际提交的人或AI身份ID；先查询或创建身份"
+          },
+          "initiatedByPersonId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 36
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Initiatedbypersonid",
+            "description": "仅AI代录时指定人类发起者"
+          },
+          "modelInfo": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ModelInfo"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "省略则用AI身份默认模型；传空对象明确表示模型未提供"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "identityId"
+        ],
+        "title": "CreationInput"
+      },
       "Dependencies": {
         "properties": {
           "request_id": {
@@ -922,7 +1120,7 @@
             "minLength": 1,
             "title": "Actor",
             "description": "审计标签，不代表认证身份",
-            "default": "我"
+            "default": "未指定"
           },
           "dependsOn": {
             "items": {
@@ -963,7 +1161,7 @@
             "minLength": 1,
             "title": "Actor",
             "description": "审计标签，不代表认证身份",
-            "default": "我"
+            "default": "未指定"
           },
           "content": {
             "type": "string",
@@ -994,6 +1192,165 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "IdentityCreate": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 8,
+            "title": "Request Id",
+            "description": "同一次请求重试使用同号，内容改变须换号"
+          },
+          "expected_version": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expected Version",
+            "description": "GET /api/workspace 返回的全局 revision"
+          },
+          "actor": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Actor",
+            "description": "审计标签，不代表认证身份",
+            "default": "未指定"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "person",
+              "agent"
+            ],
+            "title": "Kind"
+          },
+          "via": {
+            "type": "string",
+            "enum": [
+              "manual",
+              "claude_code",
+              "workbuddy",
+              "codex",
+              "deepseek_harness"
+            ],
+            "title": "Via",
+            "default": "manual"
+          },
+          "modelName": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Modelname",
+            "default": ""
+          },
+          "modelProvider": {
+            "type": "string",
+            "maxLength": 80,
+            "title": "Modelprovider",
+            "default": ""
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request_id",
+          "expected_version",
+          "name",
+          "kind"
+        ],
+        "title": "IdentityCreate"
+      },
+      "IdentityUpdate": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 8,
+            "title": "Request Id",
+            "description": "同一次请求重试使用同号，内容改变须换号"
+          },
+          "expected_version": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expected Version",
+            "description": "GET /api/workspace 返回的全局 revision"
+          },
+          "actor": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Actor",
+            "description": "审计标签，不代表认证身份",
+            "default": "未指定"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 60,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "via": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "manual",
+                  "claude_code",
+                  "workbuddy",
+                  "codex",
+                  "deepseek_harness"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Via"
+          },
+          "modelName": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 160
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modelname"
+          },
+          "modelProvider": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modelprovider"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request_id",
+          "expected_version"
+        ],
+        "title": "IdentityUpdate"
+      },
       "IssueCreate": {
         "properties": {
           "request_id": {
@@ -1015,7 +1372,17 @@
             "minLength": 1,
             "title": "Actor",
             "description": "审计标签，不代表认证身份",
-            "default": "我"
+            "default": "未指定"
+          },
+          "creation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CreationInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "title": {
             "type": "string",
@@ -1076,7 +1443,7 @@
             "minLength": 1,
             "title": "Actor",
             "description": "审计标签，不代表认证身份",
-            "default": "我"
+            "default": "未指定"
           },
           "action": {
             "type": "string",
@@ -1189,7 +1556,7 @@
             "minLength": 1,
             "title": "Actor",
             "description": "审计标签，不代表认证身份",
-            "default": "我"
+            "default": "未指定"
           },
           "title": {
             "anyOf": [
@@ -1253,6 +1620,25 @@
         ],
         "title": "IssueUpdate"
       },
+      "ModelInfo": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Name",
+            "default": ""
+          },
+          "provider": {
+            "type": "string",
+            "maxLength": 80,
+            "title": "Provider",
+            "default": ""
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "ModelInfo"
+      },
       "Reorder": {
         "properties": {
           "request_id": {
@@ -1274,7 +1660,7 @@
             "minLength": 1,
             "title": "Actor",
             "description": "审计标签，不代表认证身份",
-            "default": "我"
+            "default": "未指定"
           },
           "target_id": {
             "type": "string",
@@ -1318,7 +1704,17 @@
             "minLength": 1,
             "title": "Actor",
             "description": "审计标签，不代表认证身份",
-            "default": "我"
+            "default": "未指定"
+          },
+          "creation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CreationInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "title": {
             "type": "string",
@@ -1380,7 +1776,7 @@
             "minLength": 1,
             "title": "Actor",
             "description": "审计标签，不代表认证身份",
-            "default": "我"
+            "default": "未指定"
           },
           "status": {
             "type": "string",
@@ -1429,7 +1825,7 @@
             "minLength": 1,
             "title": "Actor",
             "description": "审计标签，不代表认证身份",
-            "default": "我"
+            "default": "未指定"
           },
           "title": {
             "anyOf": [
@@ -1549,7 +1945,7 @@
             "minLength": 1,
             "title": "Actor",
             "description": "审计标签，不代表认证身份",
-            "default": "我"
+            "default": "未指定"
           }
         },
         "additionalProperties": false,

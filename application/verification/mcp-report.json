@@ -43,6 +43,46 @@
       "expected_error": false
     },
     {
+      "tool": "create_identity",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "create_identity",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "list_identities",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "create_issue",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "update_identity",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "get_issue",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "create_task",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "get_task",
+      "passed": true,
+      "expected_error": false
+    },
+    {
       "tool": "update_issue",
       "passed": true,
       "expected_error": false
@@ -150,6 +190,9 @@
   ],
   "tools": [
     "get_system_status",
+    "list_identities",
+    "create_identity",
+    "update_identity",
     "get_workspace",
     "list_issues",
     "get_issue",

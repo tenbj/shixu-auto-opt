@@ -22,6 +22,7 @@
 
 | 表 | 实体/用途 |
 |---|---|
+| identity_profiles | 通用人/AI身份、工具、模型默认值；类型固定 |
 | issues | 问题背景、分类、优先级、状态、解决标准及验证信息 |
 | tasks | 行动、关联问题、日期、状态、编号和排序 |
 | task_dependencies | 行动间的依赖边 |
@@ -49,3 +50,11 @@ MySQL 是正式数据源。每次请求从数据库读取实体，执行规则�
 ## 2.2.1 禁止物理删除
 
 依赖表新增deleted_at及索引。移除关联保留原行，当前依赖只读取deleted_at IS NULL；重新添加用原主键激活，不删除再插入。migrate_trash.py同时安装9个BEFORE DELETE触发器，任何业务表DELETE都会由数据库拒绝；初始化账户须有TRIGGER权限。应用数据库游标拒绝DELETE/TRUNCATE/DROP/REPLACE语句。没有永久清空入口。数据库管理员的人工DDL维护属于应用外操作，不由页面/API提供。SQLite隔离适配器也有禁止DELETE触发器。
+
+## 2.3.0 创建快照增量迁移
+
+停止API后执行 `python scripts/migrate_creators.py --report runtime/creator-migration.json`，完成后重启。旧于2.2.1的库先执行migrate_trash.py。迁移校验APP_ID，备份完整表结构、旧行和触发器至runtime/backups，追加identity_profiles和issues/tasks的created_by_actor_id、initiated_by_person_id、creator_name、created_via、created_at、model_info，并对所有旧列逐表比对摘要。不会改写旧记录的历史值；来源缺失为unknown，时间为NULL。
+
+identity_profiles增加第10个BEFORE DELETE防护。创建身份及业务对象的引用由领域层在同一锁定事务校验；这些ID是历史逻辑引用（不定义物理FK），ER图明确说明。显示名称、工具、模型JSON独立快照，配置编辑不回写。原有6个物理FK及软删除机制保持有效。
+
+DDL自动提交，中断后可重复运行补齐；脚本没有物理删除或逆向删列功能。回退代码可以保留新列、新表；若需要数据恢复，将备份恢复到独立新库核对并切换DB_NAME，不能用旧备份覆盖新增业务。生产备份只留本机，不进入项目分发。schema与迁移一致性由真实数据库元数据和双图报告核对。

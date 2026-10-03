@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from pydantic import BaseModel, ConfigDict, Field, StrictBool
-from .domain import DomainError, get, live_issues, live_tasks
+from .domain import DomainError, get, live_issues, live_tasks, matches_creation
 from .store import Store
 from .config import load_environment
 from .mysql_store import MySQLStore
@@ -17,11 +17,11 @@ from .mysql_store import MySQLStore
 ROOT = Path(__file__).resolve().parents[1]
 
 
-from .models import (Write, IssueCreate, IssueUpdate, IssueTransition, Followup, TaskCreate, TaskUpdate, TaskTransition, Dependencies, Reorder)
+from .models import (Write, IssueCreate, IssueUpdate, IssueTransition, Followup, TaskCreate, TaskUpdate, TaskTransition, Dependencies, Reorder, IdentityCreate, IdentityUpdate)
 
 
 def create_app(db_path=None):
-    app = FastAPI(title='拾序系统 API', version='2.2.1', description='单人本地工作台；写入使用全局版本与持久化幂等请求。')
+    app = FastAPI(title='拾序系统 API', version='2.3.0', description='共享记录工作台；写入使用全局版本与持久化幂等请求。')
     load_environment()
     if db_path is not None or os.getenv('SHIXU_BACKEND') == 'sqlite':
         app.state.store = Store(db_path or os.getenv('SHIXU_DB', str(ROOT / 'runtime' / 'test.sqlite3')))
@@ -57,14 +57,14 @@ def create_app(db_path=None):
         return JSONResponse({'detail': '数据库暂时不可用；未确认保存，请使用同一 request_id 重试'}, status_code=503)
 
     def write(operation, identifier, body):
-        values = body.model_dump(exclude_unset=isinstance(body, (IssueUpdate, TaskUpdate)))
+        values = body.model_dump(exclude_unset=isinstance(body, (IssueUpdate, TaskUpdate, IdentityUpdate)))
         values.setdefault('actor', body.actor)
         return app.state.store.mutate(operation, identifier, values)
 
     @app.get('/api/health', summary='检查服务与数据库状态')
     def health():
         state = app.state.store.read()
-        return {'status': 'ok', 'version': '2.2.1', 'revision': state['revision'], 'mode': 'local-single-user',
+        return {'status': 'ok', 'version': '2.3.0', 'revision': state['revision'], 'mode': 'local-single-user',
                 'backend': getattr(app.state.store, 'backend', 'sqlite-test'),
                 'database': getattr(app.state.store, 'database', None),
                 'pid': os.getpid(), 'instance': os.getenv('SHIXU_INSTANCE', '')}
@@ -73,11 +73,24 @@ def create_app(db_path=None):
     def workspace():
         return app.state.store.read()
 
+    @app.get('/api/identities', summary='查询通用人类与AI记录身份')
+    def identities():
+        result = app.state.store.read()
+        return {'revision': result['revision'], 'items': result['data']['identityProfiles']}
+
+    @app.post('/api/identities', summary='创建记录身份与默认工具模型')
+    def identity_create(body: IdentityCreate):
+        return write('create_identity', None, body)
+
+    @app.patch('/api/identities/{identity_id}', summary='修改身份名称与新建默认值，保留历史快照')
+    def identity_update(identity_id: str, body: IdentityUpdate):
+        return write('update_identity', identity_id, body)
+
     @app.get('/api/issues', summary='查询问题列表')
-    def issues(q: str = '', status: str = '', priority: str = '', tag: str = ''):
+    def issues(q: str = '', status: str = '', priority: str = '', tag: str = '', creator: str = '', created_via: str = '', model: str = ''):
         snapshot = app.state.store.read()
         rows = [p for p in live_issues(snapshot['data']) if (not q or q.casefold() in (p['title'] + p['description']).casefold())
-                and (not status or p['status'] == status) and (not priority or p['priority'] == priority) and (not tag or p['tag'] == tag)]
+                and (not status or p['status'] == status) and (not priority or p['priority'] == priority) and (not tag or p['tag'] == tag) and matches_creation(p, creator, created_via, model)]
         return {'revision': snapshot['revision'], 'items': rows}
 
     @app.get('/api/issues/{issue_id}', summary='读取问题详情及关联行动')
@@ -103,9 +116,9 @@ def create_app(db_path=None):
         return write('followup', issue_id, body)
 
     @app.get('/api/tasks', summary='查询行动列表')
-    def tasks(issue_id: str | None = None, status: str = ''):
+    def tasks(issue_id: str | None = None, status: str = '', creator: str = '', created_via: str = '', model: str = ''):
         snapshot = app.state.store.read()
-        rows = [t for t in live_tasks(snapshot['data']) if (issue_id is None or t['issueId'] == (issue_id or None)) and (not status or t['status'] == status)]
+        rows = [t for t in live_tasks(snapshot['data']) if (issue_id is None or t['issueId'] == (issue_id or None)) and (not status or t['status'] == status) and matches_creation(t, creator, created_via, model)]
         return {'revision': snapshot['revision'], 'items': sorted(rows, key=lambda t: t['order'])}
 
     @app.get('/api/tasks/{task_id}', summary='读取行动详情')

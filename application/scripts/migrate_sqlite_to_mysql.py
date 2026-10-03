@@ -8,7 +8,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from app.mysql_store import MySQLStore
-from app.domain import empty_state, require
+from app.domain import empty_state, require, normalize_state
 
 
 def main():
@@ -18,7 +18,7 @@ def main():
     source = sqlite3.connect(args.source.resolve().as_uri() + '?mode=ro', uri=True)
     try:
         revision, payload = source.execute('SELECT revision,payload FROM workspace WHERE id=1').fetchone()
-        state = json.loads(payload)
+        state = normalize_state(json.loads(payload))
         activity = source.execute('SELECT revision,at,actor,operation,resource_id,payload FROM activity').fetchall()
         requests = source.execute('SELECT request_id,fingerprint,response FROM requests').fetchall()
     finally:

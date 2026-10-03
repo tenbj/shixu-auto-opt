@@ -23,11 +23,16 @@ def seed(url):
             revision = result['revision']
             return result['resource']
         source = json.loads((ROOT / 'data/demo.json').read_text(encoding='utf-8'))
+        agent = write('/api/identities', dict(name='Codex', kind='agent', via='codex',
+                      modelName='GPT-6.1 Sol', modelProvider='OpenAI'))
         for index, item in enumerate(source['issues']):
-            issue = write('/api/issues', {key: item[key] for key in ['title', 'description', 'priority', 'tag']})
+            values = {key: item[key] for key in ['title', 'description', 'priority', 'tag']}
+            # Synthetic provenance example; one issue demonstrates legacy unknown origin.
+            values['creation'] = dict(identityId=agent['id']) if index < len(source['issues'])-1 else None
+            issue = write('/api/issues', values)
             if item['tasks']:
                 write(f'/api/issues/{issue["id"]}/transitions', dict(action='triage', nextStep=item['nextStep'], successCriteria=item['successCriteria']))
-                tasks = [write('/api/tasks', dict(title=title, issueId=issue['id'], due=today())) for title in item['tasks']]
+                tasks = [write('/api/tasks', dict(title=title, issueId=issue['id'], due=today(), creation=dict(identityId=agent['id']))) for title in item['tasks']]
                 if index == 0:
                     write(f'/api/tasks/{tasks[1]["id"]}/dependencies', dict(dependsOn=[tasks[0]['id']]))
                     write(f'/api/tasks/{tasks[0]["id"]}/transitions', dict(status='进行中'))

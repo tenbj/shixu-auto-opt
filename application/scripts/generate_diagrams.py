@@ -8,8 +8,9 @@ OUT = ROOT / 'static' / 'diagrams'
 OUT.mkdir(parents=True, exist_ok=True)
 
 INFO = {
-    'issues': ('IS', '问题', 750, 70, ['id','number','title','status','deleted_at','deletion_batch'], '七状态问题工作流；软删除保留全部历史与编号。同批恢复；duplicate_of / deleted_with_issue 是逻辑引用，非数据库外键。'),
-    'tasks': ('TA', '行动', 750, 710, ['id','issue_id','title','status','deleted_at','deletion_batch','deleted_with_issue'], '软删除保留行动与依赖；随问题删除须同批恢复。deleted_with_issue 为逻辑引用，无新增外键。'),
+    'identity_profiles': ('IP', '记录身份', 750, 1470, ['id','name','kind','via','model_name'], '通用人/AI身份。问题和行动的created_by_actor_id、initiated_by_person_id是经领域校验的历史逻辑引用，不是物理外键；创建名称、来源、模型保存独立快照，改名或改默认值不追溯更新。'),
+    'issues': ('IS', '问题', 750, 70, ['id','number','title','status','created_via','creator_name','model_info','deleted_at'], '七状态问题工作流；软删除保留全部历史与编号。同批恢复；duplicate_of / deleted_with_issue 是逻辑引用，非数据库外键。'),
+    'tasks': ('TA', '行动', 750, 710, ['id','issue_id','title','status','created_via','creator_name','model_info','deleted_at'], '软删除保留行动与依赖；随问题删除须同批恢复。deleted_with_issue 为逻辑引用，无新增外键。'),
     'issue_followups': ('FU', '跟进记录', 50, 70, ['id','issue_id','content','event_at'], '按问题追加跟进，actor 只是审计标签。'),
     'issue_history': ('HI', '状态历史', 50, 710, ['id','issue_id','position_number','from_status','to_status'], '问题内的状态变迁按 position_number 唯一排序。'),
     'issue_logs': ('LG', '问题日志', 1450, 70, ['issue_id','position_number','content'], '问题 ID 与位置序号组成联合主键。'),
@@ -19,6 +20,7 @@ INFO = {
     'idempotency_requests': ('IR', '幂等请求', 1450, 1120, ['request_id','fingerprint','response'], '持久化请求指纹和响应；相同请求重试返回原结果。无物理外键。'),
 }
 DESCRIPTIONS = {
+ 'name':'自定义身份名称','kind':'person人 / agent AI','via':'手动或AI工具','model_name':'AI身份的默认模型名称/ID','model_provider':'AI身份的默认模型提供方','updated_at':'身份最后编辑的服务器UTC时间','created_by_actor_id':'实际提交身份的历史逻辑引用；非FK','initiated_by_person_id':'AI代录的人类发起者历史逻辑引用；非FK','creator_name':'创建人名称快照；不随身份改名改变','created_via':'创建来源快照；历史缺失为unknown','created_at':'服务器UTC创建时间；迁移历史未知为NULL','model_info':'JSON {name,provider}；手动或历史未知为NULL；AI空值表示未提供',
  'deleted_at':'软删除时间；NULL 为有效记录', 'deletion_batch':'删除批次 UUID；问题与当次关联行动一致', 'deleted_with_issue':'随删除问题的逻辑标识；非 FK；恢复时清空',
  'id':'实体标识；元数据表固定为 1', 'number':'固定问题编号', 'title':'标题', 'description':'问题背景',
  'priority':'优先级','tag':'分类标签','status':'当前状态，由领域规则约束', 'resolution':'验证结论',

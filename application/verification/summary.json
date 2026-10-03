@@ -1,8 +1,8 @@
 {
   "passed": true,
-  "business_api_tests": 46,
+  "business_api_tests": 51,
   "browser_checks": 31,
-  "mcp_tools": 22,
+  "mcp_tools": 25,
   "integration_backend": "mysql",
   "mysql_checks": 5,
   "persistence": "passed",

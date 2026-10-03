@@ -7,6 +7,17 @@ CREATE TABLE workspace_meta (
   next_task_numbers JSON NOT NULL
 ) ENGINE=InnoDB;
 
+CREATE TABLE identity_profiles (
+  id VARCHAR(36) PRIMARY KEY,
+  name VARCHAR(60) NOT NULL,
+  kind VARCHAR(8) NOT NULL,
+  via VARCHAR(32) NOT NULL,
+  model_name VARCHAR(160) NOT NULL,
+  model_provider VARCHAR(80) NOT NULL,
+  created_at VARCHAR(40) NOT NULL,
+  updated_at VARCHAR(40) NOT NULL
+) ENGINE=InnoDB;
+
 CREATE TABLE issues (
   id VARCHAR(36) PRIMARY KEY,
   number BIGINT NOT NULL UNIQUE,
@@ -26,6 +37,12 @@ CREATE TABLE issues (
   close_reason TEXT NOT NULL,
   close_type VARCHAR(40) NOT NULL,
   duplicate_of VARCHAR(36) NOT NULL,
+  created_by_actor_id VARCHAR(36) NULL,
+  initiated_by_person_id VARCHAR(36) NULL,
+  creator_name VARCHAR(60) NULL,
+  created_via VARCHAR(32) NOT NULL DEFAULT 'unknown',
+  created_at VARCHAR(40) NULL,
+  model_info JSON NULL,
   deleted_at VARCHAR(40) NULL,
   deletion_batch VARCHAR(36) NULL,
   deleted_with_issue VARCHAR(36) NULL,
@@ -46,6 +63,12 @@ CREATE TABLE tasks (
   order_index BIGINT NOT NULL,
   number_group VARCHAR(40) NOT NULL,
   sequence_number BIGINT NOT NULL,
+  created_by_actor_id VARCHAR(36) NULL,
+  initiated_by_person_id VARCHAR(36) NULL,
+  creator_name VARCHAR(60) NULL,
+  created_via VARCHAR(32) NOT NULL DEFAULT 'unknown',
+  created_at VARCHAR(40) NULL,
+  model_info JSON NULL,
   deleted_at VARCHAR(40) NULL,
   deletion_batch VARCHAR(36) NULL,
   deleted_with_issue VARCHAR(36) NULL,
@@ -122,3 +145,5 @@ CREATE TRIGGER shixu_no_delete_issue_history BEFORE DELETE ON issue_history FOR 
 CREATE TRIGGER shixu_no_delete_issue_logs BEFORE DELETE ON issue_logs FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Physical deletion is disabled';
 CREATE TRIGGER shixu_no_delete_activity BEFORE DELETE ON activity FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Physical deletion is disabled';
 CREATE TRIGGER shixu_no_delete_idempotency_requests BEFORE DELETE ON idempotency_requests FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Physical deletion is disabled';
+
+CREATE TRIGGER shixu_no_delete_identity_profiles BEFORE DELETE ON identity_profiles FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Physical deletion is disabled';

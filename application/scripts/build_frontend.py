@@ -105,5 +105,7 @@ html = html.replace('拾序</div>${mobileAttrs', '拾序<span id="mobile-sync-st
 html = html.replace("new Date().toLocaleString('zh-CN')", "new Date().toLocaleString('zh-CN',{timeZone:'Asia/Shanghai'})")
 html = html.replace('const date=d=>{const x=new Date();x.setDate(x.getDate()+d);return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,\'0\')}-${String(x.getDate()).padStart(2,\'0\')}`}', "const date=d=>{const x=new Date(Date.now()+d*86400000);return new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}).format(x)}")
 html = html.replace('</style>', '@media(max-width:700px){.mobile-sync-state{font-size:11px;font-weight:400;letter-spacing:0;color:var(--muted)}.mobile-brand{gap:8px}.banner{margin-bottom:16px}}\n</style>')
+from creator_frontend import integrate
+html = integrate(html, ROOT)
 (ROOT / 'static' / 'index.html').write_text(html, encoding='utf-8')
 print('Generated static/index.html; prototype unchanged')
