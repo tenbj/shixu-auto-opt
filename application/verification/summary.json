@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "business_api_tests": 51,
+  "business_api_tests": 57,
   "browser_checks": 31,
   "mcp_tools": 25,
   "integration_backend": "mysql",

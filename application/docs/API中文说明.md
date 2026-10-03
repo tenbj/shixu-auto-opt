@@ -1,6 +1,6 @@
 # 拾序 API 中文说明
 
-版本 2.3.0 · 基地址 http://127.0.0.1:8765 · UTF-8 JSON。在线交互文档 `/docs`，机器Schema `/openapi.json`。
+版本 2.4.0 · 基地址 http://127.0.0.1:8765 · UTF-8 JSON。在线交互文档 `/docs`，机器Schema `/openapi.json`。
 
 ## 并发、幂等与错误
 
@@ -370,6 +370,10 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 问题/行动列表支持creator（人类发起者优先，否则实际提交者ID；unknown筛选历史未知）、created_via和model（模型名称不区分大小写子串）组合筛选。返回及导出包含快照、身份列表；当前选中身份ID只保存于该浏览器。
 
 identity_profiles与问题/行动的身份ID为历史逻辑引用，由领域层创建时校验，不定义物理外键；独立保存名称、来源与model_info JSON，避免默认配置变化污染历史。
+
+## MCP访问认证
+
+HTTP MCP随服务启动于 /mcp，需要 Authorization: Bearer 访问密钥；无效密钥返回401。stdio仍为本机子进程。密钥按接入端分发、逐次校验、可分别撤销，详见 MCP远程接入.md。此认证不覆盖网页与/api，不提供账号或角色权限，也不验证creation与模型声明。
 
 ## 示例与边界
 

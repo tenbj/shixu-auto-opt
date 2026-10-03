@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "delivery_id": "b6901469-bd17-4501-b047-275ffb0c4bcd",
+  "delivery_id": "f09f717a-c941-456c-a07e-e76603bbf495",
   "diagram_sha256": "375efa13b60c420cfc392573bc98a32bb3a52dfbc0dd9add133bd180c5e6c8cc",
   "sources": [
     {
@@ -9,7 +9,7 @@
     },
     {
       "path": "scripts/migrate_creators.py",
-      "sha256": "d86a3d8ef0eed814541e8e607aaf8e72cfe952593c9a3fa562a7ed075fd8e3e6"
+      "sha256": "1bc4b108510aab80c1144029c4d0046f4a4b10c8aab9eb6fc8f337cbab88edf4"
     },
     {
       "path": "app/mysql_store.py",

@@ -28,7 +28,7 @@ def main():
     schema = app.openapi()
     tools = asyncio.run(server.list_tools())
     write_json('docs/openapi.json', schema)
-    catalog = {'server': 'shixu', 'transport': 'stdio', 'command': 'python /absolute/path/application/mcp_server.py', 'url': None,
+    catalog = {'server': 'shixu', 'transport': 'streamable-http', 'transports': ['streamable-http', 'stdio'], 'authentication': 'HTTP: per-client Bearer key; stdio: local process', 'command': 'python /absolute/path/application/mcp_server.py', 'url': 'http://127.0.0.1:8765/mcp',
                'instructions': server.instructions, 'tools': []}
     for tool in tools:
         entry = tool.model_dump(mode='json', by_alias=True)
@@ -39,7 +39,7 @@ def main():
                                     order='先health，再list/get版本，再写入', error_handling='404检查ID；409重读；422修正输入；503不确认成功、同号重试', protocol=entry))
     write_json('docs/MCP工具目录.json', catalog)
     operations = []
-    doc = ['# 拾序 API 中文说明', '', '版本 2.3.0 · 基地址 http://127.0.0.1:8765 · UTF-8 JSON。在线交互文档 `/docs`，机器Schema `/openapi.json`。', '',
+    doc = ['# 拾序 API 中文说明', '', '版本 2.4.0 · 基地址 http://127.0.0.1:8765 · UTF-8 JSON。在线交互文档 `/docs`，机器Schema `/openapi.json`。', '',
            '## 并发、幂等与错误', '',
            '所有写入携带 `request_id`（8–120字符，推荐UUID）、`expected_version`（当前全局revision）与可选 `actor`（审计标签，默认未指定）。请求体不接受未声明字段。每个写入是一个MySQL InnoDB事务；返回 `revision`、`resource` 和事务提交时的 `data`。失败不改变数据、审计或版本。', '',
            '同一request_id及完全相同内容重放返回原始成功响应；request_id相同但内容不同返回409。网络超时保持请求内容和编号重试。全局版本是工作台版本，不是单个对象版本；任何对象写入都会递增。', '',
@@ -80,6 +80,7 @@ def main():
             '普通PATCH不接受创建字段。改名、编辑内容、删除恢复不会修改创建快照。关联行动使用本次提交身份，不继承所属问题。兼容旧客户端不传creation时来源unknown，创建时间仍为服务器时间；迁移历史记录的时间保持NULL，不猜测。', '',
             '问题/行动列表支持creator（人类发起者优先，否则实际提交者ID；unknown筛选历史未知）、created_via和model（模型名称不区分大小写子串）组合筛选。返回及导出包含快照、身份列表；当前选中身份ID只保存于该浏览器。', '',
             'identity_profiles与问题/行动的身份ID为历史逻辑引用，由领域层创建时校验，不定义物理外键；独立保存名称、来源与model_info JSON，避免默认配置变化污染历史。', '']
+    doc += ['## MCP访问认证', '', 'HTTP MCP随服务启动于 /mcp，需要 Authorization: Bearer 访问密钥；无效密钥返回401。stdio仍为本机子进程。密钥按接入端分发、逐次校验、可分别撤销，详见 MCP远程接入.md。此认证不覆盖网页与/api，不提供账号或角色权限，也不验证creation与模型声明。', '']
     doc += ['## 示例与边界' , '', '只读：`python examples/api_client.py`。合成写入：加 `--write-demo`。浏览器示例：服务运行后访问 `/examples/`。', '',
             '本版为共享工作台，支持显式配置0.0.0.0监听与内网Host允许列表；actor不是身份认证。正式存储为用户配置的MySQL专属新库，实体分表保存；SQLite仅用于隔离测试。提供回收站软删除与恢复，依赖关系移除也是软删除，数据库10表DELETE触发器与运行时SQL防护阻止物理删除。没有永久删除、导入、上传、登录或离线跨设备同步API。完整工作台/导出包含回收站，普通列表和详情仅限有效记录。恢复必要行动可重开验证，删除问题/恢复问题均原子处理同批关联行动。审计分页使用after=最后一条revision继续查询。完整备份使用MySQL专属库备份，页面JSON不含幂等表。']
     text = '\n'.join(doc) + '\n'
@@ -99,7 +100,7 @@ def main():
     contract['prototype']['path'] = 'reference/creator-source.html（冻结创建身份原型）'
     contract['prototype']['source_modified'] = False
     contract['operations'] = operations
-    checks = {'business':'api-report.json', 'api':'api-report.json', 'mcp':'mcp-report.json', 'browser':'browser-report.json', 'persistence':'persistence-report.json', 'portable':'portable-report.json', 'release_scan':'release-scan.json', 'trash_browser':'trash-browser-report.json', 'diagrams':'diagrams/report.json', 'architecture':'diagrams/architecture-report.json', 'erd':'diagrams/erd-report.json', 'creators':'creator-browser-report.json'}
+    checks = {'business':'api-report.json', 'api':'api-report.json', 'mcp':'mcp-report.json', 'http_mcp':'http-mcp-report.json', 'browser':'browser-report.json', 'persistence':'persistence-report.json', 'portable':'portable-report.json', 'release_scan':'release-scan.json', 'trash_browser':'trash-browser-report.json', 'diagrams':'diagrams/report.json', 'architecture':'diagrams/architecture-report.json', 'erd':'diagrams/erd-report.json', 'creators':'creator-browser-report.json'}
     contract['checks'] = []
     for name, file in checks.items():
         path = ROOT / 'verification' / file
@@ -110,11 +111,11 @@ def main():
     mysql_report = ROOT / 'verification/mysql-report.json'
     if mysql_report.exists():
         contract['checks'].append(dict(name='mysql', status='passed' if json.loads(mysql_report.read_text(encoding='utf-8')).get('passed') else 'failed', evidence='verification/mysql-report.json'))
-    contract['limits'] = ['单机服务连接专属MySQL实体库，不等同生产就绪；无账号认证、多人权限或高可用',
+    contract['limits'] = ['单机服务连接专属MySQL实体库，不等同生产就绪；MCP有独立密钥，但网页/API无账号认证、多人权限或高可用',
                            '全局revision适合个人规模，未做大数据负载验收',
                            '未导入原型浏览器中的真实记录；已将当前系统SQLite记录只读迁入新MySQL库，原SQLite保留',
                            '当前用户MySQL实例未启用TLS；凭据仅存仓库外私有配置，ZIP不含连接凭据',
-                           'MCP使用stdio；未自动注册客户端；AI自主任务验收未执行',
+                           'MCP支持HTTP Bearer密钥与本机stdio；静态密钥非OAuth，不支持仅OAuth客户端；未自动注册客户端，AI自主任务验收未执行',
                            '仅Windows/Python3.11实测；便携验证指ZIP解压换目录复用已安装依赖运行，不是免安装exe',
                            '支持0.0.0.0监听与明确Host允许列表；内网访问面向可信网络，同源写入校验继续启用',
                            '许可证未选择；生产凭据、本机数据库和真实工作台访问截图不入包']

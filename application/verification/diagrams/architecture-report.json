@@ -1,11 +1,11 @@
 {
   "passed": true,
-  "delivery_id": "b6901469-bd17-4501-b047-275ffb0c4bcd",
-  "diagram_sha256": "b75ded3b2348b9879f00c720f44f27102b1be23b918ab65117456a5fd79a2b30",
+  "delivery_id": "f09f717a-c941-456c-a07e-e76603bbf495",
+  "diagram_sha256": "c9341f4e51700352b41364f18d635cf62791ae68173421060ef5c166c0ab641e",
   "sources": [
     {
       "path": "app/main.py",
-      "sha256": "abf009cbeb97b4c1f6ac9389ce47f51993420950c5ae2004ef8702964ec2ba68"
+      "sha256": "947016e586de02e0724c3ab6777056bf5ccbd921e03d952f442850ae3a5428a8"
     },
     {
       "path": "app/domain.py",
@@ -17,7 +17,19 @@
     },
     {
       "path": "mcp_server.py",
-      "sha256": "7ca56de314e92018e0631936a0ec558085339adaabdfba3f5b71c7291c28e59a"
+      "sha256": "db769d1e119e23465606587cba12ddcd657c310cf137313f7c62cdeb551d3484"
+    },
+    {
+      "path": "app/mcp_http.py",
+      "sha256": "70039b14f525b7c133cb8474f4ee62b90ee87e16409f7b0ea1c78d92e2d061b3"
+    },
+    {
+      "path": "app/mcp_access.py",
+      "sha256": "3271569fd5506dea2c8121e2b2293b439e641c3b81480ce8d8172fa33c415da9"
+    },
+    {
+      "path": "scripts/service.py",
+      "sha256": "48179ce0c9c3d36cb12abff9ea80544657eae88c85f0aa8b4e8b545ece651e26"
     }
   ],
   "source_consistent": true,

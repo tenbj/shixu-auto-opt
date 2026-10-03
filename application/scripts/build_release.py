@@ -34,7 +34,7 @@ def files():
 
 def scan(paths):
     findings = []
-    patterns = [r'-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----', r'(?<![A-Za-z])sk-[A-Za-z0-9_-]{25,}', r'ghp_[A-Za-z0-9]{30,}']
+    patterns = [r'-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----', r'(?<![A-Za-z])sk-[A-Za-z0-9_-]{25,}', r'ghp_[A-Za-z0-9]{30,}', r'sx_[A-Za-z0-9_-]{43}']
     for path in paths:
         if path.is_symlink():
             findings.append(str(path.relative_to(ROOT)) + ': symlink')
@@ -66,6 +66,8 @@ def portable(zip_path, temporary):
     url = f'http://127.0.0.1:{port}'
     env = dict(os.environ, PYTHONIOENCODING='utf-8', SHIXU_BACKEND='sqlite')
     env.pop('SHIXU_DB', None)
+    env.pop('SHIXU_MCP_KEYS_PATH', None)
+    env['SHIXU_API_URL'] = url
     kwargs = {'creationflags': subprocess.CREATE_NO_WINDOW} if os.name == 'nt' else {}
     process = subprocess.Popen([sys.executable, '-m', 'uvicorn', 'app.main:app', '--host', '127.0.0.1', '--port', str(port)], cwd=project, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, **kwargs)
     try:
@@ -114,7 +116,7 @@ def main():
     (ROOT / 'verification/release-scan.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
     directory = ROOT / 'dist'
     directory.mkdir(exist_ok=True)
-    target = directory / 'shixu-system-2.3.0.zip'
+    target = directory / 'shixu-system-2.4.0.zip'
     archive(target, files())
     digest = hashlib.sha256(target.read_bytes()).hexdigest()
     (directory / 'SHA256SUMS.txt').write_text(digest + '  ' + target.name + '\n', encoding='utf-8')

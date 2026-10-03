@@ -9,9 +9,10 @@ import re
 REQUIRED=['README.md','CHANGELOG.md','LICENSE','.gitignore','.env.example',
           'requirements.txt','requirements-dev.txt','docs/API中文说明.md','docs/API中文说明.html',
           'docs/openapi.json','docs/AI接入与调用指南.md','docs/MCP工具目录.json',
+          'docs/MCP远程接入.md','examples/http_mcp_client.py','scripts/mcp_access.py',
           'examples/api_client.py','examples/mcp_client.py','scripts/configure_mcp.py',
           'scripts/build_release.py','.github/workflows/ci.yml']
-CHECKS={'business','api','mcp','browser','persistence','portable','release_scan','trash_browser','diagrams','retention_mysql','architecture','erd','creators'}
+CHECKS={'business','api','mcp','http_mcp','browser','persistence','portable','release_scan','trash_browser','diagrams','retention_mysql','architecture','erd','creators'}
 
 
 def safe_path(root, value):

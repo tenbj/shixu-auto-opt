@@ -25,7 +25,7 @@ def main():
     if os.getenv('SHIXU_ENV_FILE'):
         needles['private_config_path'] = os.environ['SHIXU_ENV_FILE'].encode()
     patterns = [rb'-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----', rb'ghp_[A-Za-z0-9]{30,}',
-                rb'github_pat_[A-Za-z0-9_]{50,}', rb'(?<![A-Za-z])sk-[A-Za-z0-9_-]{25,}']
+                rb'sx_[A-Za-z0-9_-]{43}', rb'github_pat_[A-Za-z0-9_]{50,}', rb'(?<![A-Za-z])sk-[A-Za-z0-9_-]{25,}']
     command = ['git', 'ls-files', '-z'] if args.staged else ['git', 'ls-files', '--cached', '--others', '--exclude-standard', '-z']
     paths = subprocess.check_output(command, cwd=REPO).decode('utf-8').split('\0')
     findings = []
