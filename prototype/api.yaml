@@ -384,7 +384,7 @@ components:
             type: string
           status:
             type: string
-            enum: &id001
+            enum: &id006
             - 待梳理
             - 待处理
             - 处理中
@@ -427,6 +427,46 @@ components:
             default: []
             items:
               $ref: '#/components/schemas/Followup'
+      properties:
+        createdByActorId: &id001
+          type: string
+          nullable: true
+          readOnly: true
+        initiatedByPersonId: &id002
+          type: string
+          nullable: true
+          readOnly: true
+        createdVia: &id003
+          type: string
+          enum:
+          - manual
+          - claude_code
+          - workbuddy
+          - codex
+          - deepseek_harness
+          - unknown
+          readOnly: true
+        createdAt: &id004
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+        modelInfo: &id005
+          type: object
+          nullable: true
+          readOnly: true
+          properties:
+            name:
+              type: string
+              maxLength: 160
+            provider:
+              type: string
+              maxLength: 80
+        creatorName:
+          type: string
+          nullable: true
+          readOnly: true
+          description: display-name snapshot at creation
     Task:
       allOf:
       - $ref: '#/components/schemas/TaskWrite'
@@ -446,6 +486,17 @@ components:
             - 已取消
           cancelReason:
             type: string
+      properties:
+        createdByActorId: *id001
+        initiatedByPersonId: *id002
+        createdVia: *id003
+        createdAt: *id004
+        modelInfo: *id005
+        creatorName:
+          type: string
+          nullable: true
+          readOnly: true
+          description: display-name snapshot at creation
     TaskUpdate:
       allOf:
       - $ref: '#/components/schemas/TaskWrite'
@@ -513,10 +564,10 @@ components:
       properties:
         from:
           type: string
-          enum: *id001
+          enum: *id006
         to:
           type: string
-          enum: *id001
+          enum: *id006
         reason:
           type: string
         at:
@@ -582,6 +633,20 @@ components:
           format: date-time
         actor:
           type: string
+    CreationIdentity:
+      type: object
+      description: 只读创建元数据，正式服务从认证上下文和绑定工具推导；原型用手动选择演示
+      properties:
+        createdByActorId: *id001
+        initiatedByPersonId: *id002
+        createdVia: *id003
+        createdAt: *id004
+        modelInfo: *id005
+        creatorName:
+          type: string
+          nullable: true
+          readOnly: true
+          description: display-name snapshot at creation
 x-workflow:
   triage:
     from:
@@ -660,3 +725,16 @@ x-workflow:
     to: 待梳理
     required:
     - reason
+x-creation-identity:
+  requirement_id: REQ-017
+  runtime: design-only; prototype localStorage
+  legacy: unknown
+  updates: creation fields immutable
+  ai_identity: bound connection actor, optional explicit human initiator; never infer
+  filters:
+  - creator
+  - createdVia
+  model: Persist actual model name/id and provider from call metadata; absence unknown;
+    never infer from tool
+  profiles: Generic person/agent registry; custom name; source/model defaults; historical
+    name snapshot

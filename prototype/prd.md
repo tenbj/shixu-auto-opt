@@ -132,3 +132,13 @@
 手机断点为700px。首页压缩品牌及导航，使用三项统计摘要，第一项行动在首屏可见；五项底部导航固定。行动看板用问题选择器与状态筛选，列表采用卡片，日期、状态和主操作无需横滑。日程采用按月的日期分组列表，包含未设日期分组。详情和编辑表单全屏，保留原有父子弹窗返回机制。主要点击区域至少44px，表单字号16px。360/390/430px与1440px分别验收。桌面布局及业务七状态、行动依赖和固定编号保持。
 
 本轮只更新prototype目录，未重新生成application页面、未部署。原型独立存储键为shixu-mobile-prototype-v1；使用演示数据，不访问线上API。离线HTML仍自包含，assets中的样式与脚本为可维护源，已内嵌到HTML。
+
+## REQ-017 · 通用创建身份与AI模型
+
+用户可以配置任意显示名称的人类或AI身份。AI身份配置工具、模型名称/ID和提供方；选择的身份自动填入新建问题与行动，保持仅标题必填。工具包括Claude Code、WorkBuddy、Codex、DeepSeek Harness。
+
+创建元数据包含createdByActorId、initiatedByPersonId、creatorName、createdVia、createdAt和modelInfo。身份名称保留创建时快照。AI可自行录入或指定已配置人类发起者；行动归属按本次创建上下文，不继承父问题。普通编辑、身份设置变更不覆盖历史来源或模型。
+
+列表显示创建人和AI模型，详情显示来源、提供方与时间；两视图独立支持创建人/来源AND筛选。旧数据未知且不推断模型；演示数据除一个未知问题外，全部为Codex、GPT-6、OpenAI。模型依据会话声明，未提供具体版本ID。
+
+schemaVersion=3，试改存储键shixu-creator-prototype-v2。JSON导出包含记录与身份配置。原型不实现认证、多人同步或实际AI接入。
