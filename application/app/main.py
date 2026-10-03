@@ -1,5 +1,6 @@
 """HTTP 系统入口：python -m uvicorn app.main:app --host 127.0.0.1 --port 8765"""
 import os
+from contextlib import asynccontextmanager
 import sqlite3
 import pymysql
 from pathlib import Path
@@ -21,7 +22,19 @@ from .models import (Write, IssueCreate, IssueUpdate, IssueTransition, Followup,
 
 
 def create_app(db_path=None):
-    app = FastAPI(title='拾序系统 API', version='2.3.0', description='共享记录工作台；写入使用全局版本与持久化幂等请求。')
+    @asynccontextmanager
+    async def lifespan(application):
+        from .mcp_access import ensure_keys
+        ensure_keys(application.state.mcp_keys, os.getenv('SHIXU_API_URL', 'http://127.0.0.1:8765').rstrip('/') + '/mcp')
+        async with application.state.mcp_http.router.lifespan_context(application.state.mcp_http):
+            application.state.mcp_running = True
+            try:
+                yield
+            finally:
+                application.state.mcp_running = False
+
+    app = FastAPI(title='拾序系统 API', version='2.4.0', lifespan=lifespan,
+                  description='共享记录工作台；写入使用全局版本与持久化幂等请求。')
     load_environment()
     if db_path is not None or os.getenv('SHIXU_BACKEND') == 'sqlite':
         app.state.store = Store(db_path or os.getenv('SHIXU_DB', str(ROOT / 'runtime' / 'test.sqlite3')))
@@ -64,10 +77,12 @@ def create_app(db_path=None):
     @app.get('/api/health', summary='检查服务与数据库状态')
     def health():
         state = app.state.store.read()
-        return {'status': 'ok', 'version': '2.3.0', 'revision': state['revision'], 'mode': 'local-single-user',
+        return {'status': 'ok', 'version': '2.4.0', 'revision': state['revision'], 'mode': 'local-single-user',
                 'backend': getattr(app.state.store, 'backend', 'sqlite-test'),
                 'database': getattr(app.state.store, 'database', None),
-                'pid': os.getpid(), 'instance': os.getenv('SHIXU_INSTANCE', '')}
+                'pid': os.getpid(), 'instance': os.getenv('SHIXU_INSTANCE', ''),
+                'mcp': {'running': getattr(app.state, 'mcp_running', False), 'transport': 'streamable-http',
+                        'endpoint': '/mcp', 'authentication': 'bearer-key'}}
 
     @app.get('/api/workspace', summary='读取完整工作台与并发版本')
     def workspace():
@@ -182,6 +197,13 @@ def create_app(db_path=None):
 
     app.mount('/static', StaticFiles(directory=ROOT / 'static'), name='static')
     app.mount('/examples', StaticFiles(directory=ROOT / 'examples', html=True), name='examples')
+    from .mcp_http import create_http
+    test_db = db_path or (os.getenv('SHIXU_DB') if os.getenv('SHIXU_BACKEND') == 'sqlite' else None)
+    default_keys = Path(test_db).parent / 'mcp-access.json' if test_db else ROOT / 'runtime/mcp-access.json'
+    app.state.mcp_keys = Path(os.getenv('SHIXU_MCP_KEYS_PATH', default_keys))
+    app.state.mcp_running = False
+    app.state.mcp_http, protected_mcp = create_http(app, app.state.mcp_keys, allowed_hosts + extra_hosts)
+    app.mount('/', protected_mcp)
     return app
 
 

@@ -61,7 +61,8 @@ def main():
     if current:
         raise SystemExit('Port already serves an application; use status or another port')
     instance = str(uuid4())
-    env = dict(os.environ, SHIXU_DB=str(args.db.resolve()), SHIXU_INSTANCE=instance, PYTHONIOENCODING='utf-8')
+    env = dict(os.environ, SHIXU_DB=str(args.db.resolve()), SHIXU_INSTANCE=instance,
+               SHIXU_API_URL=url, PYTHONIOENCODING='utf-8')
     kwargs = {'creationflags': subprocess.CREATE_NO_WINDOW} if os.name == 'nt' else {'start_new_session': True}
     with (runtime / f'service-{args.port}.log').open('ab') as log:
         process = subprocess.Popen([sys.executable, '-m', 'uvicorn', 'app.main:app', '--host', args.host, '--port', str(args.port)],
@@ -73,7 +74,7 @@ def main():
             result = health(url)
             if result.get('instance') == instance:
                 state_file.write_text(json.dumps({'pid': result['pid'], 'instance': instance, 'url': url, 'bind_host': args.host}), encoding='utf-8')
-                print(f'Started {url}; listening on {args.host}:{args.port}')
+                print(f'Started {url}; listening on {args.host}:{args.port}; authenticated MCP: {url}/mcp')
                 return 0
             process.terminate()
             raise SystemExit('Port belongs to another process')

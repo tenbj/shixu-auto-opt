@@ -134,11 +134,11 @@ def main():
         import hashlib
         contract=json.loads((ROOT/'project-contract.json').read_text(encoding='utf-8'))
         contract['diagrams']={}
-        for kind,skill,files in [('architecture','D04',['app/main.py','app/domain.py','app/mysql_store.py','mcp_server.py']),('erd','G02',['data/mysql-schema.sql','scripts/migrate_creators.py','app/mysql_store.py'])]:
+        for kind,skill,files in [('architecture','D04',['app/main.py','app/domain.py','app/mysql_store.py','mcp_server.py','app/mcp_http.py','app/mcp_access.py','scripts/service.py']),('erd','G02',['data/mysql-schema.sql','scripts/migrate_creators.py','app/mysql_store.py'])]:
             path='static/diagrams/'+kind+'.html'
             sources=[dict(path=f,sha256=hashlib.sha256((ROOT/f).read_bytes()).hexdigest()) for f in files]
             sha=hashlib.sha256((ROOT/path).read_bytes()).hexdigest()
-            contract['diagrams'][kind]=dict(skill=skill,path=path,sha256=sha,maintenance='updated',change_note='2.3.0 通用记录身份、创建与模型快照；10实体6物理外键，身份历史引用明示为逻辑关联',sources=sources)
+            contract['diagrams'][kind]=dict(skill=skill,path=path,sha256=sha,maintenance='updated' if kind=='architecture' else 'reviewed_unchanged',change_note='2.4.0 MCP HTTP与API同生命周期，独立Bearer密钥；无DDL变化，ER仍为10实体6物理外键',sources=sources)
             evidence=dict(passed=True,delivery_id=contract['delivery_id'],diagram_sha256=sha,sources=sources,source_consistent=True,details='verification/diagrams/report.json',scope='真实浏览器离线几何与交互；源码、DDL、迁移、元数据核对',live_schema=report.get('live_schema'))
             (OUT/(kind+'-report.json')).write_text(json.dumps(evidence,ensure_ascii=False,indent=2),encoding='utf-8')
         (ROOT/'project-contract.json').write_text(json.dumps(contract,ensure_ascii=False,indent=2),encoding='utf-8')

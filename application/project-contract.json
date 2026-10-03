@@ -204,6 +204,11 @@
       "evidence": "verification/mcp-report.json"
     },
     {
+      "name": "http_mcp",
+      "status": "passed",
+      "evidence": "verification/http-mcp-report.json"
+    },
+    {
       "name": "browser",
       "status": "passed",
       "evidence": "verification/browser-report.json"
@@ -266,11 +271,11 @@
     }
   ],
   "limits": [
-    "单机服务连接专属MySQL实体库，不等同生产就绪；无账号认证、多人权限或高可用",
+    "单机服务连接专属MySQL实体库，不等同生产就绪；MCP有独立密钥，但网页/API无账号认证、多人权限或高可用",
     "全局revision适合个人规模，未做大数据负载验收",
     "未导入原型浏览器中的真实记录；已将当前系统SQLite记录只读迁入新MySQL库，原SQLite保留",
     "当前用户MySQL实例未启用TLS；凭据仅存仓库外私有配置，ZIP不含连接凭据",
-    "MCP使用stdio；未自动注册客户端；AI自主任务验收未执行",
+    "MCP支持HTTP Bearer密钥与本机stdio；静态密钥非OAuth，不支持仅OAuth客户端；未自动注册客户端，AI自主任务验收未执行",
     "仅Windows/Python3.11实测；便携验证指ZIP解压换目录复用已安装依赖运行，不是免安装exe",
     "支持0.0.0.0监听与明确Host允许列表；内网访问面向可信网络，同源写入校验继续启用",
     "许可证未选择；生产凭据、本机数据库和真实工作台访问截图不入包"
@@ -281,19 +286,19 @@
     "tables": 10,
     "test_adapter": "SQLite仅用于隔离测试与无凭据分发包检查"
   },
-  "version": "2.3.0",
-  "delivery_id": "b6901469-bd17-4501-b047-275ffb0c4bcd",
+  "version": "2.4.0",
+  "delivery_id": "f09f717a-c941-456c-a07e-e76603bbf495",
   "diagrams": {
     "architecture": {
       "skill": "D04",
       "path": "static/diagrams/architecture.html",
-      "sha256": "b75ded3b2348b9879f00c720f44f27102b1be23b918ab65117456a5fd79a2b30",
+      "sha256": "c9341f4e51700352b41364f18d635cf62791ae68173421060ef5c166c0ab641e",
       "maintenance": "updated",
-      "change_note": "2.3.0 通用记录身份、创建与模型快照；10实体6物理外键，身份历史引用明示为逻辑关联",
+      "change_note": "2.4.0 MCP HTTP与API同生命周期，独立Bearer密钥；无DDL变化，ER仍为10实体6物理外键",
       "sources": [
         {
           "path": "app/main.py",
-          "sha256": "abf009cbeb97b4c1f6ac9389ce47f51993420950c5ae2004ef8702964ec2ba68"
+          "sha256": "947016e586de02e0724c3ab6777056bf5ccbd921e03d952f442850ae3a5428a8"
         },
         {
           "path": "app/domain.py",
@@ -305,7 +310,19 @@
         },
         {
           "path": "mcp_server.py",
-          "sha256": "7ca56de314e92018e0631936a0ec558085339adaabdfba3f5b71c7291c28e59a"
+          "sha256": "db769d1e119e23465606587cba12ddcd657c310cf137313f7c62cdeb551d3484"
+        },
+        {
+          "path": "app/mcp_http.py",
+          "sha256": "70039b14f525b7c133cb8474f4ee62b90ee87e16409f7b0ea1c78d92e2d061b3"
+        },
+        {
+          "path": "app/mcp_access.py",
+          "sha256": "3271569fd5506dea2c8121e2b2293b439e641c3b81480ce8d8172fa33c415da9"
+        },
+        {
+          "path": "scripts/service.py",
+          "sha256": "48179ce0c9c3d36cb12abff9ea80544657eae88c85f0aa8b4e8b545ece651e26"
         }
       ]
     },
@@ -313,8 +330,8 @@
       "skill": "G02",
       "path": "static/diagrams/erd.html",
       "sha256": "375efa13b60c420cfc392573bc98a32bb3a52dfbc0dd9add133bd180c5e6c8cc",
-      "maintenance": "updated",
-      "change_note": "2.3.0 通用记录身份、创建与模型快照；10实体6物理外键，身份历史引用明示为逻辑关联",
+      "maintenance": "reviewed_unchanged",
+      "change_note": "2.4.0 MCP HTTP与API同生命周期，独立Bearer密钥；无DDL变化，ER仍为10实体6物理外键",
       "sources": [
         {
           "path": "data/mysql-schema.sql",
@@ -322,7 +339,7 @@
         },
         {
           "path": "scripts/migrate_creators.py",
-          "sha256": "d86a3d8ef0eed814541e8e607aaf8e72cfe952593c9a3fa562a7ed075fd8e3e6"
+          "sha256": "1bc4b108510aab80c1144029c4d0046f4a4b10c8aab9eb6fc8f337cbab88edf4"
         },
         {
           "path": "app/mysql_store.py",

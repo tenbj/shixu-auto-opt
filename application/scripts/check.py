@@ -58,6 +58,8 @@ def main():
         (REPORT / 'api-report.json').write_text(json.dumps(api_report, ensure_ascii=False, indent=2), encoding='utf-8')
         port = available_port()
         url = f'http://127.0.0.1:{port}'
+        env['SHIXU_API_URL'] = url
+        env['SHIXU_MCP_KEYS_PATH'] = str(Path(temporary) / 'mcp-access.json')
         env['SHIXU_DB'] = str(Path(temporary) / 'integration.sqlite3')
         backend = 'sqlite-test'
         if args.mysql:
@@ -79,6 +81,8 @@ def main():
             assert first_health['backend'] == backend
             run('examples/api_client.py', '--url', url, env=env)
             run('examples/mcp_client.py', '--url', url, '--write-demo', '--report', str(REPORT / 'mcp-report.json'), env=env)
+            run('examples/http_mcp_client.py', '--config', str(Path(temporary) / 'mcp-client-default.json'),
+                '--write-demo', '--report', str(REPORT / 'http-mcp-report.json'), env=env)
             run('tests/browser_check.py', '--url', url, env=env)
             run('tests/trash_browser_check.py', '--url', url, env=env)
             run('tests/creator_browser_check.py', '--url', url, env=env)
