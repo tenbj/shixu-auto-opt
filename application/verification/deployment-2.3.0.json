@@ -1,0 +1,69 @@
+{
+  "passed": true,
+  "version": "2.3.0",
+  "backend": "mysql",
+  "revision": 12,
+  "issues": 4,
+  "tasks": 3,
+  "business_rows_written": 0,
+  "source_prototype_modified": false,
+  "migration": {
+    "passed": true,
+    "version": "2.3.0",
+    "added": [
+      "identity_profiles",
+      "issues.created_by_actor_id",
+      "issues.initiated_by_person_id",
+      "issues.creator_name",
+      "issues.created_via",
+      "issues.created_at",
+      "issues.model_info",
+      "tasks.created_by_actor_id",
+      "tasks.initiated_by_person_id",
+      "tasks.creator_name",
+      "tasks.created_via",
+      "tasks.created_at",
+      "tasks.model_info",
+      "identity_delete_guard"
+    ],
+    "preserved_tables": {
+      "activity": {
+        "rows": 12,
+        "sha256": "8ef18c95eeb69de50f4af56e530ff04c8f65f736ff167009b92fbd1a3eeac020"
+      },
+      "idempotency_requests": {
+        "rows": 12,
+        "sha256": "e370f8764fcb85eec7293a4c69a85e5167619b08d7bbc6b1ff41aecf46a8e93e"
+      },
+      "issue_followups": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "issue_history": {
+        "rows": 3,
+        "sha256": "2e4a4c7fc09766aa954655f5b95ff6017000fbbedec6bd627ee7c8fcea1f7659"
+      },
+      "issue_logs": {
+        "rows": 16,
+        "sha256": "6a471520c1f08c6b781c1e4efc4a0f30b9443c508e9294052f70a73c40958e8f"
+      },
+      "issues": {
+        "rows": 4,
+        "sha256": "860fe75d1d57a47e8f11e6b5e1015b41c04fbd6a4a54b272c9666bd51c32dc88"
+      },
+      "task_dependencies": {
+        "rows": 1,
+        "sha256": "940b85bde6f2bb6490c71b493f41bc3cfa4b8b0052acbf31bfede1499d46cdd0"
+      },
+      "tasks": {
+        "rows": 3,
+        "sha256": "79a986ad517f0893cc92e8678ba57712aef490355af6006f0eb82fc44fd20d3c"
+      },
+      "workspace_meta": {
+        "rows": 1,
+        "sha256": "b7abc5ebba9daacccb34f79c23644cf08709b06a50a9758828d2c363983a8202"
+      }
+    },
+    "backup_created": true
+  }
+}

@@ -10,11 +10,11 @@
     "新建独立连接回读完整状态一致"
   ],
   "entity_counts": {
-    "issues": 91,
-    "tasks": 62,
-    "followups": 18,
-    "histories": 122,
-    "dependencies": 8
+    "issues": 123,
+    "tasks": 88,
+    "followups": 22,
+    "histories": 158,
+    "dependencies": 11
   },
   "old_databases_accessed": false
 }

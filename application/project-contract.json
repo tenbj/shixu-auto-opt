@@ -3,12 +3,12 @@
   "project_name": "拾序系统",
   "status": "ready",
   "prototype": {
-    "path": "reference/trash-compact-source.html（冻结试改原型）",
-    "sha256": "02abbebca95b07cb95921d461cabe66543beaac8918b5ec649d0991f91539270",
-    "title": "拾序紧凑菜单与回收站试改原型",
+    "path": "reference/creator-source.html（冻结创建身份原型）",
+    "sha256": "922e5068eceba00909ad67f4aa7856baeb9ab6d710ca05f8ec344af72e811001",
+    "title": "拾序通用创建身份与模型原型",
     "source_modified": false,
-    "version": "trash-compact-20261002",
-    "reference_snapshot": "reference/trash-compact-source.html"
+    "version": "481bc92",
+    "reference_snapshot": "reference/creator-source.html"
   },
   "operations": [
     {
@@ -24,6 +24,27 @@
       "path": "/api/workspace",
       "mcp_tool": "get_workspace",
       "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "identities",
+      "method": "GET",
+      "path": "/api/identities",
+      "mcp_tool": "list_identities",
+      "python_example": "examples/creator_client.py"
+    },
+    {
+      "id": "identity_create",
+      "method": "POST",
+      "path": "/api/identities",
+      "mcp_tool": "create_identity",
+      "python_example": "examples/creator_client.py"
+    },
+    {
+      "id": "identity_update",
+      "method": "PATCH",
+      "path": "/api/identities/{identity_id}",
+      "mcp_tool": "update_identity",
+      "python_example": "examples/creator_client.py"
     },
     {
       "id": "issues",
@@ -213,6 +234,21 @@
       "evidence": "verification/diagrams/report.json"
     },
     {
+      "name": "architecture",
+      "status": "passed",
+      "evidence": "verification/diagrams/architecture-report.json"
+    },
+    {
+      "name": "erd",
+      "status": "passed",
+      "evidence": "verification/diagrams/erd-report.json"
+    },
+    {
+      "name": "creators",
+      "status": "passed",
+      "evidence": "verification/creator-browser-report.json"
+    },
+    {
       "name": "ai_task",
       "status": "not_run",
       "evidence": "",
@@ -242,8 +278,57 @@
   "storage": {
     "production": "mysql-entity-tables",
     "schema": "data/mysql-schema.sql",
-    "tables": 9,
+    "tables": 10,
     "test_adapter": "SQLite仅用于隔离测试与无凭据分发包检查"
   },
-  "version": "2.2.1"
+  "version": "2.3.0",
+  "delivery_id": "b6901469-bd17-4501-b047-275ffb0c4bcd",
+  "diagrams": {
+    "architecture": {
+      "skill": "D04",
+      "path": "static/diagrams/architecture.html",
+      "sha256": "b75ded3b2348b9879f00c720f44f27102b1be23b918ab65117456a5fd79a2b30",
+      "maintenance": "updated",
+      "change_note": "2.3.0 通用记录身份、创建与模型快照；10实体6物理外键，身份历史引用明示为逻辑关联",
+      "sources": [
+        {
+          "path": "app/main.py",
+          "sha256": "abf009cbeb97b4c1f6ac9389ce47f51993420950c5ae2004ef8702964ec2ba68"
+        },
+        {
+          "path": "app/domain.py",
+          "sha256": "2a3156a80c83ab833e53264ab284150417670e2d1a8a52765a9509e2c79d2455"
+        },
+        {
+          "path": "app/mysql_store.py",
+          "sha256": "88f28a9ef778e096fbe537d3027363b080da9a2e2210354c0e0923099ad8cbbe"
+        },
+        {
+          "path": "mcp_server.py",
+          "sha256": "7ca56de314e92018e0631936a0ec558085339adaabdfba3f5b71c7291c28e59a"
+        }
+      ]
+    },
+    "erd": {
+      "skill": "G02",
+      "path": "static/diagrams/erd.html",
+      "sha256": "375efa13b60c420cfc392573bc98a32bb3a52dfbc0dd9add133bd180c5e6c8cc",
+      "maintenance": "updated",
+      "change_note": "2.3.0 通用记录身份、创建与模型快照；10实体6物理外键，身份历史引用明示为逻辑关联",
+      "sources": [
+        {
+          "path": "data/mysql-schema.sql",
+          "sha256": "cb5bb7963e469d9c8ae346c97071af136d2ab9509ceda2ba4b30e8c5014fdcb1"
+        },
+        {
+          "path": "scripts/migrate_creators.py",
+          "sha256": "d86a3d8ef0eed814541e8e607aaf8e72cfe952593c9a3fa562a7ed075fd8e3e6"
+        },
+        {
+          "path": "app/mysql_store.py",
+          "sha256": "88f28a9ef778e096fbe537d3027363b080da9a2e2210354c0e0923099ad8cbbe"
+        }
+      ]
+    }
+  }
 }

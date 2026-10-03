@@ -1,0 +1,30 @@
+{
+  "passed": true,
+  "delivery_id": "b6901469-bd17-4501-b047-275ffb0c4bcd",
+  "diagram_sha256": "375efa13b60c420cfc392573bc98a32bb3a52dfbc0dd9add133bd180c5e6c8cc",
+  "sources": [
+    {
+      "path": "data/mysql-schema.sql",
+      "sha256": "cb5bb7963e469d9c8ae346c97071af136d2ab9509ceda2ba4b30e8c5014fdcb1"
+    },
+    {
+      "path": "scripts/migrate_creators.py",
+      "sha256": "d86a3d8ef0eed814541e8e607aaf8e72cfe952593c9a3fa562a7ed075fd8e3e6"
+    },
+    {
+      "path": "app/mysql_store.py",
+      "sha256": "88f28a9ef778e096fbe537d3027363b080da9a2e2210354c0e0923099ad8cbbe"
+    }
+  ],
+  "source_consistent": true,
+  "details": "verification/diagrams/report.json",
+  "scope": "真实浏览器离线几何与交互；源码、DDL、迁移、元数据核对",
+  "live_schema": {
+    "status": "pass",
+    "tables": 10,
+    "columns": 89,
+    "foreign_keys": 6,
+    "business_rows_read": 0,
+    "writes": 0
+  }
+}

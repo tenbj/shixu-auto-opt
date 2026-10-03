@@ -30,14 +30,17 @@ python scripts/configure_mcp.py --format toml
 | 工具 | 何时使用 | 主要输入 | 返回 | 副作用 |
 |---|---|---|---|---|
 | get_system_status | 首次调用/恢复连接 | 无 | status、revision | 无 |
+| list_identities | 新建前选择人/AI身份 | 无 | items、revision | 无 |
+| create_identity | 登记通用身份 | body.name/kind/via/modelName/modelProvider | resource、data、revision | 新增身份 |
+| update_identity | 改名或改默认模型 | identity_id、body中的变更字段 | 同上 | 不追溯修改历史 |
 | get_workspace | 跨对象查看/获取一致快照 | 无 | revision、data | 无 |
-| list_issues | 搜索问题 | q/status/priority/tag | items、revision | 无 |
+| list_issues | 搜索问题 | q/status/priority/tag/creator/created_via/model | items、revision | 无 |
 | get_issue | 写入前读详情 | issue_id | item、tasks、revision | 无 |
 | create_issue | 记录新困扰 | body.title等 | resource、data、revision | 创建问题 |
 | update_issue | 编辑背景和属性 | issue_id、body中的变更字段 | 同上 | 更新问题 |
 | transition_issue | 梳理/开始/验证/解决/暂缓/关闭/重开 | issue_id、body.action及依据 | 同上 | 状态/历史；关闭时处置行动 |
 | add_followup | 记录日常进展 | issue_id、body.content | 同上 | 追加跟进，不改状态 |
-| list_tasks | 浏览行动 | issue_id/status | items、revision | 无 |
+| list_tasks | 浏览行动 | issue_id/status/creator/created_via/model | items、revision | 无 |
 | get_task | 查看依赖/写入前取版本 | task_id | item、revision | 无 |
 | create_task | 拆解下一步 | body.title/issueId/due/required | resource、data、revision | 创建行动；可能退回验证阶段 |
 | update_task | 编辑安排或关联 | task_id、body中的变更字段 | 同上 | 编辑行动；可能变更问题阶段 |
@@ -72,3 +75,19 @@ python scripts/configure_mcp.py --format toml
 ## 数据保留约束
 
 删除问题、行动及移除前置关系均为软删除。不能通过任何工具永久删除或清空数据库记录；deleted_at标识失效，恢复/重新添加激活原记录。跟进、历史、日志和审计不提供删除工具。
+
+## 2.3.0：Elias、Codex 与模型的记录方式
+
+先调用list_identities，选择或登记人类Elias和AI Codex两个独立身份。AI身份kind=agent、via=codex，默认modelName=GPT-6.1 Sol、modelProvider=OpenAI（此处只是用户指定的示例，并非系统检测）。每次create_issue/create_task传：
+
+```json
+{"body":{"title":"示例问题","request_id":"本次新UUID","expected_version":123,"creation":{"identityId":"Codex身份ID","initiatedByPersonId":"Elias身份ID","modelInfo":{"name":"GPT-6.1 Sol","provider":"OpenAI"}}}}
+```
+
+将示例ID、UUID及revision替换为真实值。AI自主记录省略initiatedByPersonId；手动创建使用人类identityId且不传modelInfo。工具来源由所选身份推导，工具名不能推断模型。模型省略/null使用默认值；显式空对象表示未提供。应优先把每次调用已知的实际模型传入；无法确定时留空，不编造。
+
+creation只用于创建，后续PATCH不能改写来源字段。API/MCP输出createdByActorId、initiatedByPersonId、creatorName、createdVia、createdAt、modelInfo。legacy调用不传creation仍兼容，但明确记录为unknown。actor仍仅是本次操作审计标签，不能替代创建身份。所有身份均为调用方声明，不证明登录用户、真实工具执行环境或模型真实性。
+
+25个工具都经HTTP共用同一事务与规则。Claude Code、WorkBuddy、Codex和DeepSeek Harness以各客户端实际支持的MCP配置方式接入同一stdio服务；这些是来源选项，未声称逐一完成四种客户端兼容验证。接入时登记对应via及真实模型，不将Codex示例用作其他工具默认值。
+
+可运行 `python examples/creator_client.py` 只读查看身份，加 `--write-demo` 才创建合成身份与问题；`/examples/`也可选择已登记的AI和人类发起者。历史记录没有自动导入原型浏览器存储。

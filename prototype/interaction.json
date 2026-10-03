@@ -19,7 +19,8 @@
         "REQ-011",
         "REQ-012",
         "REQ-013",
-        "REQ-015"
+        "REQ-015",
+        "REQ-017"
       ]
     },
     {
@@ -66,7 +67,12 @@
         "guide-tab": "切换流转图",
         "mobile-more": "打开更多功能",
         "mobile-task-menu": "打开行动操作菜单",
-        "mobile-go-analysis": "关闭菜单并切换统计"
+        "mobile-go-analysis": "关闭菜单并切换统计",
+        "clear-creator-filter": "清除当前视图创建人和来源过滤",
+        "identity-settings": "打开通用身份管理",
+        "add-profile": "新增人或AI身份",
+        "edit-profile": "编辑配置，不改历史快照",
+        "use-profile": "选择身份，保存新建默认上下文"
       },
       "branches": {
         "workflow-form": "editing",
@@ -89,7 +95,8 @@
         "REQ-013",
         "REQ-014",
         "REQ-015",
-        "REQ-016"
+        "REQ-016",
+        "REQ-017"
       ]
     },
     {
@@ -150,7 +157,8 @@
         "REQ-011",
         "REQ-012",
         "REQ-013",
-        "REQ-015"
+        "REQ-015",
+        "REQ-017"
       ]
     },
     {
@@ -173,6 +181,39 @@
       "action": "更新selectedTaskIssue并渲染手机行动；不复用桌面状态筛选事件",
       "requirement_ids": [
         "REQ-016"
+      ]
+    },
+    {
+      "id": "EVT-IDENTITY",
+      "component_id": "identity-control",
+      "trigger": "change",
+      "from_state": "ready",
+      "to_state": "ready",
+      "action": "切换身份类型，人或AI；通用身份支持自定义名称、工具和模型",
+      "requirement_ids": [
+        "REQ-017"
+      ]
+    },
+    {
+      "id": "EVT-CREATION",
+      "component_id": "creation-control",
+      "trigger": "change",
+      "from_state": "editing",
+      "to_state": "editing",
+      "action": "选择来源和发起者，手动来源不允许AI自主身份；新建时保存创建快照；AI来源额外选填实际模型名称/ID及提供方，未知不猜测",
+      "requirement_ids": [
+        "REQ-017"
+      ]
+    },
+    {
+      "id": "EVT-CREATOR-FILTER",
+      "component_id": "creator-filter-control",
+      "trigger": "change",
+      "from_state": "ready",
+      "to_state": "ready",
+      "action": "对当前问题或行动独立组合筛选创建人和工具来源",
+      "requirement_ids": [
+        "REQ-017"
       ]
     }
   ],

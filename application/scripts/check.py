@@ -81,6 +81,7 @@ def main():
             run('examples/mcp_client.py', '--url', url, '--write-demo', '--report', str(REPORT / 'mcp-report.json'), env=env)
             run('tests/browser_check.py', '--url', url, env=env)
             run('tests/trash_browser_check.py', '--url', url, env=env)
+            run('tests/creator_browser_check.py', '--url', url, env=env)
             if args.mysql:
                 run('tests/mysql_check.py', '--url', url, env=env)
                 run('tests/retention_mysql_check.py', '--url', url, env=env)
@@ -101,7 +102,7 @@ def main():
             (REPORT / 'persistence-report.json').write_text(json.dumps(persistence, ensure_ascii=False, indent=2), encoding='utf-8')
         finally:
             stop(process)
-    summary = {'passed': True, 'business_api_tests': api_report['tests'], 'browser_checks': len(json.loads((REPORT / 'browser-report.json').read_text(encoding='utf-8'))['checks']), 'mcp_tools': 22, 'integration_backend': backend, 'mysql_checks': 5 if args.mysql else 0, 'persistence': 'passed', 'ai_autonomous': 'not_run', 'environment': {'os': sys.platform, 'python': sys.version.split()[0]}, 'scope': '单机服务；MySQL模式在新建_test库真实联调；浏览器响应丢失使用网络拦截模拟；未做AI自主任务验收'}
+    summary = {'passed': True, 'business_api_tests': api_report['tests'], 'browser_checks': len(json.loads((REPORT / 'browser-report.json').read_text(encoding='utf-8'))['checks']), 'mcp_tools': 25, 'integration_backend': backend, 'mysql_checks': 5 if args.mysql else 0, 'persistence': 'passed', 'ai_autonomous': 'not_run', 'environment': {'os': sys.platform, 'python': sys.version.split()[0]}, 'scope': '单机服务；MySQL模式在新建_test库真实联调；浏览器响应丢失使用网络拦截模拟；未做AI自主任务验收'}
     (REPORT / 'summary.json').write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding='utf-8')
     print(json.dumps(summary, ensure_ascii=False))
 

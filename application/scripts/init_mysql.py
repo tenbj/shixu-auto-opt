@@ -26,7 +26,7 @@ def main():
                     cur.execute(statement)
             cur.execute('INSERT INTO workspace_meta VALUES (1,%s,0,1,%s)', (APP_ID, '{}'))
         connection.commit()
-        print('Initialized 9 entity/metadata tables in ' + args.database)
+        print('Initialized 10 entity/metadata tables in ' + args.database)
     finally:
         connection.close()
 

@@ -2,8 +2,10 @@
 -- JS issueId -> issue_id, required -> required_for_resolution, 空日期 -> NULL。
 -- 状态动作、原因校验、任务处置与history/logs写入由应用在同一事务执行。
 PRAGMA foreign_keys=ON;
+-- 创建身份参考：正式服务须校验主体，以下为离线原型设计合同。
 CREATE TABLE issue(
  id TEXT PRIMARY KEY,
+ created_by_actor_id TEXT,creator_name TEXT,initiated_by_person_id TEXT,created_via TEXT NOT NULL DEFAULT 'unknown',created_at TEXT,model_name TEXT,model_provider TEXT,
  title TEXT NOT NULL CHECK(length(trim(title)) BETWEEN 1 AND 160),
  description TEXT NOT NULL DEFAULT '',priority TEXT NOT NULL DEFAULT '中' CHECK(priority IN ('高','中','低')),
  tag TEXT NOT NULL DEFAULT '未分类',
@@ -18,6 +20,8 @@ CREATE TABLE issue(
 );
 CREATE TABLE task(
  id TEXT PRIMARY KEY,issue_id TEXT REFERENCES issue(id),
+ created_by_actor_id TEXT,creator_name TEXT,initiated_by_person_id TEXT,created_via TEXT NOT NULL DEFAULT 'unknown',created_at TEXT,model_name TEXT,model_provider TEXT,
+
  title TEXT NOT NULL CHECK(length(trim(title)) BETWEEN 1 AND 160),due TEXT,
  status TEXT NOT NULL DEFAULT '待办' CHECK(status IN ('待办','进行中','已完成','已取消')),
  required_for_resolution INTEGER NOT NULL DEFAULT 1 CHECK(required_for_resolution IN (0,1)),

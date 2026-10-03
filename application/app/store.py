@@ -43,7 +43,7 @@ class Store:
     def read(self):
         with self.connect() as connection:
             revision, payload = connection.execute('SELECT revision,payload FROM workspace WHERE id=1').fetchone()
-            return dict(revision=revision, data=json.loads(payload))
+            return dict(revision=revision, data=domain.normalize_state(json.loads(payload)))
 
     def activity(self, after=0, limit=100):
         with self.connect() as connection:

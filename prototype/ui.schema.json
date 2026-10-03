@@ -62,7 +62,8 @@
         "REQ-011",
         "REQ-012",
         "REQ-013",
-        "REQ-015"
+        "REQ-015",
+        "REQ-017"
       ]
     },
     {
@@ -92,7 +93,8 @@
         "REQ-013",
         "REQ-014",
         "REQ-015",
-        "REQ-016"
+        "REQ-016",
+        "REQ-017"
       ],
       "variants": {
         "nav": "切换 today/issues/tasks/review 页面",
@@ -154,7 +156,8 @@
         "REQ-010",
         "REQ-011",
         "REQ-013",
-        "REQ-016"
+        "REQ-016",
+        "REQ-017"
       ]
     },
     {
@@ -198,7 +201,8 @@
         "REQ-008",
         "REQ-009",
         "REQ-010",
-        "REQ-011"
+        "REQ-011",
+        "REQ-017"
       ]
     },
     {
@@ -229,6 +233,54 @@
       ],
       "requirement_ids": [
         "REQ-016"
+      ]
+    },
+    {
+      "id": "identity-control",
+      "type": "select",
+      "selector": "[data-event-id=\"EVT-IDENTITY\"]",
+      "events": [
+        "EVT-IDENTITY"
+      ],
+      "states": [
+        "ready",
+        "editing",
+        "empty"
+      ],
+      "requirement_ids": [
+        "REQ-017"
+      ]
+    },
+    {
+      "id": "creation-control",
+      "type": "select",
+      "selector": "[data-event-id=\"EVT-CREATION\"]",
+      "events": [
+        "EVT-CREATION"
+      ],
+      "states": [
+        "ready",
+        "editing",
+        "empty"
+      ],
+      "requirement_ids": [
+        "REQ-017"
+      ]
+    },
+    {
+      "id": "creator-filter-control",
+      "type": "select",
+      "selector": "[data-event-id=\"EVT-CREATOR-FILTER\"]",
+      "events": [
+        "EVT-CREATOR-FILTER"
+      ],
+      "states": [
+        "ready",
+        "editing",
+        "empty"
+      ],
+      "requirement_ids": [
+        "REQ-017"
       ]
     }
   ],
@@ -361,7 +413,7 @@
     "id": "string",
     "content": "trimmed text, 1..5000",
     "at": "ISO timestamp",
-    "actor": "我"
+    "actor": "当前使用者昵称"
   },
   "distribution": {
     "scope": "all issues including resolved, deferred and closed",
@@ -399,6 +451,206 @@
     "issue_selection": "select",
     "calendar": "month-agenda",
     "detail": "fullscreen-dialog",
-    "storage_key": "shixu-mobile-prototype-v1"
+    "storage_key": "shixu-creator-prototype-v2"
+  },
+  "creation_identity": {
+    "fields": [
+      "createdByActorId",
+      "initiatedByPersonId",
+      "createdVia",
+      "createdAt",
+      "modelInfo",
+      "creatorName"
+    ],
+    "immutable_on_edit": true,
+    "legacy": "unknown",
+    "source_options": [
+      "manual",
+      "claude_code",
+      "workbuddy",
+      "codex",
+      "deepseek_harness",
+      "unknown"
+    ],
+    "prototype_only": "client-selected identity; not authenticated",
+    "modelInfo": {
+      "name": "actual model name/id or empty",
+      "provider": "actual provider or empty",
+      "unknown_label": "模型未提供",
+      "manual": null
+    },
+    "profiles": {
+      "kind": [
+        "person",
+        "agent"
+      ],
+      "name": "custom display name",
+      "active": "persisted profile id",
+      "immutable_record": "creatorName snapshot"
+    }
+  },
+  "responsive": {
+    "mode": "adaptive",
+    "mobile_breakpoint": 700,
+    "layouts": {
+      "desktop": "侧栏导航、单行行动、顶部身份选择和双筛选",
+      "mobile": "底部导航、行动卡片、顶部身份选择、双列来源筛选、全屏表单"
+    },
+    "viewports": [
+      {
+        "width": 360,
+        "height": 844
+      },
+      {
+        "width": 390,
+        "height": 844
+      },
+      {
+        "width": 430,
+        "height": 844
+      },
+      {
+        "width": 1440,
+        "height": 1000
+      }
+    ],
+    "scenarios": [
+      {
+        "id": "generic-profile",
+        "requirement_ids": [
+          "REQ-001",
+          "REQ-017"
+        ],
+        "steps": [
+          {
+            "action": "click",
+            "selector": ".identity-button:visible"
+          },
+          {
+            "action": "click",
+            "selector": "dialog[open] [data-action=\"add-profile\"]"
+          },
+          {
+            "action": "fill",
+            "selector": "dialog[open] [name=\"profileName\"]",
+            "value": "自定义成员"
+          },
+          {
+            "action": "click",
+            "selector": "dialog[open] button[type=\"submit\"]"
+          },
+          {
+            "action": "expect_text",
+            "selector": ".identity-button:visible",
+            "value": "自定义成员"
+          },
+          {
+            "action": "click",
+            "selector": "#app [data-action=\"new\"]"
+          },
+          {
+            "action": "fill",
+            "selector": "dialog[open] [name=\"title\"]",
+            "value": "成员记录"
+          },
+          {
+            "action": "click",
+            "selector": "dialog[open] button[type=\"submit\"]"
+          },
+          {
+            "action": "click",
+            "selector": "nav:visible [data-action=\"nav\"][data-id=\"issues\"]"
+          },
+          {
+            "action": "expect_text",
+            "selector": ".issue-card:has-text(\"成员记录\") .creator-line",
+            "value": "自定义成员"
+          },
+          {
+            "action": "click",
+            "selector": ".issue-card:has-text(\"成员记录\") .issue-title"
+          },
+          {
+            "action": "expect_text",
+            "selector": "dialog[open] .creation-detail",
+            "value": "手动"
+          }
+        ]
+      },
+      {
+        "id": "create-ai-action",
+        "requirement_ids": [
+          "REQ-003",
+          "REQ-017"
+        ],
+        "steps": [
+          {
+            "action": "click",
+            "selector": "nav:visible [data-action=\"nav\"][data-id=\"tasks\"]"
+          },
+          {
+            "action": "click",
+            "selector": "#app .pagehead>.primary"
+          },
+          {
+            "action": "select",
+            "selector": "dialog[open] #kind",
+            "value": "task"
+          },
+          {
+            "action": "click",
+            "selector": "dialog[open] .creation-config summary"
+          },
+          {
+            "action": "select",
+            "selector": "dialog[open] [name=\"creationVia\"]",
+            "value": "deepseek_harness"
+          },
+          {
+            "action": "select",
+            "selector": "dialog[open] [name=\"creationPerson\"]",
+            "value": "ai"
+          },
+          {
+            "action": "fill",
+            "selector": "dialog[open] [name=\"modelName\"]",
+            "value": "测试模型-v1"
+          },
+          {
+            "action": "fill",
+            "selector": "dialog[open] [name=\"modelProvider\"]",
+            "value": "测试提供方"
+          },
+          {
+            "action": "fill",
+            "selector": "dialog[open] [name=\"title\"]",
+            "value": "AI自主创建的行动"
+          },
+          {
+            "action": "click",
+            "selector": "dialog[open] button[type=\"submit\"]"
+          },
+          {
+            "action": "select",
+            "selector": "[aria-label=\"按创建来源筛选\"]",
+            "value": "deepseek_harness"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#app",
+            "value": "AI自主创建的行动"
+          },
+          {
+            "action": "expect_visible",
+            "selector": "#app :is(.mobile-task-card,.action-row):has-text(\"AI自主创建的行动\") .creator-line"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#app :is(.mobile-task-card,.action-row):has-text(\"AI自主创建的行动\") .creator-line",
+            "value": "测试模型-v1"
+          }
+        ]
+      }
+    ]
   }
 }

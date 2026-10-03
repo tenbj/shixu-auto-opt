@@ -43,7 +43,68 @@ def valid_date(value):
 
 
 def empty_state():
-    return dict(version=1, schemaVersion=2, nextIssueNumber=1, nextTaskNumbers={}, issues=[], tasks=[])
+    return dict(version=1, schemaVersion=3, identityProfiles=[], nextIssueNumber=1, nextTaskNumbers={}, issues=[], tasks=[])
+
+
+CREATION_DEFAULTS = dict(createdByActorId=None, initiatedByPersonId=None, creatorName=None,
+                         createdVia='unknown', createdAt=None, modelInfo=None)
+
+
+def normalize_state(state):
+    state.setdefault('identityProfiles', [])
+    state['schemaVersion'] = 3
+    for row in state['issues'] + state['tasks']:
+        for key, value in CREATION_DEFAULTS.items():
+            row.setdefault(key, value)
+    return state
+
+
+def identity(state, identifier):
+    row = next((x for x in state.get('identityProfiles', []) if x['id'] == identifier), None)
+    require(row is not None, '记录身份不存在，请先创建或重新选择', 404)
+    return row
+
+
+def save_identity(state, identifier, values):
+    old = identity(state, identifier) if identifier else None
+    row = dict(old) if old else dict(id=str(uuid4()), createdAt=now())
+    row.update(values)
+    require(row.get('kind') in ['person','agent'], '身份类型无效')
+    row['name'] = text(row.get('name'), '身份名称', 60, True)
+    require(row.get('via') in ['manual','claude_code','workbuddy','codex','deepseek_harness'], '来源无效')
+    require((row['kind']=='person') == (row['via']=='manual'), '人类身份必须使用手动来源，AI身份必须指定AI工具')
+    for key, limit in [('modelName',160),('modelProvider',80)]:
+        row[key] = text(row.get(key,''), key, limit)
+    require(row['kind']=='agent' or not (row['modelName'] or row['modelProvider']), '人类身份不能配置模型')
+    row['updatedAt'] = now()
+    if old: old.update(row)
+    else: state.setdefault('identityProfiles', []).append(row)
+    return row
+
+
+def creation_snapshot(state, context):
+    result = dict(CREATION_DEFAULTS, createdAt=now())
+    if context is None: return result
+    submitter = identity(state, context['identityId'])
+    initiator_id = context.get('initiatedByPersonId')
+    initiator = identity(state, initiator_id) if initiator_id else None
+    if initiator:
+        require(submitter['kind']=='agent' and initiator['kind']=='person', '仅AI代录可以指定人类发起者')
+    model = None
+    if submitter['kind']=='agent':
+        model = context.get('modelInfo')
+        if model is None: model = dict(name=submitter['modelName'], provider=submitter['modelProvider'])
+    else:
+        require(context.get('modelInfo') is None, '手动记录不能携带AI模型')
+    result.update(createdByActorId=submitter['id'], initiatedByPersonId=initiator_id,
+                  creatorName=(initiator or submitter)['name'], createdVia=submitter['via'], modelInfo=model)
+    return result
+
+
+def matches_creation(row, creator='', created_via='', model=''):
+    return ((not creator or (row.get('initiatedByPersonId') or row.get('createdByActorId') or 'unknown')==creator)
+            and (not created_via or row.get('createdVia','unknown')==created_via)
+            and (not model or model.casefold() in (row.get('modelInfo') or {}).get('name','').casefold()))
 
 
 def raw_get(state, kind, identifier):
@@ -105,6 +166,8 @@ def create_issue(state, values, actor):
     for key in ['description', 'resolution', 'nextStep', 'successCriteria', 'treatment', 'verificationMethod',
                 'pauseReason', 'reviewDate', 'pausedFrom', 'closeReason', 'closeType', 'duplicateOf']:
         issue[key] = ''
+    values = dict(values)
+    issue.update(creation_snapshot(state, values.pop('creation', None)))
     update_issue(state, issue, values, actor)
     state['nextIssueNumber'] += 1
     state['issues'].insert(0, issue)
@@ -197,6 +260,8 @@ def started_dependents(state, task):
 
 def create_task(state, values, actor):
     task = dict(id=str(uuid4()), status='待办', issueId=None, due='', required=True, cancelReason='', dependsOn=[], order=0)
+    values = dict(values)
+    task.update(creation_snapshot(state, values.pop('creation', None)))
     update_task(state, task, values, actor, new=True)
     task['order'] = max([-1] + [t['order'] for t in state['tasks'] if t['issueId'] == task['issueId']]) + 1
     state['tasks'].insert(0, task)
@@ -362,6 +427,9 @@ def restore_record(state, kind, identifier, actor):
 
 
 def apply(state, operation, identifier, values, actor):
+    normalize_state(state)
+    if operation in ['create_identity','update_identity']:
+        return save_identity(state, identifier, values)
     if operation in ['delete_issue','delete_task','restore_issue','restore_task']:
         kind = 'issues' if operation.endswith('_issue') else 'tasks'
         return (delete_record if operation.startswith('delete_') else restore_record)(state, kind, identifier, actor)

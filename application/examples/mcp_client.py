@@ -18,7 +18,7 @@ async def run(url, write_demo=False, report=None):
     async with Client(params) as client:
         tools = await client.list_tools()
         evidence['tools'] = [tool.name for tool in tools.tools]
-        assert len(evidence['tools']) == 22
+        assert len(evidence['tools']) == 25
 
         async def call(name, arguments=None, error=False):
             result = await client.call_tool(name, arguments or {})
@@ -52,6 +52,15 @@ async def run(url, write_demo=False, report=None):
                 result = await call(name, dict(ids, body=dict(values, request_id=str(uuid4()), expected_version=revision, actor='MCP隔离验证')))
                 revision = result['revision']
                 return result['resource']
+            human = await write('create_identity', dict(name='Elias（合成验证）',kind='person',via='manual'))
+            agent = await write('create_identity', dict(name='Codex',kind='agent',via='codex',modelName='GPT-6.1 Sol',modelProvider='OpenAI'))
+            await call('list_identities')
+            sample = await write('create_issue', dict(title='Elias + Codex 来源验证',creation=dict(identityId=agent['id'],initiatedByPersonId=human['id'])))
+            assert sample['creatorName']==human['name'] and sample['modelInfo']['name']=='GPT-6.1 Sol'
+            await write('update_identity', dict(modelName='后续模型'), identity_id=agent['id'])
+            assert (await call('get_issue',dict(issue_id=sample['id'])))['item']['modelInfo']['name']=='GPT-6.1 Sol'
+            explicit = await write('create_task',dict(title='MCP模型覆盖',creation=dict(identityId=agent['id'],modelInfo=dict(name='调用实际模型',provider='OpenAI'))))
+            assert (await call('get_task',dict(task_id=explicit['id'])))['item']['modelInfo']['name']=='调用实际模型'
             await write('update_issue', {'tag': 'MCP演示', 'description': '仅包含合成记录'}, issue_id=identifier)
             await write('transition_issue', {'action': 'triage', 'nextStep': '验证全部工具', 'successCriteria': '每个工具可回读'}, issue_id=identifier)
             first = await write('create_task', {'title': 'MCP合成步骤一', 'issueId': identifier})

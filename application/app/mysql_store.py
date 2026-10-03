@@ -29,6 +29,14 @@ TASK_FIELDS = {'id': 'id', 'title': 'title', 'issueId': 'issue_id', 'due': 'due'
                'cancelReason': 'cancel_reason', 'order': 'order_index', 'numberGroup': 'number_group', 'sequence': 'sequence_number', 'deletedAt': 'deleted_at', 'deletionBatch': 'deletion_batch', 'deletedWithIssue': 'deleted_with_issue'}
 
 
+CREATION_FIELDS = {'createdByActorId':'created_by_actor_id','initiatedByPersonId':'initiated_by_person_id',
+                   'creatorName':'creator_name','createdVia':'created_via','createdAt':'created_at','modelInfo':'model_info'}
+ISSUE_FIELDS.update(CREATION_FIELDS)
+TASK_FIELDS.update(CREATION_FIELDS)
+IDENTITY_FIELDS = dict(id='id',name='name',kind='kind',via='via',modelName='model_name',
+                       modelProvider='model_provider',createdAt='created_at',updatedAt='updated_at')
+
+
 def settings(database=None):
     load_environment()
     name = database or os.getenv('DB_NAME', '')
@@ -86,6 +94,8 @@ class MySQLStore:
         state['nextTaskNumbers'] = json.loads(meta['next_task_numbers'])
         cur.execute('SELECT * FROM issues ORDER BY number DESC')
         state['issues'] = [{key: row[column] for key, column in ISSUE_FIELDS.items()} for row in cur.fetchall()]
+        for item in state['issues']:
+            item['modelInfo'] = json.loads(item['modelInfo']) if item['modelInfo'] is not None else None
         index = {p['id']: p for p in state['issues']}
         for issue in state['issues']:
             issue.update(logs=[], history=[], followups=[])
@@ -103,11 +113,14 @@ class MySQLStore:
         state['tasks'] = [{key: row[column] for key, column in TASK_FIELDS.items()} for row in cur.fetchall()]
         tasks = {t['id']: t for t in state['tasks']}
         for task in state['tasks']:
+            task['modelInfo'] = json.loads(task['modelInfo']) if task['modelInfo'] is not None else None
             task['required'] = bool(task['required'])
             task['dependsOn'] = []
         cur.execute('SELECT * FROM task_dependencies WHERE deleted_at IS NULL ORDER BY task_id,position_number')
         for row in cur.fetchall():
             tasks[row['task_id']]['dependsOn'].append(row['dependency_id'])
+        cur.execute('SELECT * FROM identity_profiles ORDER BY created_at,id')
+        state['identityProfiles'] = [{key: row[column] for key,column in IDENTITY_FIELDS.items()} for row in cur.fetchall()]
         return dict(revision=meta['revision'], data=state)
 
     def read(self):
@@ -124,9 +137,13 @@ class MySQLStore:
         columns = ','.join('`'+column+'`' for column in fields.values())
         placeholders = ','.join(['%s'] * len(fields))
         updates = ','.join('`'+column+'`=VALUES(`'+column+'`)' for key, column in fields.items() if key != 'id')
-        cur.execute(f'INSERT INTO `{table}` ({columns}) VALUES ({placeholders}) ON DUPLICATE KEY UPDATE {updates}', tuple(item.get(key) for key in fields))
+        cur.execute(f'INSERT INTO `{table}` ({columns}) VALUES ({placeholders}) ON DUPLICATE KEY UPDATE {updates}', tuple(dumps(item[key]) if key=='modelInfo' and item.get(key) is not None else item.get(key) for key in fields))
 
     def _persist(self, cur, state, previous):
+        old_profiles = {p['id']:p for p in previous.get('identityProfiles',[])}
+        for profile in state.get('identityProfiles',[]):
+            if profile != old_profiles.get(profile['id']):
+                self._upsert(cur,'identity_profiles',IDENTITY_FIELDS,profile)
         old_issues = {p['id']: p for p in previous['issues']}
         old_tasks = {t['id']: t for t in previous['tasks']}
         domain.require(set(old_issues) <= {p['id'] for p in state['issues']} and set(old_tasks) <= {t['id'] for t in state['tasks']}, '业务记录只能软删除，不得移除实体', 409)

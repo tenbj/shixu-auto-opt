@@ -5,10 +5,39 @@ class Write(BaseModel):
     model_config = ConfigDict(extra='forbid', str_strip_whitespace=True)
     request_id: str = Field(min_length=8, max_length=120, description='同一次请求重试使用同号，内容改变须换号')
     expected_version: int = Field(ge=0, strict=True, description='GET /api/workspace 返回的全局 revision')
-    actor: str = Field(default='我', min_length=1, max_length=80, description='审计标签，不代表认证身份')
+    actor: str = Field(default='未指定', min_length=1, max_length=80, description='审计标签，不代表认证身份')
+
+
+class ModelInfo(BaseModel):
+    model_config = ConfigDict(extra='forbid', str_strip_whitespace=True)
+    name: str = Field(default='', max_length=160)
+    provider: str = Field(default='', max_length=80)
+
+
+class CreationInput(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    identityId: str = Field(min_length=1, max_length=36, description='实际提交的人或AI身份ID；先查询或创建身份')
+    initiatedByPersonId: str | None = Field(default=None, max_length=36, description='仅AI代录时指定人类发起者')
+    modelInfo: ModelInfo | None = Field(default=None, description='省略则用AI身份默认模型；传空对象明确表示模型未提供')
+
+
+class IdentityCreate(Write):
+    name: str = Field(min_length=1, max_length=60)
+    kind: Literal['person', 'agent']
+    via: Literal['manual', 'claude_code', 'workbuddy', 'codex', 'deepseek_harness'] = 'manual'
+    modelName: str = Field(default='', max_length=160)
+    modelProvider: str = Field(default='', max_length=80)
+
+
+class IdentityUpdate(Write):
+    name: str | None = Field(default=None, min_length=1, max_length=60)
+    via: Literal['manual', 'claude_code', 'workbuddy', 'codex', 'deepseek_harness'] | None = None
+    modelName: str | None = Field(default=None, max_length=160)
+    modelProvider: str | None = Field(default=None, max_length=80)
 
 
 class IssueCreate(Write):
+    creation: CreationInput | None = None
     title: str = Field(min_length=1, max_length=160)
     description: str = Field(default='', max_length=5000)
     priority: Literal['高', '中', '低'] = '中'
@@ -41,6 +70,7 @@ class Followup(Write):
 
 
 class TaskCreate(Write):
+    creation: CreationInput | None = None
     title: str = Field(min_length=1, max_length=160)
     issueId: str | None = Field(default=None, max_length=120)
     due: str = Field(default='', max_length=10)

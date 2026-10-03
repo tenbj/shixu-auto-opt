@@ -25,5 +25,9 @@ jobs:
         working-directory: ${{ env.SYSTEM_DIR }}
       - run: python scripts/generate_docs.py
         working-directory: ${{ env.SYSTEM_DIR }}
+      - run: python scripts/generate_diagrams.py
+        working-directory: ${{ env.SYSTEM_DIR }}
+      - run: python scripts/check_diagrams.py
+        working-directory: ${{ env.SYSTEM_DIR }}
       - run: python scripts/build_release.py
         working-directory: ${{ env.SYSTEM_DIR }}

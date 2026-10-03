@@ -1,10 +1,10 @@
 # 拾序 API 中文说明
 
-版本 2.2.1 · 基地址 http://127.0.0.1:8765 · UTF-8 JSON。在线交互文档 `/docs`，机器Schema `/openapi.json`。
+版本 2.3.0 · 基地址 http://127.0.0.1:8765 · UTF-8 JSON。在线交互文档 `/docs`，机器Schema `/openapi.json`。
 
 ## 并发、幂等与错误
 
-所有写入携带 `request_id`（8–120字符，推荐UUID）、`expected_version`（当前全局revision）与可选 `actor`（审计标签，默认我）。请求体不接受未声明字段。每个写入是一个MySQL InnoDB事务；返回 `revision`、`resource` 和事务提交时的 `data`。失败不改变数据、审计或版本。
+所有写入携带 `request_id`（8–120字符，推荐UUID）、`expected_version`（当前全局revision）与可选 `actor`（审计标签，默认未指定）。请求体不接受未声明字段。每个写入是一个MySQL InnoDB事务；返回 `revision`、`resource` 和事务提交时的 `data`。失败不改变数据、审计或版本。
 
 同一request_id及完全相同内容重放返回原始成功响应；request_id相同但内容不同返回409。网络超时保持请求内容和编号重试。全局版本是工作台版本，不是单个对象版本；任何对象写入都会递增。
 
@@ -37,11 +37,54 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 
 读取完整工作台与并发版本。MCP：`get_workspace`。
 
+### GET /api/identities
+
+查询通用人类与AI记录身份。MCP：`list_identities`。
+
+### POST /api/identities
+
+创建记录身份与默认工具模型。MCP：`create_identity`。
+
+请求体：`IdentityCreate`；必填：request_id, expected_version, name, kind。
+
+| 字段 | 约束/默认 |
+|---|---|
+| `request_id` | {"type": "string", "maxLength": 120, "minLength": 8, "description": "同一次请求重试使用同号，内容改变须换号"} |
+| `expected_version` | {"type": "integer", "minimum": 0.0, "description": "GET /api/workspace 返回的全局 revision"} |
+| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "未指定"} |
+| `name` | {"type": "string", "maxLength": 60, "minLength": 1} |
+| `kind` | {"type": "string", "enum": ["person", "agent"]} |
+| `via` | {"type": "string", "enum": ["manual", "claude_code", "workbuddy", "codex", "deepseek_harness"], "default": "manual"} |
+| `modelName` | {"type": "string", "maxLength": 160, "default": ""} |
+| `modelProvider` | {"type": "string", "maxLength": 80, "default": ""} |
+
+写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
+
+### PATCH /api/identities/{identity_id}
+
+修改身份名称与新建默认值，保留历史快照。MCP：`update_identity`。
+
+参数：`identity_id`（path）。
+
+请求体：`IdentityUpdate`；必填：request_id, expected_version。
+
+| 字段 | 约束/默认 |
+|---|---|
+| `request_id` | {"type": "string", "maxLength": 120, "minLength": 8, "description": "同一次请求重试使用同号，内容改变须换号"} |
+| `expected_version` | {"type": "integer", "minimum": 0.0, "description": "GET /api/workspace 返回的全局 revision"} |
+| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "未指定"} |
+| `name` | {"anyOf": [{"type": "string", "maxLength": 60, "minLength": 1}, {"type": "null"}]} |
+| `via` | {"anyOf": [{"type": "string", "enum": ["manual", "claude_code", "workbuddy", "codex", "deepseek_harness"]}, {"type": "null"}]} |
+| `modelName` | {"anyOf": [{"type": "string", "maxLength": 160}, {"type": "null"}]} |
+| `modelProvider` | {"anyOf": [{"type": "string", "maxLength": 80}, {"type": "null"}]} |
+
+写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
+
 ### GET /api/issues
 
 查询问题列表。MCP：`list_issues`。
 
-参数：`q`（query）；`status`（query）；`priority`（query）；`tag`（query）。
+参数：`q`（query）；`status`（query）；`priority`（query）；`tag`（query）；`creator`（query）；`created_via`（query）；`model`（query）。
 
 ### GET /api/issues/{issue_id}
 
@@ -59,7 +102,8 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 |---|---|
 | `request_id` | {"type": "string", "maxLength": 120, "minLength": 8, "description": "同一次请求重试使用同号，内容改变须换号"} |
 | `expected_version` | {"type": "integer", "minimum": 0.0, "description": "GET /api/workspace 返回的全局 revision"} |
-| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "我"} |
+| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "未指定"} |
+| `creation` | {"anyOf": [{"$ref": "#/components/schemas/CreationInput"}, {"type": "null"}]} |
 | `title` | {"type": "string", "maxLength": 160, "minLength": 1} |
 | `description` | {"type": "string", "maxLength": 5000, "default": ""} |
 | `priority` | {"type": "string", "enum": ["高", "中", "低"], "default": "中"} |
@@ -79,7 +123,7 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 |---|---|
 | `request_id` | {"type": "string", "maxLength": 120, "minLength": 8, "description": "同一次请求重试使用同号，内容改变须换号"} |
 | `expected_version` | {"type": "integer", "minimum": 0.0, "description": "GET /api/workspace 返回的全局 revision"} |
-| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "我"} |
+| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "未指定"} |
 | `title` | {"anyOf": [{"type": "string", "maxLength": 160, "minLength": 1}, {"type": "null"}]} |
 | `description` | {"anyOf": [{"type": "string", "maxLength": 5000}, {"type": "null"}]} |
 | `priority` | {"anyOf": [{"type": "string", "enum": ["高", "中", "低"]}, {"type": "null"}]} |
@@ -99,7 +143,7 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 |---|---|
 | `request_id` | {"type": "string", "maxLength": 120, "minLength": 8, "description": "同一次请求重试使用同号，内容改变须换号"} |
 | `expected_version` | {"type": "integer", "minimum": 0.0, "description": "GET /api/workspace 返回的全局 revision"} |
-| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "我"} |
+| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "未指定"} |
 | `action` | {"type": "string", "enum": ["triage", "start", "verify", "resolve", "reject", "pause", "resume", "close-issue", "reopen", "retriage"]} |
 | `reason` | {"type": "string", "maxLength": 5000, "default": ""} |
 | `nextStep` | {"type": "string", "maxLength": 5000, "default": ""} |
@@ -126,7 +170,7 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 |---|---|
 | `request_id` | {"type": "string", "maxLength": 120, "minLength": 8, "description": "同一次请求重试使用同号，内容改变须换号"} |
 | `expected_version` | {"type": "integer", "minimum": 0.0, "description": "GET /api/workspace 返回的全局 revision"} |
-| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "我"} |
+| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "未指定"} |
 | `content` | {"type": "string", "maxLength": 5000, "minLength": 1} |
 
 写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
@@ -135,7 +179,7 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 
 查询行动列表。MCP：`list_tasks`。
 
-参数：`issue_id`（query）；`status`（query）。
+参数：`issue_id`（query）；`status`（query）；`creator`（query）；`created_via`（query）；`model`（query）。
 
 ### GET /api/tasks/{task_id}
 
@@ -153,7 +197,8 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 |---|---|
 | `request_id` | {"type": "string", "maxLength": 120, "minLength": 8, "description": "同一次请求重试使用同号，内容改变须换号"} |
 | `expected_version` | {"type": "integer", "minimum": 0.0, "description": "GET /api/workspace 返回的全局 revision"} |
-| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "我"} |
+| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "未指定"} |
+| `creation` | {"anyOf": [{"$ref": "#/components/schemas/CreationInput"}, {"type": "null"}]} |
 | `title` | {"type": "string", "maxLength": 160, "minLength": 1} |
 | `issueId` | {"anyOf": [{"type": "string", "maxLength": 120}, {"type": "null"}]} |
 | `due` | {"type": "string", "maxLength": 10, "default": ""} |
@@ -173,7 +218,7 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 |---|---|
 | `request_id` | {"type": "string", "maxLength": 120, "minLength": 8, "description": "同一次请求重试使用同号，内容改变须换号"} |
 | `expected_version` | {"type": "integer", "minimum": 0.0, "description": "GET /api/workspace 返回的全局 revision"} |
-| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "我"} |
+| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "未指定"} |
 | `title` | {"anyOf": [{"type": "string", "maxLength": 160, "minLength": 1}, {"type": "null"}]} |
 | `issueId` | {"anyOf": [{"type": "string", "maxLength": 120}, {"type": "null"}]} |
 | `due` | {"anyOf": [{"type": "string", "maxLength": 10}, {"type": "null"}]} |
@@ -193,7 +238,7 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 |---|---|
 | `request_id` | {"type": "string", "maxLength": 120, "minLength": 8, "description": "同一次请求重试使用同号，内容改变须换号"} |
 | `expected_version` | {"type": "integer", "minimum": 0.0, "description": "GET /api/workspace 返回的全局 revision"} |
-| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "我"} |
+| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "未指定"} |
 | `status` | {"type": "string", "enum": ["待办", "进行中", "已完成", "已取消"]} |
 | `reason` | {"type": "string", "maxLength": 5000, "default": ""} |
 
@@ -211,7 +256,7 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 |---|---|
 | `request_id` | {"type": "string", "maxLength": 120, "minLength": 8, "description": "同一次请求重试使用同号，内容改变须换号"} |
 | `expected_version` | {"type": "integer", "minimum": 0.0, "description": "GET /api/workspace 返回的全局 revision"} |
-| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "我"} |
+| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "未指定"} |
 | `dependsOn` | {"items": {"type": "string"}, "type": "array", "maxItems": 100} |
 
 写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
@@ -228,7 +273,7 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 |---|---|
 | `request_id` | {"type": "string", "maxLength": 120, "minLength": 8, "description": "同一次请求重试使用同号，内容改变须换号"} |
 | `expected_version` | {"type": "integer", "minimum": 0.0, "description": "GET /api/workspace 返回的全局 revision"} |
-| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "我"} |
+| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "未指定"} |
 | `target_id` | {"type": "string", "maxLength": 120, "minLength": 1} |
 | `after` | {"type": "boolean", "default": false} |
 
@@ -250,7 +295,7 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 |---|---|
 | `request_id` | {"type": "string", "maxLength": 120, "minLength": 8, "description": "同一次请求重试使用同号，内容改变须换号"} |
 | `expected_version` | {"type": "integer", "minimum": 0.0, "description": "GET /api/workspace 返回的全局 revision"} |
-| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "我"} |
+| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "未指定"} |
 
 写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
 
@@ -266,7 +311,7 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 |---|---|
 | `request_id` | {"type": "string", "maxLength": 120, "minLength": 8, "description": "同一次请求重试使用同号，内容改变须换号"} |
 | `expected_version` | {"type": "integer", "minimum": 0.0, "description": "GET /api/workspace 返回的全局 revision"} |
-| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "我"} |
+| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "未指定"} |
 
 写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
 
@@ -282,7 +327,7 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 |---|---|
 | `request_id` | {"type": "string", "maxLength": 120, "minLength": 8, "description": "同一次请求重试使用同号，内容改变须换号"} |
 | `expected_version` | {"type": "integer", "minimum": 0.0, "description": "GET /api/workspace 返回的全局 revision"} |
-| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "我"} |
+| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "未指定"} |
 
 写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
 
@@ -298,7 +343,7 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 |---|---|
 | `request_id` | {"type": "string", "maxLength": 120, "minLength": 8, "description": "同一次请求重试使用同号，内容改变须换号"} |
 | `expected_version` | {"type": "integer", "minimum": 0.0, "description": "GET /api/workspace 返回的全局 revision"} |
-| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "我"} |
+| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "未指定"} |
 
 写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
 
@@ -312,8 +357,22 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 
 导出全部问题行动与版本。MCP：`export_workspace`。
 
+## 通用记录身份与创建快照
+
+身份保存在服务端identityProfiles；GET/POST/PATCH /api/identities 查询、新增、编辑。kind=person时via必须manual且模型为空；kind=agent时via为claude_code/workbuddy/codex/deepseek_harness，模型可选。kind不可修改；名字或默认模型变更仅影响新记录。
+
+创建问题/行动可带creation={identityId,initiatedByPersonId,modelInfo:{name,provider}}。identityId是实际提交身份；initiatedByPersonId仅允许AI代录时指向人。modelInfo省略或null使用身份默认值；空对象清空模型（显示模型未提供），每次调用可显式覆盖。工具不能推导模型。手动创建不能携带模型或发起者。
+
+服务端输出createdByActorId、initiatedByPersonId、creatorName、createdVia、createdAt和modelInfo。creatorName取人类发起者或提交者当时名称；createdAt由服务器生成UTC。Elias委托Codex时显示Elias 经 Codex 创建 · GPT-6.1 Sol。这是请求声明的来源快照，并非认证或运行模型自动探测。
+
+普通PATCH不接受创建字段。改名、编辑内容、删除恢复不会修改创建快照。关联行动使用本次提交身份，不继承所属问题。兼容旧客户端不传creation时来源unknown，创建时间仍为服务器时间；迁移历史记录的时间保持NULL，不猜测。
+
+问题/行动列表支持creator（人类发起者优先，否则实际提交者ID；unknown筛选历史未知）、created_via和model（模型名称不区分大小写子串）组合筛选。返回及导出包含快照、身份列表；当前选中身份ID只保存于该浏览器。
+
+identity_profiles与问题/行动的身份ID为历史逻辑引用，由领域层创建时校验，不定义物理外键；独立保存名称、来源与model_info JSON，避免默认配置变化污染历史。
+
 ## 示例与边界
 
 只读：`python examples/api_client.py`。合成写入：加 `--write-demo`。浏览器示例：服务运行后访问 `/examples/`。
 
-本版为单人工作台，支持显式配置0.0.0.0监听与内网Host允许列表；actor不是身份认证。正式存储为用户配置的MySQL专属新库，实体分表保存；SQLite仅用于隔离测试。提供回收站软删除与恢复，依赖关系移除也是软删除，数据库9表DELETE触发器与运行时SQL防护阻止物理删除。没有永久删除、导入、上传、登录或离线跨设备同步API。完整工作台/导出包含回收站，普通列表和详情仅限有效记录。恢复必要行动可重开验证，删除问题/恢复问题均原子处理同批关联行动。审计分页使用after=最后一条revision继续查询。完整备份使用MySQL专属库备份，页面JSON不含幂等表。
+本版为共享工作台，支持显式配置0.0.0.0监听与内网Host允许列表；actor不是身份认证。正式存储为用户配置的MySQL专属新库，实体分表保存；SQLite仅用于隔离测试。提供回收站软删除与恢复，依赖关系移除也是软删除，数据库10表DELETE触发器与运行时SQL防护阻止物理删除。没有永久删除、导入、上传、登录或离线跨设备同步API。完整工作台/导出包含回收站，普通列表和详情仅限有效记录。恢复必要行动可重开验证，删除问题/恢复问题均原子处理同批关联行动。审计分页使用after=最后一条revision继续查询。完整备份使用MySQL专属库备份，页面JSON不含幂等表。

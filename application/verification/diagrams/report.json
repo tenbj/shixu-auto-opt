@@ -15,7 +15,7 @@
     "unique": true,
     "integrity": true,
     "crowfeet": true,
-    "tables": 9,
+    "tables": 10,
     "relations": 6
   },
   "collapsed": {
@@ -27,11 +27,19 @@
     "unique": true,
     "integrity": true,
     "crowfeet": true,
-    "tables": 9,
+    "tables": 10,
     "relations": 6
   },
   "browser_errors": [],
   "external_requests": [],
+  "live_schema": {
+    "status": "pass",
+    "tables": 10,
+    "columns": 89,
+    "foreign_keys": 6,
+    "business_rows_read": 0,
+    "writes": 0
+  },
   "status": "pass",
   "passed": true
 }

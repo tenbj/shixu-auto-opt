@@ -1,0 +1,95 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "1440: exactly one unknown demo record",
+      "passed": true
+    },
+    {
+      "name": "1440: known samples Codex/GPT-6/OpenAI",
+      "passed": true
+    },
+    {
+      "name": "1440: arbitrary human profile",
+      "passed": true
+    },
+    {
+      "name": "1440: manual defaults",
+      "passed": true
+    },
+    {
+      "name": "1440: AI actor and human initiator and model",
+      "passed": true
+    },
+    {
+      "name": "1440: combined filters",
+      "passed": true
+    },
+    {
+      "name": "1440: immutable creation",
+      "passed": true
+    },
+    {
+      "name": "1440: profile rename keeps old snapshots",
+      "passed": true
+    },
+    {
+      "name": "1440: profile persistence",
+      "passed": true
+    },
+    {
+      "name": "1440: export includes profiles and model",
+      "passed": true
+    },
+    {
+      "name": "1440: no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "390: exactly one unknown demo record",
+      "passed": true
+    },
+    {
+      "name": "390: known samples Codex/GPT-6/OpenAI",
+      "passed": true
+    },
+    {
+      "name": "390: arbitrary human profile",
+      "passed": true
+    },
+    {
+      "name": "390: manual defaults",
+      "passed": true
+    },
+    {
+      "name": "390: AI actor and human initiator and model",
+      "passed": true
+    },
+    {
+      "name": "390: combined filters",
+      "passed": true
+    },
+    {
+      "name": "390: immutable creation",
+      "passed": true
+    },
+    {
+      "name": "390: profile rename keeps old snapshots",
+      "passed": true
+    },
+    {
+      "name": "390: profile persistence",
+      "passed": true
+    },
+    {
+      "name": "390: export includes profiles and model",
+      "passed": true
+    },
+    {
+      "name": "390: no horizontal overflow",
+      "passed": true
+    }
+  ],
+  "errors": [],
+  "scope": "isolated local HTML; desktop/mobile Chromium simulation"
+}
