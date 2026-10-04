@@ -1,0 +1,1183 @@
+{
+  "version": "1.8.0",
+  "page": {
+    "id": "personal-workspace",
+    "states": [
+      "loading",
+      "ready",
+      "editing",
+      "detail",
+      "validating",
+      "success",
+      "empty",
+      "error",
+      "signed_out",
+      "registering",
+      "account_settings",
+      "access_management",
+      "authorizing",
+      "access_issued",
+      "access_revoked",
+      "connection_quick",
+      "connection_prepare",
+      "connection_consent",
+      "connection_denied",
+      "connection_verify",
+      "connection_reload",
+      "connection_error",
+      "connection_unsupported",
+      "connection_ready",
+      "connection_manual",
+      "connection_devices",
+      "connection_public"
+    ],
+    "views": [
+      {
+        "id": "today",
+        "title": "今日概览"
+      },
+      {
+        "id": "issues",
+        "title": "问题池"
+      },
+      {
+        "id": "tasks",
+        "title": "行动看板"
+      },
+      {
+        "id": "analysis",
+        "title": "统计分析",
+        "tabs": [
+          "issues",
+          "tasks"
+        ]
+      },
+      {
+        "id": "review",
+        "title": "复盘记录"
+      },
+      {
+        "id": "settings",
+        "title": "账号设置"
+      },
+      {
+        "id": "connections",
+        "title": "AI接入"
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "field-control",
+      "type": "form-input",
+      "selector": "[data-event-id=\"EVT-FIELD\"]",
+      "events": [
+        "EVT-FIELD"
+      ],
+      "states": [
+        "editing",
+        "validating"
+      ],
+      "requirement_ids": [
+        "REQ-001",
+        "REQ-003",
+        "REQ-005",
+        "REQ-007",
+        "REQ-008",
+        "REQ-009",
+        "REQ-010",
+        "REQ-011",
+        "REQ-012",
+        "REQ-013",
+        "REQ-015",
+        "REQ-017"
+      ]
+    },
+    {
+      "id": "action-control",
+      "type": "reusable-button",
+      "selector": "[data-event-id=\"EVT-ACTION\"]",
+      "events": [
+        "EVT-ACTION"
+      ],
+      "states": [
+        "ready",
+        "detail",
+        "success"
+      ],
+      "requirement_ids": [
+        "REQ-001",
+        "REQ-003",
+        "REQ-004",
+        "REQ-005",
+        "REQ-006",
+        "REQ-007",
+        "REQ-008",
+        "REQ-009",
+        "REQ-010",
+        "REQ-011",
+        "REQ-012",
+        "REQ-013",
+        "REQ-014",
+        "REQ-015",
+        "REQ-016",
+        "REQ-017"
+      ],
+      "variants": {
+        "nav": "切换 today/issues/tasks/review 页面",
+        "new": "新建问题",
+        "new-task": "新建独立或关联行动",
+        "new-linked": "从问题新增行动",
+        "detail": "显示问题及行动与处理记录",
+        "edit-task": "编辑行动",
+        "edit-issue": "编辑问题",
+        "close": "取消并关闭弹窗",
+        "toggle": "完成/重开行动；必要时重开问题",
+        "advance": "待办与进行中切换",
+        "resolve": "已解决",
+        "reopen": "已解决重开到处理中；已关闭重开到待梳理",
+        "export": "下载当前JSON记录",
+        "triage": "待处理",
+        "start": "处理中",
+        "verify": "待验证",
+        "reject": "处理中",
+        "pause": "已暂缓",
+        "resume": "pausedFrom",
+        "close-issue": "已关闭",
+        "retriage": "待梳理",
+        "cancel-task": "取消行动并填写理由",
+        "status-filter": "七状态筛选",
+        "followup": "打开问题跟进输入",
+        "edit-background": "只编辑description并返回详情",
+        "overview-state": "清除旧条件，按状态打开问题池",
+        "overview-category": "清除旧条件，按分类打开问题池",
+        "analysis-tab": "切换问题/行动分析",
+        "overview-task-status": "按行动状态进入看板",
+        "overview-task-due": "按未完成行动时间分组进入看板",
+        "clear-task-filter": "清除看板筛选",
+        "edit-attributes": "编辑优先级和分类",
+        "workflow-guide": "全局流转图",
+        "issue-guide": "从详情打开流转图，可返回详情",
+        "guide-tab": "切换问题/行动流转图",
+        "mobile-more": "打开帮助、导出与统计菜单",
+        "mobile-task-menu": "打开行动编辑、依赖、调序和取消菜单",
+        "mobile-go-analysis": "关闭菜单并进入统计分析"
+      }
+    },
+    {
+      "id": "filter-control",
+      "type": "search-and-select",
+      "selector": "[data-event-id=\"EVT-FILTER\"]",
+      "events": [
+        "EVT-FILTER"
+      ],
+      "states": [
+        "ready",
+        "empty"
+      ],
+      "requirement_ids": [
+        "REQ-002",
+        "REQ-007",
+        "REQ-008",
+        "REQ-009",
+        "REQ-010",
+        "REQ-011",
+        "REQ-013",
+        "REQ-016",
+        "REQ-017"
+      ]
+    },
+    {
+      "id": "kind-control",
+      "type": "select",
+      "selector": "[data-event-id=\"EVT-KIND\"]",
+      "events": [
+        "EVT-KIND"
+      ],
+      "states": [
+        "editing"
+      ],
+      "requirement_ids": [
+        "REQ-001",
+        "REQ-007",
+        "REQ-008",
+        "REQ-009",
+        "REQ-010",
+        "REQ-011"
+      ]
+    },
+    {
+      "id": "record-form",
+      "type": "form",
+      "selector": "form[data-event-id=\"EVT-SUBMIT\"]",
+      "events": [
+        "EVT-SUBMIT"
+      ],
+      "states": [
+        "editing",
+        "validating",
+        "success",
+        "error"
+      ],
+      "requirement_ids": [
+        "REQ-001",
+        "REQ-003",
+        "REQ-005",
+        "REQ-006",
+        "REQ-007",
+        "REQ-008",
+        "REQ-009",
+        "REQ-010",
+        "REQ-011",
+        "REQ-017"
+      ]
+    },
+    {
+      "id": "board-filter-control",
+      "type": "select",
+      "selector": "[data-event-id=\"EVT-BOARD-FILTER\"]",
+      "events": [
+        "EVT-BOARD-FILTER"
+      ],
+      "states": [
+        "ready",
+        "empty"
+      ],
+      "requirement_ids": [
+        "REQ-016"
+      ]
+    },
+    {
+      "id": "mobile-problem-control",
+      "type": "select",
+      "selector": "[data-event-id=\"EVT-MOBILE-PROBLEM\"]",
+      "events": [
+        "EVT-MOBILE-PROBLEM"
+      ],
+      "states": [
+        "ready",
+        "empty"
+      ],
+      "requirement_ids": [
+        "REQ-016"
+      ]
+    },
+    {
+      "id": "identity-control",
+      "type": "select",
+      "selector": "[data-event-id=\"EVT-IDENTITY\"]",
+      "events": [
+        "EVT-IDENTITY"
+      ],
+      "states": [
+        "ready",
+        "editing",
+        "empty"
+      ],
+      "requirement_ids": [
+        "REQ-017"
+      ]
+    },
+    {
+      "id": "creation-control",
+      "type": "select",
+      "selector": "[data-event-id=\"EVT-CREATION\"]",
+      "events": [
+        "EVT-CREATION"
+      ],
+      "states": [
+        "ready",
+        "editing",
+        "empty"
+      ],
+      "requirement_ids": [
+        "REQ-017"
+      ]
+    },
+    {
+      "id": "creator-filter-control",
+      "type": "select",
+      "selector": "[data-event-id=\"EVT-CREATOR-FILTER\"]",
+      "events": [
+        "EVT-CREATOR-FILTER"
+      ],
+      "states": [
+        "ready",
+        "editing",
+        "empty"
+      ],
+      "requirement_ids": [
+        "REQ-017"
+      ]
+    },
+    {
+      "id": "account-control",
+      "type": "account-and-access-control",
+      "selector": "[data-event-id=\"EVT-ACCOUNT\"]",
+      "events": [
+        "EVT-ACCOUNT"
+      ],
+      "states": [
+        "signed_out",
+        "registering",
+        "ready",
+        "account_settings",
+        "access_management",
+        "authorizing",
+        "access_issued",
+        "access_revoked",
+        "error"
+      ],
+      "requirement_ids": [
+        "REQ-018",
+        "REQ-019",
+        "REQ-020",
+        "REQ-021"
+      ]
+    },
+    {
+      "id": "ai-connect-control",
+      "type": "ai-onboarding",
+      "selector": "[data-event-id=\"EVT-AI-CONNECT\"]",
+      "events": [
+        "EVT-AI-CONNECT"
+      ],
+      "states": [
+        "connection_quick",
+        "connection_prepare",
+        "connection_consent",
+        "connection_denied",
+        "connection_verify",
+        "connection_reload",
+        "connection_error",
+        "connection_unsupported",
+        "connection_ready",
+        "connection_manual",
+        "connection_devices",
+        "connection_public"
+      ],
+      "requirement_ids": [
+        "REQ-022",
+        "REQ-023",
+        "REQ-024",
+        "REQ-025"
+      ]
+    }
+  ],
+  "entity_states": {
+    "issue": [
+      "待梳理",
+      "待处理",
+      "处理中",
+      "待验证",
+      "已解决",
+      "已暂缓",
+      "已关闭"
+    ],
+    "task": [
+      "待办",
+      "进行中",
+      "已完成",
+      "已取消"
+    ]
+  },
+  "notes": "组件是复用组件定义；实例通过data-action与data-id识别。表单输入通过name与所属form识别，提交时统一读取，事件委托绑定在document。",
+  "issue_transitions": {
+    "triage": {
+      "from": [
+        "待梳理"
+      ],
+      "to": "待处理",
+      "required": [
+        "nextStep",
+        "successCriteria"
+      ]
+    },
+    "start": {
+      "from": [
+        "待处理"
+      ],
+      "to": "处理中",
+      "guard": "nextStep与successCriteria已填写"
+    },
+    "verify": {
+      "from": [
+        "待梳理",
+        "待处理",
+        "处理中"
+      ],
+      "to": "待验证",
+      "required": [
+        "successCriteria",
+        "treatment",
+        "verificationMethod"
+      ],
+      "guard": "无未完成必要行动；前两种源状态仅在零关联行动时允许直接观察验证"
+    },
+    "resolve": {
+      "from": [
+        "待验证"
+      ],
+      "to": "已解决",
+      "required": [
+        "resolution"
+      ],
+      "guard": "无未完成必要行动"
+    },
+    "reject": {
+      "from": [
+        "待验证"
+      ],
+      "to": "处理中",
+      "required": [
+        "reason"
+      ]
+    },
+    "pause": {
+      "from": [
+        "待梳理",
+        "待处理",
+        "处理中",
+        "待验证"
+      ],
+      "to": "已暂缓",
+      "required": [
+        "reason",
+        "reviewDate"
+      ],
+      "guard": "回看日期不得早于今天；保存pausedFrom"
+    },
+    "resume": {
+      "from": [
+        "已暂缓"
+      ],
+      "to": "pausedFrom",
+      "guard": "恢复待验证时若有未完成必要行动则退回处理中"
+    },
+    "close-issue": {
+      "from": [
+        "待梳理",
+        "待处理",
+        "处理中",
+        "待验证",
+        "已暂缓"
+      ],
+      "to": "已关闭",
+      "required": [
+        "reason",
+        "closeType"
+      ],
+      "guard": "重复需duplicateOf，存在未完成行动需taskPolicy=detach或cancel"
+    },
+    "reopen": {
+      "from": [
+        "已解决",
+        "已关闭"
+      ],
+      "to": "已解决重开到处理中；已关闭重开到待梳理",
+      "required": [
+        "reason"
+      ]
+    },
+    "retriage": {
+      "from": [
+        "待处理"
+      ],
+      "to": "待梳理",
+      "required": [
+        "reason"
+      ]
+    }
+  },
+  "followup_fields": {
+    "id": "string",
+    "content": "trimmed text, 1..5000",
+    "at": "ISO timestamp",
+    "actor": "当前使用者昵称"
+  },
+  "distribution": {
+    "scope": "all issues including resolved, deferred and closed",
+    "position": "analysis page, issues tab; today has entry link only",
+    "metrics": [
+      "count",
+      "rounded percentage"
+    ],
+    "empty": "zero safe; no category data message",
+    "category_source": "distinct trimmed issue.tag, blank becomes 未分类"
+  },
+  "action_distribution": {
+    "scope_status": "all tasks",
+    "scope_due": "pending tasks, includes deferred-parent tasks",
+    "due_groups": [
+      "已逾期",
+      "今天到期",
+      "未来到期",
+      "未设日期"
+    ]
+  },
+  "workflow_guide": {
+    "presentation": "SVG overview plus collapsed rules",
+    "tabs": [
+      "issues",
+      "tasks"
+    ],
+    "mobile": "local horizontal scrolling",
+    "read_only": true
+  },
+  "mobile_presentation": {
+    "breakpoint": 700,
+    "navigation": "fixed-bottom-five-items",
+    "tasks": "card-list",
+    "issue_selection": "select",
+    "calendar": "month-agenda",
+    "detail": "fullscreen-dialog",
+    "storage_key": "shixu-creator-prototype-v2"
+  },
+  "creation_identity": {
+    "fields": [
+      "createdByActorId",
+      "initiatedByPersonId",
+      "createdVia",
+      "createdAt",
+      "modelInfo",
+      "creatorName"
+    ],
+    "immutable_on_edit": true,
+    "legacy": "unknown",
+    "source_options": [
+      "manual",
+      "claude_code",
+      "workbuddy",
+      "codex",
+      "deepseek_harness",
+      "unknown"
+    ],
+    "prototype_only": "client-selected identity; not authenticated",
+    "modelInfo": {
+      "name": "actual model name/id or empty",
+      "provider": "actual provider or empty",
+      "unknown_label": "模型未提供",
+      "manual": null
+    },
+    "profiles": {
+      "kind": [
+        "person",
+        "agent"
+      ],
+      "name": "custom display name",
+      "active": "persisted profile id",
+      "immutable_record": "creatorName snapshot"
+    }
+  },
+  "responsive": {
+    "mode": "adaptive",
+    "mobile_breakpoint": 700,
+    "layouts": {
+      "desktop": "账号卡片下拉与工作台工具二级菜单；AI接入居中弹窗、三Tab，主操作复制给AI",
+      "mobile": "账号卡片保持最右上；全屏接入弹窗、内部滚动、44px触达；底部业务导航不重复辅助入口"
+    },
+    "viewports": [
+      {
+        "width": 360,
+        "height": 844
+      },
+      {
+        "width": 390,
+        "height": 844
+      },
+      {
+        "width": 430,
+        "height": 844
+      },
+      {
+        "width": 537,
+        "height": 884
+      },
+      {
+        "width": 1440,
+        "height": 1000
+      }
+    ],
+    "scenarios": [
+      {
+        "id": "account-login-error-success",
+        "requirement_ids": [
+          "REQ-018",
+          "REQ-019"
+        ],
+        "steps": [
+          {
+            "action": "fill",
+            "selector": "#account-auth [name=\"password\"]",
+            "value": "wrong"
+          },
+          {
+            "action": "click",
+            "selector": "#account-auth button[type=\"submit\"]"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#account-auth-error",
+            "value": "账号或密码不正确"
+          },
+          {
+            "action": "fill",
+            "selector": "#account-auth [name=\"username\"]",
+            "value": "test"
+          },
+          {
+            "action": "fill",
+            "selector": "#account-auth [name=\"password\"]",
+            "value": "1234"
+          },
+          {
+            "action": "click",
+            "selector": "#account-auth button[type=\"submit\"]"
+          },
+          {
+            "action": "expect_visible",
+            "selector": "#mobile-identity:visible [data-account-action=\"toggle-menu\"],#account-menu:visible [data-account-action=\"toggle-menu\"]"
+          },
+          {
+            "action": "click",
+            "selector": "nav:visible [data-action=\"nav\"][data-id=\"issues\"]"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#app",
+            "value": "重复复制粘贴"
+          }
+        ]
+      },
+      {
+        "id": "workspace-create",
+        "requirement_ids": [
+          "REQ-001",
+          "REQ-019",
+          "REQ-017"
+        ],
+        "steps": [
+          {
+            "action": "fill",
+            "selector": "#account-auth [name=\"username\"]",
+            "value": "test"
+          },
+          {
+            "action": "fill",
+            "selector": "#account-auth [name=\"password\"]",
+            "value": "1234"
+          },
+          {
+            "action": "click",
+            "selector": "#account-auth button[type=\"submit\"]"
+          },
+          {
+            "action": "click",
+            "selector": "nav:visible [data-action=\"nav\"][data-id=\"issues\"]"
+          },
+          {
+            "action": "click",
+            "selector": "#app .pagehead>.primary"
+          },
+          {
+            "action": "fill",
+            "selector": "#modal[open] [name=\"title\"]",
+            "value": "账号独立的问题"
+          },
+          {
+            "action": "click",
+            "selector": "#modal[open] button[type=\"submit\"]"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#app",
+            "value": "账号独立的问题"
+          }
+        ]
+      },
+      {
+        "id": "new-account-empty",
+        "requirement_ids": [
+          "REQ-018",
+          "REQ-019"
+        ],
+        "steps": [
+          {
+            "action": "click",
+            "selector": "#account-auth [data-account-action=\"register-mode\"]"
+          },
+          {
+            "action": "fill",
+            "selector": "#account-auth [name=\"username\"]",
+            "value": "reader"
+          },
+          {
+            "action": "fill",
+            "selector": "#account-auth [name=\"displayName\"]",
+            "value": "新用户"
+          },
+          {
+            "action": "fill",
+            "selector": "#account-auth [name=\"password\"]",
+            "value": "preview-pass"
+          },
+          {
+            "action": "fill",
+            "selector": "#account-auth [name=\"confirm\"]",
+            "value": "preview-pass"
+          },
+          {
+            "action": "click",
+            "selector": "#account-auth button[type=\"submit\"]"
+          },
+          {
+            "action": "click",
+            "selector": "nav:visible [data-action=\"nav\"][data-id=\"issues\"]"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#app",
+            "value": "这里还没有匹配的问题"
+          }
+        ]
+      },
+      {
+        "id": "ai-quick-copy",
+        "requirement_ids": [
+          "REQ-022",
+          "REQ-023"
+        ],
+        "steps": [
+          {
+            "action": "fill",
+            "selector": "#account-auth [name=\"username\"]",
+            "value": "test"
+          },
+          {
+            "action": "fill",
+            "selector": "#account-auth [name=\"password\"]",
+            "value": "1234"
+          },
+          {
+            "action": "click",
+            "selector": "#account-auth button[type=\"submit\"]"
+          },
+          {
+            "action": "click",
+            "selector": "[data-account-action=\"toggle-menu\"]:visible"
+          },
+          {
+            "action": "click",
+            "selector": "#account-dropdown [data-account-action=\"connections\"]"
+          },
+          {
+            "action": "select",
+            "selector": "#ai-runtime",
+            "value": "workbuddy"
+          },
+          {
+            "action": "click",
+            "selector": "[data-ai-action=\"copy-prompt\"]:visible"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#ai-prompt",
+            "value": "WorkBuddy"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#ai-prompt",
+            "value": "待上线"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#ai-prompt",
+            "value": "不要让我把密码"
+          }
+        ]
+      },
+      {
+        "id": "ai-authorize-verify-manage",
+        "requirement_ids": [
+          "REQ-024",
+          "REQ-025"
+        ],
+        "steps": [
+          {
+            "action": "fill",
+            "selector": "#account-auth [name=\"username\"]",
+            "value": "test"
+          },
+          {
+            "action": "fill",
+            "selector": "#account-auth [name=\"password\"]",
+            "value": "1234"
+          },
+          {
+            "action": "click",
+            "selector": "#account-auth button[type=\"submit\"]"
+          },
+          {
+            "action": "click",
+            "selector": "[data-account-action=\"toggle-menu\"]:visible"
+          },
+          {
+            "action": "click",
+            "selector": "#account-dropdown [data-account-action=\"connections\"]"
+          },
+          {
+            "action": "click",
+            "selector": "[data-ai-action=\"start-demo\"]:visible"
+          },
+          {
+            "action": "click",
+            "selector": "[data-ai-action=\"authorize\"]:visible"
+          },
+          {
+            "action": "click",
+            "selector": "#ai-consent-form button[type=\"submit\"]"
+          },
+          {
+            "action": "click",
+            "selector": "[data-ai-action=\"verify\"]:visible"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#account-tabpanel",
+            "value": "已准备好"
+          },
+          {
+            "action": "click",
+            "selector": "[data-ai-action=\"devices\"]:visible"
+          },
+          {
+            "action": "click",
+            "selector": ".ai-device:last-of-type [data-ai-action=\"rename\"]"
+          },
+          {
+            "action": "fill",
+            "selector": "#ai-rename-form [name=\"name\"]",
+            "value": "办公电脑"
+          },
+          {
+            "action": "click",
+            "selector": "#ai-rename-form button[type=\"submit\"]"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#account-tabpanel",
+            "value": "办公电脑"
+          },
+          {
+            "action": "click",
+            "selector": ".ai-device:last-of-type [data-account-action=\"revoke-access\"]"
+          },
+          {
+            "action": "click",
+            "selector": "[data-account-action=\"confirm-revoke\"]:visible"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#account-tabpanel",
+            "value": "已撤销"
+          }
+        ]
+      },
+      {
+        "id": "ai-deny-readonly",
+        "requirement_ids": [
+          "REQ-024"
+        ],
+        "steps": [
+          {
+            "action": "fill",
+            "selector": "#account-auth [name=\"username\"]",
+            "value": "test"
+          },
+          {
+            "action": "fill",
+            "selector": "#account-auth [name=\"password\"]",
+            "value": "1234"
+          },
+          {
+            "action": "click",
+            "selector": "#account-auth button[type=\"submit\"]"
+          },
+          {
+            "action": "click",
+            "selector": "[data-account-action=\"toggle-menu\"]:visible"
+          },
+          {
+            "action": "click",
+            "selector": "#account-dropdown [data-account-action=\"connections\"]"
+          },
+          {
+            "action": "click",
+            "selector": "[data-ai-action=\"start-demo\"]:visible"
+          },
+          {
+            "action": "click",
+            "selector": "[data-ai-action=\"authorize\"]:visible"
+          },
+          {
+            "action": "click",
+            "selector": "[data-ai-action=\"deny\"]:visible"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#account-tabpanel",
+            "value": "没有新增设备"
+          },
+          {
+            "action": "click",
+            "selector": "[data-ai-action=\"authorize\"]:visible"
+          },
+          {
+            "action": "select",
+            "selector": "#ai-consent-form [name=\"scope\"]",
+            "value": "read"
+          },
+          {
+            "action": "click",
+            "selector": "#ai-consent-form button[type=\"submit\"]"
+          },
+          {
+            "action": "click",
+            "selector": "[data-ai-action=\"verify\"]:visible"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#account-tabpanel",
+            "value": "记录新问题需要重新确认读写权限"
+          }
+        ]
+      },
+      {
+        "id": "ai-fail-retry",
+        "requirement_ids": [
+          "REQ-024"
+        ],
+        "steps": [
+          {
+            "action": "fill",
+            "selector": "#account-auth [name=\"username\"]",
+            "value": "test"
+          },
+          {
+            "action": "fill",
+            "selector": "#account-auth [name=\"password\"]",
+            "value": "1234"
+          },
+          {
+            "action": "click",
+            "selector": "#account-auth button[type=\"submit\"]"
+          },
+          {
+            "action": "click",
+            "selector": "[data-account-action=\"toggle-menu\"]:visible"
+          },
+          {
+            "action": "click",
+            "selector": "#account-dropdown [data-account-action=\"connections\"]"
+          },
+          {
+            "action": "click",
+            "selector": "[data-ai-action=\"start-demo\"]:visible"
+          },
+          {
+            "action": "click",
+            "selector": "[data-ai-action=\"authorize\"]:visible"
+          },
+          {
+            "action": "click",
+            "selector": "#ai-consent-form button[type=\"submit\"]"
+          },
+          {
+            "action": "click",
+            "selector": "[data-ai-action=\"fail\"]:visible"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#account-tabpanel",
+            "value": "连接还没有验证成功"
+          },
+          {
+            "action": "click",
+            "selector": "[data-ai-action=\"verify\"]:visible"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#account-tabpanel",
+            "value": "已准备好"
+          }
+        ]
+      },
+      {
+        "id": "ai-reload",
+        "requirement_ids": [
+          "REQ-024"
+        ],
+        "steps": [
+          {
+            "action": "fill",
+            "selector": "#account-auth [name=\"username\"]",
+            "value": "test"
+          },
+          {
+            "action": "fill",
+            "selector": "#account-auth [name=\"password\"]",
+            "value": "1234"
+          },
+          {
+            "action": "click",
+            "selector": "#account-auth button[type=\"submit\"]"
+          },
+          {
+            "action": "click",
+            "selector": "[data-account-action=\"toggle-menu\"]:visible"
+          },
+          {
+            "action": "click",
+            "selector": "#account-dropdown [data-account-action=\"connections\"]"
+          },
+          {
+            "action": "click",
+            "selector": "[data-ai-action=\"start-demo\"]:visible"
+          },
+          {
+            "action": "click",
+            "selector": "[data-ai-action=\"authorize\"]:visible"
+          },
+          {
+            "action": "click",
+            "selector": "#ai-consent-form button[type=\"submit\"]"
+          },
+          {
+            "action": "click",
+            "selector": "[data-ai-action=\"reload\"]:visible"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#account-tabpanel",
+            "value": "配置无需重新填写"
+          },
+          {
+            "action": "click",
+            "selector": "[data-ai-action=\"verify\"]:visible"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#account-tabpanel",
+            "value": "已准备好"
+          }
+        ]
+      },
+      {
+        "id": "ai-manual-token",
+        "requirement_ids": [
+          "REQ-023",
+          "REQ-025"
+        ],
+        "steps": [
+          {
+            "action": "fill",
+            "selector": "#account-auth [name=\"username\"]",
+            "value": "test"
+          },
+          {
+            "action": "fill",
+            "selector": "#account-auth [name=\"password\"]",
+            "value": "1234"
+          },
+          {
+            "action": "click",
+            "selector": "#account-auth button[type=\"submit\"]"
+          },
+          {
+            "action": "click",
+            "selector": "[data-account-action=\"toggle-menu\"]:visible"
+          },
+          {
+            "action": "click",
+            "selector": "#account-dropdown [data-account-action=\"connections\"]"
+          },
+          {
+            "action": "click",
+            "selector": "[data-ai-action=\"start-demo\"]:visible"
+          },
+          {
+            "action": "click",
+            "selector": "[data-ai-action=\"unsupported\"]:visible"
+          },
+          {
+            "action": "click",
+            "selector": "[data-ai-action=\"manual\"]:visible"
+          },
+          {
+            "action": "select",
+            "selector": "#ai-config-runtime",
+            "value": "codex"
+          },
+          {
+            "action": "click",
+            "selector": "[data-account-action=\"new-access\"]:visible"
+          },
+          {
+            "action": "fill",
+            "selector": "#account-access-form [name=\"name\"]",
+            "value": "服务器配置"
+          },
+          {
+            "action": "click",
+            "selector": "#account-access-form button[type=\"submit\"]"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#issued-config",
+            "value": "[mcp_servers.shixu]"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#issued-config",
+            "value": "https://shixu.eliasliu.cc/mcp"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#issued-config",
+            "value": "DEMO_"
+          }
+        ]
+      },
+      {
+        "id": "ai-public-guide",
+        "requirement_ids": [
+          "REQ-022",
+          "REQ-023"
+        ],
+        "steps": [
+          {
+            "action": "click",
+            "selector": "[data-ai-action=\"public-help\"]:visible"
+          },
+          {
+            "action": "expect_visible",
+            "selector": "#ai-runtime"
+          },
+          {
+            "action": "click",
+            "selector": "[data-ai-action=\"install-help\"]:visible"
+          },
+          {
+            "action": "click",
+            "selector": "[data-ai-action=\"choose-install\"][data-id=\"workbuddy\"]"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#ai-install-detail",
+            "value": "WorkBuddy"
+          }
+        ]
+      }
+    ]
+  }
+}
