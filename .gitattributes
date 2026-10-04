@@ -1,2 +1,6 @@
 # Frozen prototype hashes must survive Windows checkout unchanged.
 application/reference/*.html -text
+
+# Portable Skill hashes and migration evidence preserve exact source bytes.
+application/skills/** -text
+application/scripts/migrate_custom_tools.py -text

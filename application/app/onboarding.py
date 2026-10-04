@@ -16,8 +16,8 @@ def catalog(request):
     address=mcp_connection(request)['url'];base=address.removesuffix('/mcp')
     bundle['url']=base+'/downloads/'+bundle['filename']
     runtimes=json.loads((ROOT/'docs/connect/runtimes.json').read_text(encoding='utf-8'))
-    return dict(version='1.0',interfaceVersion='3.1.0',mcp=address,guide=base+'/connect.md',
-                skill=bundle,runtimes=runtimes,verificationTool='get_connection_context',
+    return dict(version='1.0',interfaceVersion='3.2.0',mcp=address,guide=base+'/connect.md',
+                skill=bundle,runtimes=runtimes,updates=dict(manifest=base+'/connect/manifest.json',guide=base+'/connect/updates.md',tool='get_connection_updates',mode='user-driven'),verificationTool='get_connection_context',
                 stages=['downloaded','configured','authorized','runtime-loaded','mcp-verified','skill-discoverable'])
 
 def install_onboarding(app):
@@ -26,6 +26,17 @@ def install_onboarding(app):
 
     @app.get('/connect/manifest.json',summary='公开AI接入版本清单')
     def connect_manifest(request:Request):return catalog(request)
+
+    @app.get('/connect/updates.md',summary='已有Skill和MCP更新指南',response_class=PlainTextResponse)
+    def update_guide():
+        return (ROOT/'docs/connect/updates.md').read_text(encoding='utf-8')
+
+    @app.get('/api/connection-updates',summary='读取当前接入版本与更新建议')
+    def connection_updates(request:Request,skill_version:str=Query('',max_length=40),mcp_url:str=Query('',max_length=2048)):
+        data=catalog(request)
+        data['comparison']=dict(skill='unknown' if not skill_version else 'current' if skill_version==data['skill']['version'] else 'different',mcp='unknown' if not mcp_url else 'current' if mcp_url.rstrip('/')==data['mcp'].rstrip('/') else 'different')
+        data['clientChangesApplied']=False
+        return data
 
     @app.get('/connect.md',summary='公开AI接入指南',response_class=PlainTextResponse)
     def connect_guide(request:Request):

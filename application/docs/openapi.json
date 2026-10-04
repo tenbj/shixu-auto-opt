@@ -3,7 +3,7 @@
   "info": {
     "title": "拾序系统 API",
     "description": "账号独立工作台；会话或令牌认证，按账号隔离版本、编号与幂等。",
-    "version": "3.1.0"
+    "version": "3.2.0"
   },
   "paths": {
     "/api/auth/login": {
@@ -803,6 +803,85 @@
         }
       }
     },
+    "/connect/updates.md": {
+      "get": {
+        "summary": "已有Skill和MCP更新指南",
+        "operationId": "update_guide_connect_updates_md_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/connection-updates": {
+      "get": {
+        "summary": "读取当前接入版本与更新建议",
+        "operationId": "connection_updates_api_connection_updates_get",
+        "parameters": [
+          {
+            "name": "skill_version",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 40,
+              "default": "",
+              "title": "Skill Version"
+            }
+          },
+          {
+            "name": "mcp_url",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 2048,
+              "default": "",
+              "title": "Mcp Url"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
+      }
+    },
     "/connect.md": {
       "get": {
         "summary": "公开AI接入指南",
@@ -1008,6 +1087,89 @@
           },
           {
             "SecureAccountSession": []
+          }
+        ]
+      }
+    },
+    "/api/ai-tools": {
+      "get": {
+        "summary": "查询预设及账号自定义AI工具",
+        "operationId": "ai_tools_api_ai_tools_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "添加或复用AI工具，账号内名称不区分大小写",
+        "operationId": "ai_tool_create_api_ai_tools_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AIToolCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "使用网页登录Cookie时必填；业务Bearer请求无需此字段"
           }
         ]
       }
@@ -2426,6 +2588,45 @@
   },
   "components": {
     "schemas": {
+      "AIToolCreate": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 8,
+            "title": "Request Id",
+            "description": "同一次请求重试使用同号，内容改变须换号"
+          },
+          "expected_version": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Expected Version",
+            "description": "GET /api/workspace 返回的全局 revision"
+          },
+          "actor": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Actor",
+            "description": "审计标签，不代表认证身份",
+            "default": "未指定"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Name"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request_id",
+          "expected_version",
+          "name"
+        ],
+        "title": "AIToolCreate"
+      },
       "Access": {
         "properties": {
           "name": {
@@ -2648,15 +2849,22 @@
           },
           "via": {
             "type": "string",
-            "enum": [
-              "manual",
-              "claude_code",
-              "workbuddy",
-              "codex",
-              "deepseek_harness"
-            ],
+            "maxLength": 80,
             "title": "Via",
+            "description": "预设工具、账号内custom:ID或__custom__；后者须同时提供toolName",
             "default": "manual"
+          },
+          "toolName": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Toolname"
           },
           "modelName": {
             "type": "string",
@@ -2721,19 +2929,25 @@
             "anyOf": [
               {
                 "type": "string",
-                "enum": [
-                  "manual",
-                  "claude_code",
-                  "workbuddy",
-                  "codex",
-                  "deepseek_harness"
-                ]
+                "maxLength": 80
               },
               {
                 "type": "null"
               }
             ],
             "title": "Via"
+          },
+          "toolName": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Toolname"
           },
           "modelName": {
             "anyOf": [

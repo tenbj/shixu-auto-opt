@@ -13,6 +13,16 @@
       "expected_error": false
     },
     {
+      "tool": "get_connection_updates",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "list_ai_tools",
+      "passed": true,
+      "expected_error": false
+    },
+    {
       "tool": "list_issues",
       "passed": true,
       "expected_error": false
@@ -44,6 +54,21 @@
     },
     {
       "tool": "add_followup",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "create_ai_tool",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "create_identity",
+      "passed": true,
+      "expected_error": false
+    },
+    {
+      "tool": "create_issue",
       "passed": true,
       "expected_error": false
     },
@@ -196,6 +221,9 @@
   "tools": [
     "get_system_status",
     "get_connection_context",
+    "get_connection_updates",
+    "list_ai_tools",
+    "create_ai_tool",
     "list_identities",
     "create_identity",
     "update_identity",
@@ -223,5 +251,5 @@
   ],
   "backend": "mysql",
   "passed": true,
-  "delivery_id": "d22bcb32-463c-4c00-9e75-c7764eea4afe"
+  "delivery_id": "5c1c2eda-e1c7-4f15-8ba0-e95295f32551"
 }

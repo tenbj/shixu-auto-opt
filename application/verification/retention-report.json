@@ -1,7 +1,7 @@
 {
   "passed": true,
   "backend": "mysql",
-  "guards": 19,
+  "guards": 20,
   "checks": [
     "移除前置保留同一行并标记删除时间",
     "有效依赖过滤已删除关联",
@@ -10,5 +10,5 @@
     "软删除问题保留行动和依赖，恢复有效原关系"
   ],
   "business_production_writes": 0,
-  "delivery_id": "d22bcb32-463c-4c00-9e75-c7764eea4afe"
+  "delivery_id": "5c1c2eda-e1c7-4f15-8ba0-e95295f32551"
 }

@@ -8,6 +8,7 @@ OUT = ROOT / 'static' / 'diagrams'
 OUT.mkdir(parents=True, exist_ok=True)
 
 INFO = {
+    'ai_tools': ('AT','AI工具目录',50,1470,['id','name'],'账号内工具名按casefold后的SHA256唯一；预设工具来自领域常量。身份via及历史created_via是逻辑引用，不建物理外键；工具保留保证历史来源可读。'),
     'identity_profiles': ('IP', '记录身份', 750, 1470, ['id','name','kind','via','model_name'], '通用人/AI身份。问题和行动的created_by_actor_id、initiated_by_person_id是经领域校验的历史逻辑引用，不是物理外键；创建名称、来源、模型保存独立快照，改名或改默认值不追溯更新。'),
     'issues': ('IS', '问题', 750, 70, ['id','number','title','status','created_via','creator_name','model_info','deleted_at'], '七状态问题工作流；软删除保留全部历史与编号。同批恢复；duplicate_of / deleted_with_issue 是逻辑引用，非数据库外键。'),
     'tasks': ('TA', '行动', 750, 710, ['id','issue_id','title','status','created_via','creator_name','model_info','deleted_at'], '软删除保留行动与依赖；随问题删除须同批恢复。deleted_with_issue 为逻辑引用，无新增外键。'),
@@ -32,6 +33,7 @@ INFO.update({
 'account_login_limits':('RL', '登录限流', 50, 2670, ['bucket', 'attempts', 'reset_at'], '认证与账号隔离。owner_id/client_id为应用事务校验的逻辑关联；不是物理外键。会话、令牌、授权码只保存摘要，敏感字段不经列表返回。'),
 })
 DESCRIPTIONS = {
+ 'name_key':'trim后casefold名称的SHA256，账号内去重',
  'access_id':'授权设备逻辑引用','last_seen_at':'最近认证访问Unix时间；非在线状态','verified_at':'通过MCP诊断工具的最近认证时间','runtime_name':'客户端自报名称','runtime_version':'客户端自报版本','skill_version':'客户端自报Skill版本','client_id':'OAuth客户端逻辑引用','resource':'精确绑定的MCP资源地址','digest':'令牌SHA256，不保存明文','expires_at':'Unix到期时间','used':'刷新令牌或授权码已使用','revoked':'撤销标记',
  'name':'自定义身份名称','kind':'person人 / agent AI','via':'手动或AI工具','model_name':'AI身份的默认模型名称/ID','model_provider':'AI身份的默认模型提供方','updated_at':'身份最后编辑的服务器UTC时间','created_by_actor_id':'实际提交身份的历史逻辑引用；非FK','initiated_by_person_id':'AI代录的人类发起者历史逻辑引用；非FK','creator_name':'创建人名称快照；不随身份改名改变','created_via':'创建来源快照；历史缺失为unknown','created_at':'服务器UTC创建时间；迁移历史未知为NULL','model_info':'JSON {name,provider}；手动或历史未知为NULL；AI空值表示未提供',
  'deleted_at':'软删除时间；NULL 为有效记录', 'deletion_batch':'删除批次 UUID；问题与当次关联行动一致', 'deleted_with_issue':'随删除问题的逻辑标识；非 FK；恢复时清空',

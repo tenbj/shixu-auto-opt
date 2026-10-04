@@ -1,0 +1,181 @@
+{
+  "first": {
+    "passed": true,
+    "version": "3.2.0",
+    "added": [
+      "activity.resource_id"
+    ],
+    "preserved_tables": {
+      "access_metadata": {
+        "rows": 33,
+        "sha256": "be60cc1c4702d80367429649d4db829ab2a9e599a8041fa1b76dc32dad7733b4"
+      },
+      "account_access": {
+        "rows": 33,
+        "sha256": "449cc01540d9583df7708174b73ea8e29db225c264ba64ed69643aaddf006304"
+      },
+      "account_login_limits": {
+        "rows": 22,
+        "sha256": "54076fe1bcba136931cb89e50f186bc384aa188c7f803b6ba37ed7306320a052"
+      },
+      "account_sessions": {
+        "rows": 90,
+        "sha256": "0c9f81b5d6cf28c4a81172d4ecd528b912761e99431036c23b1466e5e47dbd70"
+      },
+      "activity": {
+        "rows": 1164,
+        "sha256": "3f495adb06f2eb2d961e4c2e4dcc5c914e534852f22a0983d8eab2694e394611"
+      },
+      "ai_tools": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "app_users": {
+        "rows": 45,
+        "sha256": "93fa4826281fdede85fb4cece00a0b081db41fa975dc9d08dd4fcd4082971949"
+      },
+      "idempotency_requests": {
+        "rows": 1164,
+        "sha256": "63dd6c1d01ac9f3844f0748dd7488ccf79be8ee9535160badcc19271ab0f74d3"
+      },
+      "identity_profiles": {
+        "rows": 72,
+        "sha256": "231fdc96383cd482a15dfe3a9cb5fd93b5815ecb891c08f697c1abe1158d90e2"
+      },
+      "issue_followups": {
+        "rows": 38,
+        "sha256": "c48f1c1e395e56381262dbea970c39d66541e9dfd32d0a7860b09a57eeaefde3"
+      },
+      "issue_history": {
+        "rows": 265,
+        "sha256": "7fa067de5a640fe18b830ed21204c2ed866cd1f59bf052008aa2ec7986983f06"
+      },
+      "issue_logs": {
+        "rows": 1254,
+        "sha256": "c2949c90033942f8a7d01aa92c4e8e0209940d7c3e2b024ee5f4c4f40fe3c215"
+      },
+      "issues": {
+        "rows": 240,
+        "sha256": "8a6c31d93c3193fcece69fe7e58c5c9201d50b0ace953689143f59250e690bb0"
+      },
+      "oauth_clients": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "oauth_codes": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "oauth_pending": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "oauth_refresh_tokens": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "task_dependencies": {
+        "rows": 24,
+        "sha256": "e999144f6cbd6d6a003d2bd3743698b4ef8c8fc093654cdcf43a36b2751ef139"
+      },
+      "tasks": {
+        "rows": 174,
+        "sha256": "a0085dcf6fd0a31f00edbd3b3481d56d7bc9d939c705f70a29423819f033a8f4"
+      },
+      "workspace_meta": {
+        "rows": 45,
+        "sha256": "6038b1f955d78f1209a76bf9ecd00db5f946df2448fbf94de602398dc0f7c41f"
+      }
+    },
+    "backup_created": true
+  },
+  "replay": {
+    "passed": true,
+    "version": "3.2.0",
+    "added": [],
+    "preserved_tables": {
+      "access_metadata": {
+        "rows": 33,
+        "sha256": "be60cc1c4702d80367429649d4db829ab2a9e599a8041fa1b76dc32dad7733b4"
+      },
+      "account_access": {
+        "rows": 33,
+        "sha256": "449cc01540d9583df7708174b73ea8e29db225c264ba64ed69643aaddf006304"
+      },
+      "account_login_limits": {
+        "rows": 22,
+        "sha256": "54076fe1bcba136931cb89e50f186bc384aa188c7f803b6ba37ed7306320a052"
+      },
+      "account_sessions": {
+        "rows": 90,
+        "sha256": "0c9f81b5d6cf28c4a81172d4ecd528b912761e99431036c23b1466e5e47dbd70"
+      },
+      "activity": {
+        "rows": 1164,
+        "sha256": "3f495adb06f2eb2d961e4c2e4dcc5c914e534852f22a0983d8eab2694e394611"
+      },
+      "ai_tools": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "app_users": {
+        "rows": 45,
+        "sha256": "93fa4826281fdede85fb4cece00a0b081db41fa975dc9d08dd4fcd4082971949"
+      },
+      "idempotency_requests": {
+        "rows": 1164,
+        "sha256": "63dd6c1d01ac9f3844f0748dd7488ccf79be8ee9535160badcc19271ab0f74d3"
+      },
+      "identity_profiles": {
+        "rows": 72,
+        "sha256": "231fdc96383cd482a15dfe3a9cb5fd93b5815ecb891c08f697c1abe1158d90e2"
+      },
+      "issue_followups": {
+        "rows": 38,
+        "sha256": "c48f1c1e395e56381262dbea970c39d66541e9dfd32d0a7860b09a57eeaefde3"
+      },
+      "issue_history": {
+        "rows": 265,
+        "sha256": "7fa067de5a640fe18b830ed21204c2ed866cd1f59bf052008aa2ec7986983f06"
+      },
+      "issue_logs": {
+        "rows": 1254,
+        "sha256": "c2949c90033942f8a7d01aa92c4e8e0209940d7c3e2b024ee5f4c4f40fe3c215"
+      },
+      "issues": {
+        "rows": 240,
+        "sha256": "8a6c31d93c3193fcece69fe7e58c5c9201d50b0ace953689143f59250e690bb0"
+      },
+      "oauth_clients": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "oauth_codes": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "oauth_pending": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "oauth_refresh_tokens": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "task_dependencies": {
+        "rows": 24,
+        "sha256": "e999144f6cbd6d6a003d2bd3743698b4ef8c8fc093654cdcf43a36b2751ef139"
+      },
+      "tasks": {
+        "rows": 174,
+        "sha256": "a0085dcf6fd0a31f00edbd3b3481d56d7bc9d939c705f70a29423819f033a8f4"
+      },
+      "workspace_meta": {
+        "rows": 45,
+        "sha256": "6038b1f955d78f1209a76bf9ecd00db5f946df2448fbf94de602398dc0f7c41f"
+      }
+    },
+    "backup_created": true
+  },
+  "passed": true
+}

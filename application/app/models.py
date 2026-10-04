@@ -21,17 +21,23 @@ class CreationInput(BaseModel):
     modelInfo: ModelInfo | None = Field(default=None, description='省略则用AI身份默认模型；传空对象明确表示模型未提供')
 
 
+class AIToolCreate(Write):
+    name: str = Field(min_length=1, max_length=80)
+
+
 class IdentityCreate(Write):
     name: str = Field(min_length=1, max_length=60)
     kind: Literal['person', 'agent']
-    via: Literal['manual', 'claude_code', 'workbuddy', 'codex', 'deepseek_harness'] = 'manual'
+    via: str = Field(default='manual', max_length=80, description='预设工具、账号内custom:ID或__custom__；后者须同时提供toolName')
+    toolName: str | None = Field(default=None, max_length=80)
     modelName: str = Field(default='', max_length=160)
     modelProvider: str = Field(default='', max_length=80)
 
 
 class IdentityUpdate(Write):
     name: str | None = Field(default=None, min_length=1, max_length=60)
-    via: Literal['manual', 'claude_code', 'workbuddy', 'codex', 'deepseek_harness'] | None = None
+    via: str | None = Field(default=None, max_length=80)
+    toolName: str | None = Field(default=None, max_length=80)
     modelName: str | None = Field(default=None, max_length=160)
     modelProvider: str | None = Field(default=None, max_length=80)
 

@@ -17,7 +17,7 @@ def run(url):
     checks=[];errors=[]
     with sync_playwright() as pw:
         browser=pw.chromium.launch(channel='msedge',headless=True)
-        for width in [1440,390]:
+        for width in [1440,360,390,430]:
             page=browser.new_page(viewport=dict(width=width,height=1000 if width==1440 else 844))
             page.set_default_timeout(20000)
             page.on('pageerror',lambda e:errors.append(str(e)))
@@ -30,6 +30,8 @@ def run(url):
                 page.locator('[name="profileName"]').fill(name)
                 if agent:
                     page.locator('[name="profileKind"]').select_option('agent')
+                    page.locator('[name="profileVia"]').select_option('__custom__')
+                    page.locator('[name="profileCustomTool"]').fill('Browser tool '+suffix)
                     page.locator('[name="profileModel"]').fill('GPT-6.1 Sol')
                     page.locator('[name="profileProvider"]').fill('OpenAI')
                 page.locator('#profile-form [type=submit]').click()
@@ -53,7 +55,7 @@ def run(url):
             expect(card.locator('.creator-line')).to_contain_text(human)
             expect(card.locator('.creator-line')).to_contain_text('GPT-6.1 Sol')
             page.locator('[aria-label="按创建人筛选"]').select_option(h['id'])
-            page.locator('[aria-label="按创建来源筛选"]').select_option('codex')
+            page.locator('[aria-label="按创建来源筛选"]').select_option(a['via'])
             expect(page.locator('.issue-card')).to_have_count(1)
             card.locator('[data-action="detail"]').first.click()
             expect(page.locator('dialog[open] .creation-detail')).to_contain_text('OpenAI')
@@ -63,9 +65,12 @@ def run(url):
             page.locator(f'[data-action="edit-profile"][data-id="{a["id"]}"]').click()
             expect(page.locator('[name="profileKind"]')).to_be_disabled()
             page.locator('[name="profileModel"]').fill('后续模型')
+            page.locator('[name="profileVia"]').select_option('codex')
             page.locator('#profile-form [type=submit]').click()
             expect(page.locator('#profile-form')).to_be_hidden();page.locator('[data-account-action=close-account-panel]').click()
             assert api.get('/api/issues/'+record['id']).json()['item']['modelInfo']['name']=='GPT-6.1 Sol'
+            assert api.get('/api/workspace').json()['data']['customTools'][a['via']]=='Browser tool '+suffix
+            expect(page.locator('.creator-line:visible').filter(has_text='Browser tool '+suffix).first).to_be_visible()
             page.locator('nav:visible [data-action="nav"][data-id="tasks"]').click()
             page.locator('#app [data-action="new-task"]').first.click()
             page.locator('[name="title"]').fill('自主行动-'+suffix)

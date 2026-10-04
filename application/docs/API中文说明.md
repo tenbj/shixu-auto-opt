@@ -1,6 +1,6 @@
 # 拾序 API 中文说明
 
-版本 3.1.0 · 基地址 http://127.0.0.1:8765 · UTF-8 JSON。在线交互文档 `/docs`，机器Schema `/openapi.json`。
+版本 3.2.0 · 基地址 http://127.0.0.1:8765 · UTF-8 JSON。在线交互文档 `/docs`，机器Schema `/openapi.json`。
 
 ## 账号认证
 
@@ -181,6 +181,16 @@ MCP资源元数据。MCP：`账号或公开引导，不暴露为MCP工具`。
 
 公开AI接入版本清单。MCP：`账号或公开引导，不暴露为MCP工具`。
 
+### GET /connect/updates.md
+
+已有Skill和MCP更新指南。MCP：`账号或公开引导，不暴露为MCP工具`。
+
+### GET /api/connection-updates
+
+读取当前接入版本与更新建议。MCP：`get_connection_updates`。
+
+参数：`skill_version`（query）；`mcp_url`（query）。
+
 ### GET /connect.md
 
 公开AI接入指南。MCP：`账号或公开引导，不暴露为MCP工具`。
@@ -211,6 +221,27 @@ MCP资源元数据。MCP：`账号或公开引导，不暴露为MCP工具`。
 
 读取完整工作台与并发版本。MCP：`get_workspace`。
 
+### GET /api/ai-tools
+
+查询预设及账号自定义AI工具。MCP：`list_ai_tools`。
+
+### POST /api/ai-tools
+
+添加或复用AI工具，账号内名称不区分大小写。MCP：`create_ai_tool`。
+
+参数：`X-CSRF-Token`（header）。
+
+请求体：`AIToolCreate`；必填：request_id, expected_version, name。
+
+| 字段 | 约束/默认 |
+|---|---|
+| `request_id` | {"type": "string", "maxLength": 120, "minLength": 8, "description": "同一次请求重试使用同号，内容改变须换号"} |
+| `expected_version` | {"type": "integer", "minimum": 0.0, "description": "GET /api/workspace 返回的全局 revision"} |
+| `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "未指定"} |
+| `name` | {"type": "string", "maxLength": 80, "minLength": 1} |
+
+写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
+
 ### GET /api/identities
 
 查询通用人类与AI记录身份。MCP：`list_identities`。
@@ -230,7 +261,8 @@ MCP资源元数据。MCP：`账号或公开引导，不暴露为MCP工具`。
 | `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "未指定"} |
 | `name` | {"type": "string", "maxLength": 60, "minLength": 1} |
 | `kind` | {"type": "string", "enum": ["person", "agent"]} |
-| `via` | {"type": "string", "enum": ["manual", "claude_code", "workbuddy", "codex", "deepseek_harness"], "default": "manual"} |
+| `via` | {"type": "string", "maxLength": 80, "description": "预设工具、账号内custom:ID或__custom__；后者须同时提供toolName", "default": "manual"} |
+| `toolName` | {"anyOf": [{"type": "string", "maxLength": 80}, {"type": "null"}]} |
 | `modelName` | {"type": "string", "maxLength": 160, "default": ""} |
 | `modelProvider` | {"type": "string", "maxLength": 80, "default": ""} |
 
@@ -250,7 +282,8 @@ MCP资源元数据。MCP：`账号或公开引导，不暴露为MCP工具`。
 | `expected_version` | {"type": "integer", "minimum": 0.0, "description": "GET /api/workspace 返回的全局 revision"} |
 | `actor` | {"type": "string", "maxLength": 80, "minLength": 1, "description": "审计标签，不代表认证身份", "default": "未指定"} |
 | `name` | {"anyOf": [{"type": "string", "maxLength": 60, "minLength": 1}, {"type": "null"}]} |
-| `via` | {"anyOf": [{"type": "string", "enum": ["manual", "claude_code", "workbuddy", "codex", "deepseek_harness"]}, {"type": "null"}]} |
+| `via` | {"anyOf": [{"type": "string", "maxLength": 80}, {"type": "null"}]} |
+| `toolName` | {"anyOf": [{"type": "string", "maxLength": 80}, {"type": "null"}]} |
 | `modelName` | {"anyOf": [{"type": "string", "maxLength": 160}, {"type": "null"}]} |
 | `modelProvider` | {"anyOf": [{"type": "string", "maxLength": 80}, {"type": "null"}]} |
 
@@ -539,7 +572,7 @@ MCP资源元数据。MCP：`账号或公开引导，不暴露为MCP工具`。
 
 ## 通用记录身份与创建快照
 
-身份保存在服务端identityProfiles；GET/POST/PATCH /api/identities 查询、新增、编辑。kind=person时via必须manual且模型为空；kind=agent时via为claude_code/workbuddy/codex/deepseek_harness，模型可选。kind不可修改；名字或默认模型变更仅影响新记录。
+身份保存在服务端identityProfiles；GET/POST/PATCH /api/identities 查询、新增、编辑。kind=person时via必须manual且模型为空；kind=agent时via为预设ID或当前账号custom:ID；传via=__custom__与toolName可在同一事务添加/复用工具。工具名trim后1至80字，casefold去重，包含预设名称；GET/POST /api/ai-tools独立查询或新增。customTools随工作台及导出返回，最后一个身份改用其他工具后仍保留历史来源。AI模型可选。kind不可修改；名字或默认模型变更仅影响新记录。
 
 创建问题/行动可带creation={identityId,initiatedByPersonId,modelInfo:{name,provider}}。identityId是实际提交身份；initiatedByPersonId仅允许AI代录时指向人。modelInfo省略或null使用身份默认值；空对象清空模型（显示模型未提供），每次调用可显式覆盖。工具不能推导模型。手动创建不能携带模型或发起者。
 
@@ -565,4 +598,4 @@ HTTP MCP随服务启动于 /mcp，需要 Authorization: Bearer 访问密钥；�
 
 只读：`python examples/api_client.py`。合成写入：加 `--write-demo`。浏览器示例：服务运行后访问 `/examples/`。
 
-本版为账号隔离工作台，支持显式配置0.0.0.0监听与内网Host允许列表；actor不是身份认证。正式存储为用户配置的MySQL专属新库，实体分表保存；SQLite仅用于隔离测试。提供回收站软删除与恢复，依赖关系移除也是软删除，数据库19表DELETE触发器与运行时SQL防护阻止物理删除。提供登录注册、会话管理、OAuth与访问令牌；没有永久删除、导入或离线跨设备同步API。完整工作台/导出包含回收站，普通列表和详情仅限有效记录。恢复必要行动可重开验证，删除问题/恢复问题均原子处理同批关联行动。审计分页使用after=最后一条revision继续查询。完整备份使用MySQL专属库备份，页面JSON不含幂等表。
+本版为账号隔离工作台，支持显式配置0.0.0.0监听与内网Host允许列表；actor不是身份认证。正式存储为用户配置的MySQL专属新库，实体分表保存；SQLite仅用于隔离测试。提供回收站软删除与恢复，依赖关系移除也是软删除，数据库20表DELETE触发器与运行时SQL防护阻止物理删除。提供登录注册、会话管理、OAuth与访问令牌；没有永久删除、导入或离线跨设备同步API。完整工作台/导出包含回收站，普通列表和详情仅限有效记录。恢复必要行动可重开验证，删除问题/恢复问题均原子处理同批关联行动。审计分页使用after=最后一条revision继续查询。完整备份使用MySQL专属库备份，页面JSON不含幂等表。

@@ -115,6 +115,232 @@
       }
     },
     {
+      "name": "get_connection_updates",
+      "kind": "read",
+      "purpose": "用户要求接入、修复或更新时查询当前Skill包、SHA256、MCP地址及更新指引；只读，不修改客户端文件。",
+      "when_to_use": "用户要求接入、修复或更新时查询当前Skill包、SHA256、MCP地址及更新指引；只读，不修改客户端文件。",
+      "input": {
+        "properties": {
+          "skill_version": {
+            "default": "",
+            "title": "Skill Version",
+            "type": "string"
+          },
+          "mcp_url": {
+            "default": "",
+            "title": "Mcp Url",
+            "type": "string"
+          }
+        },
+        "title": "get_connection_updatesArguments",
+        "type": "object"
+      },
+      "returns": "见API响应；写入返回resource/data/revision",
+      "side_effect": "无",
+      "order": "先health，再list/get版本，再写入",
+      "error_handling": "404检查ID；409重读；422修正输入；503不确认成功、同号重试",
+      "protocol": {
+        "name": "get_connection_updates",
+        "title": null,
+        "description": "用户要求接入、修复或更新时查询当前Skill包、SHA256、MCP地址及更新指引；只读，不修改客户端文件。",
+        "inputSchema": {
+          "properties": {
+            "skill_version": {
+              "default": "",
+              "title": "Skill Version",
+              "type": "string"
+            },
+            "mcp_url": {
+              "default": "",
+              "title": "Mcp Url",
+              "type": "string"
+            }
+          },
+          "title": "get_connection_updatesArguments",
+          "type": "object"
+        },
+        "execution": null,
+        "outputSchema": null,
+        "icons": null,
+        "annotations": {
+          "title": null,
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "_meta": null
+      }
+    },
+    {
+      "name": "list_ai_tools",
+      "kind": "read",
+      "purpose": "查询预设与当前账号自定义AI工具及revision。自定义工具不跨账号共享。",
+      "when_to_use": "查询预设与当前账号自定义AI工具及revision。自定义工具不跨账号共享。",
+      "input": {
+        "properties": {},
+        "title": "list_ai_toolsArguments",
+        "type": "object"
+      },
+      "returns": "见API响应；写入返回resource/data/revision",
+      "side_effect": "无",
+      "order": "先health，再list/get版本，再写入",
+      "error_handling": "404检查ID；409重读；422修正输入；503不确认成功、同号重试",
+      "protocol": {
+        "name": "list_ai_tools",
+        "title": null,
+        "description": "查询预设与当前账号自定义AI工具及revision。自定义工具不跨账号共享。",
+        "inputSchema": {
+          "properties": {},
+          "title": "list_ai_toolsArguments",
+          "type": "object"
+        },
+        "execution": null,
+        "outputSchema": null,
+        "icons": null,
+        "annotations": {
+          "title": null,
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "_meta": null
+      }
+    },
+    {
+      "name": "create_ai_tool",
+      "kind": "write",
+      "purpose": "添加或复用1至80字工具名，忽略首尾空格与大小写。先读revision；重试同request_id。",
+      "when_to_use": "添加或复用1至80字工具名，忽略首尾空格与大小写。先读revision；重试同request_id。",
+      "input": {
+        "$defs": {
+          "AIToolCreate": {
+            "additionalProperties": false,
+            "properties": {
+              "request_id": {
+                "description": "同一次请求重试使用同号，内容改变须换号",
+                "maxLength": 120,
+                "minLength": 8,
+                "title": "Request Id",
+                "type": "string"
+              },
+              "expected_version": {
+                "description": "GET /api/workspace 返回的全局 revision",
+                "minimum": 0,
+                "title": "Expected Version",
+                "type": "integer"
+              },
+              "actor": {
+                "default": "未指定",
+                "description": "审计标签，不代表认证身份",
+                "maxLength": 80,
+                "minLength": 1,
+                "title": "Actor",
+                "type": "string"
+              },
+              "name": {
+                "maxLength": 80,
+                "minLength": 1,
+                "title": "Name",
+                "type": "string"
+              }
+            },
+            "required": [
+              "request_id",
+              "expected_version",
+              "name"
+            ],
+            "title": "AIToolCreate",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "body": {
+            "$ref": "#/$defs/AIToolCreate"
+          }
+        },
+        "required": [
+          "body"
+        ],
+        "title": "create_ai_toolArguments",
+        "type": "object"
+      },
+      "returns": "见API响应；写入返回resource/data/revision",
+      "side_effect": "经API写MySQL实体表并追加审计；具体关联状态变化见工具描述",
+      "order": "先health，再list/get版本，再写入",
+      "error_handling": "404检查ID；409重读；422修正输入；503不确认成功、同号重试",
+      "protocol": {
+        "name": "create_ai_tool",
+        "title": null,
+        "description": "添加或复用1至80字工具名，忽略首尾空格与大小写。先读revision；重试同request_id。",
+        "inputSchema": {
+          "$defs": {
+            "AIToolCreate": {
+              "additionalProperties": false,
+              "properties": {
+                "request_id": {
+                  "description": "同一次请求重试使用同号，内容改变须换号",
+                  "maxLength": 120,
+                  "minLength": 8,
+                  "title": "Request Id",
+                  "type": "string"
+                },
+                "expected_version": {
+                  "description": "GET /api/workspace 返回的全局 revision",
+                  "minimum": 0,
+                  "title": "Expected Version",
+                  "type": "integer"
+                },
+                "actor": {
+                  "default": "未指定",
+                  "description": "审计标签，不代表认证身份",
+                  "maxLength": 80,
+                  "minLength": 1,
+                  "title": "Actor",
+                  "type": "string"
+                },
+                "name": {
+                  "maxLength": 80,
+                  "minLength": 1,
+                  "title": "Name",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "request_id",
+                "expected_version",
+                "name"
+              ],
+              "title": "AIToolCreate",
+              "type": "object"
+            }
+          },
+          "properties": {
+            "body": {
+              "$ref": "#/$defs/AIToolCreate"
+            }
+          },
+          "required": [
+            "body"
+          ],
+          "title": "create_ai_toolArguments",
+          "type": "object"
+        },
+        "execution": null,
+        "outputSchema": null,
+        "icons": null,
+        "annotations": {
+          "title": null,
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "_meta": null
+      }
+    },
+    {
       "name": "list_identities",
       "kind": "read",
       "purpose": "查询人/AI记录身份及默认模型、revision。创建问题或行动前选择真实提交身份；不推测模型。",
@@ -153,8 +379,8 @@
     {
       "name": "create_identity",
       "kind": "write",
-      "purpose": "新增自定义人或AI身份。人使用manual；AI指定工具与实际模型（可空）。不做身份认证。写入并审计，409重读，同请求同号重试。",
-      "when_to_use": "新增自定义人或AI身份。人使用manual；AI指定工具与实际模型（可空）。不做身份认证。写入并审计，409重读，同请求同号重试。",
+      "purpose": "新增自定义人或AI身份。人使用manual；AI使用list_ai_tools返回的ID或via=__custom__、toolName原子添加工具；实际模型可空。不做身份认证。写入并审计，409重读，同请求同号重试。",
+      "when_to_use": "新增自定义人或AI身份。人使用manual；AI使用list_ai_tools返回的ID或via=__custom__、toolName原子添加工具；实际模型可空。不做身份认证。写入并审计，409重读，同请求同号重试。",
       "input": {
         "$defs": {
           "IdentityCreate": {
@@ -197,15 +423,23 @@
               },
               "via": {
                 "default": "manual",
-                "enum": [
-                  "manual",
-                  "claude_code",
-                  "workbuddy",
-                  "codex",
-                  "deepseek_harness"
-                ],
+                "description": "预设工具、账号内custom:ID或__custom__；后者须同时提供toolName",
+                "maxLength": 80,
                 "title": "Via",
                 "type": "string"
+              },
+              "toolName": {
+                "anyOf": [
+                  {
+                    "maxLength": 80,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Toolname"
               },
               "modelName": {
                 "default": "",
@@ -248,7 +482,7 @@
       "protocol": {
         "name": "create_identity",
         "title": null,
-        "description": "新增自定义人或AI身份。人使用manual；AI指定工具与实际模型（可空）。不做身份认证。写入并审计，409重读，同请求同号重试。",
+        "description": "新增自定义人或AI身份。人使用manual；AI使用list_ai_tools返回的ID或via=__custom__、toolName原子添加工具；实际模型可空。不做身份认证。写入并审计，409重读，同请求同号重试。",
         "inputSchema": {
           "$defs": {
             "IdentityCreate": {
@@ -291,15 +525,23 @@
                 },
                 "via": {
                   "default": "manual",
-                  "enum": [
-                    "manual",
-                    "claude_code",
-                    "workbuddy",
-                    "codex",
-                    "deepseek_harness"
-                  ],
+                  "description": "预设工具、账号内custom:ID或__custom__；后者须同时提供toolName",
+                  "maxLength": 80,
                   "title": "Via",
                   "type": "string"
+                },
+                "toolName": {
+                  "anyOf": [
+                    {
+                      "maxLength": 80,
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Toolname"
                 },
                 "modelName": {
                   "default": "",
@@ -396,13 +638,7 @@
               "via": {
                 "anyOf": [
                   {
-                    "enum": [
-                      "manual",
-                      "claude_code",
-                      "workbuddy",
-                      "codex",
-                      "deepseek_harness"
-                    ],
+                    "maxLength": 80,
                     "type": "string"
                   },
                   {
@@ -411,6 +647,19 @@
                 ],
                 "default": null,
                 "title": "Via"
+              },
+              "toolName": {
+                "anyOf": [
+                  {
+                    "maxLength": 80,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Toolname"
               },
               "modelName": {
                 "anyOf": [
@@ -514,13 +763,7 @@
                 "via": {
                   "anyOf": [
                     {
-                      "enum": [
-                        "manual",
-                        "claude_code",
-                        "workbuddy",
-                        "codex",
-                        "deepseek_harness"
-                      ],
+                      "maxLength": 80,
                       "type": "string"
                     },
                     {
@@ -529,6 +772,19 @@
                   ],
                   "default": null,
                   "title": "Via"
+                },
+                "toolName": {
+                  "anyOf": [
+                    {
+                      "maxLength": 80,
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Toolname"
                 },
                 "modelName": {
                   "anyOf": [

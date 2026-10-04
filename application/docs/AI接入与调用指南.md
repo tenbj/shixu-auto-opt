@@ -6,7 +6,7 @@
 
 ## 服务端维护与本地stdio接入
 
-3.0起，HTTP MCP默认随API在同一进程启动，地址为 `/mcp`，需要当前账号的OAuth或PAT。详见 [账号与远程接入](账号与远程接入.md)。其他电脑可以使用HTTP接入，详见 [MCP远程接入](MCP远程接入.md)。本机仍可使用下面的stdio方式，由客户端启动适配器子进程。两种方式共用26个工具和业务规则；客户端均不需要数据库密码。
+3.0起，HTTP MCP默认随API在同一进程启动，地址为 `/mcp`，需要当前账号的OAuth或PAT。详见 [账号与远程接入](账号与远程接入.md)。其他电脑可以使用HTTP接入，详见 [MCP远程接入](MCP远程接入.md)。本机仍可使用下面的stdio方式，由客户端启动适配器子进程。两种方式共用29个工具和业务规则；客户端均不需要数据库密码。
 
 在 system 目录内使用实际安装依赖的 Python：
 
@@ -93,6 +93,6 @@ python scripts/configure_mcp.py --format toml
 
 creation只用于创建，后续PATCH不能改写来源字段。API/MCP输出createdByActorId、initiatedByPersonId、creatorName、createdVia、createdAt、modelInfo。legacy调用不传creation仍兼容，但明确记录为unknown。actor仍仅是本次操作审计标签，不能替代创建身份。所有身份均为调用方声明，不证明登录用户、真实工具执行环境或模型真实性。
 
-26个工具都经HTTP共用同一事务与规则。Claude Code、WorkBuddy、Codex和DeepSeek Harness以各客户端实际支持的MCP配置方式接入同一工具集（本机stdio或带密钥的HTTP入口）；这些是来源选项，未声称逐一完成四种客户端兼容验证。接入时登记对应via及真实模型，不将Codex示例用作其他工具默认值。
+29个工具都经HTTP共用同一事务与规则。Claude Code、WorkBuddy、Codex和DeepSeek Harness以各客户端实际支持的MCP配置方式接入同一工具集（本机stdio或带密钥的HTTP入口）；这些是来源选项，未声称逐一完成四种客户端兼容验证。接入时登记对应via及真实模型，不将Codex示例用作其他工具默认值。
 
 可运行 `python examples/creator_client.py` 只读查看身份，加 `--write-demo` 才创建合成身份与问题；`/examples/`也可选择已登记的AI和人类发起者。历史记录没有自动导入原型浏览器存储。

@@ -1,7 +1,8 @@
 {
   "passed": true,
-  "delivery_id": "d22bcb32-463c-4c00-9e75-c7764eea4afe",
+  "delivery_id": "5c1c2eda-e1c7-4f15-8ba0-e95295f32551",
   "unit_and_real_stdio_tests": 7,
-  "portable_bundle_hash": "5260a3cc1bd116109ef1debae1bb0e01db5e58e5bbf548c269977c9d8ce4a4b4",
-  "scope": "F02 source/creation/snapshot/replay/readback and portable bundle path independence; runtime Skill discovery not claimed"
+  "portable_update_tests": 4,
+  "portable_bundle_hash": "a08e5868b1de22a92bc7e125df7c17275b198a290b08405c0a1cb7771f8b1295",
+  "scope": "F02旧调用脚本来源/幂等/回读7项通过；独立Skill1.5.0更新安装/旧版接管/哈希/路径/修改保护4项见pytest；不宣称runtime真实安装验收"
 }

@@ -16,8 +16,8 @@ ROOT=Path(__file__).resolve().parents[1]
 async def verify_mcp(url,token):
     async with httpx2.AsyncClient(headers={'Authorization':'Bearer '+token},trust_env=False) as http:
         async with Client(streamable_http_client(url+'/mcp',http_client=http)) as client:
-            tools=await client.list_tools();assert len(getattr(tools,'tools',tools))==26
-            response=await client.call_tool('get_connection_context',{'runtime_name':'SDK acceptance','runtime_version':'fixture','skill_version':'1.4.0'})
+            tools=await client.list_tools();assert len(getattr(tools,'tools',tools))==29
+            response=await client.call_tool('get_connection_context',{'runtime_name':'SDK acceptance','runtime_version':'fixture','skill_version':'1.5.0'})
             assert not response.is_error
             context=response.structured_content or json.loads(response.content[0].text)
             assert context['verifiedAt'] and context['verification']=='authenticated-mcp-call'
@@ -47,7 +47,7 @@ def run(url):
         context=asyncio.run(verify_mcp(url,key['token']))
         assert context['account']['id']==auth['user']['id']
         row=api.get('/api/account/mcp-access').json()['items'][0]
-        assert row['verifiedAt'] and row['lastSeenAt'] and row['skillVersion']=='1.4.0'
+        assert row['verifiedAt'] and row['lastSeenAt'] and row['skillVersion']=='1.5.0'
         assert api.get('/api/workspace').json()==before
         checks.append('real MCP diagnostic, readonly account/scope/version and device evidence; no business writes')
         errors=[]

@@ -1,8 +1,8 @@
 {
   "passed": true,
   "findings": [],
-  "files_scanned": 180,
+  "files_scanned": 196,
   "policy": "只包含白名单源码、文档、合成种子、验证证据；排除runtime/private/.env/缓存/依赖/Git；扫描私钥与常见令牌模式",
   "data_review": "data/demo.json及verification中的业务记录均来自显式合成测试；不包含用户原型浏览器记录或本机数据库",
-  "delivery_id": "d22bcb32-463c-4c00-9e75-c7764eea4afe"
+  "delivery_id": "5c1c2eda-e1c7-4f15-8ba0-e95295f32551"
 }

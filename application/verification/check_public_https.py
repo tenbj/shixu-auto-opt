@@ -21,7 +21,7 @@ async def sdk(token):
                                   trust_env=False, timeout=30) as http:
         async with Client(streamable_http_client(URL + '/mcp', http_client=http)) as client:
             listing = await client.list_tools()
-            context = await client.call_tool('get_connection_context', {'runtime_name':'public SDK verification','skill_version':'1.4.0'})
+            context = await client.call_tool('get_connection_context', {'runtime_name':'public SDK verification','skill_version':'1.5.0'})
             assert not context.is_error
             result = await client.call_tool('get_workspace', {})
             assert not result.is_error
@@ -70,7 +70,7 @@ def run():
         refreshed = web.post('/oauth/token',data={'grant_type':'refresh_token','refresh_token':exchanged['refresh_token'],'client_id':client['client_id'],'resource':URL+'/mcp'}).raise_for_status().json()
         assert refreshed['refresh_token'] != exchanged['refresh_token']
         count, renewed_state=asyncio.run(sdk(refreshed['access_token']))
-        assert count==26 and renewed_state==baseline
+        assert count==29 and renewed_state==baseline
         replay=web.post('/oauth/token',data={'grant_type':'refresh_token','refresh_token':exchanged['refresh_token'],'client_id':client['client_id'],'resource':URL+'/mcp'})
         assert replay.status_code==400 and replay.json()['error']=='invalid_grant'
         assert httpx.get(URL+'/api/workspace',headers={'Authorization':'Bearer '+refreshed['access_token']},trust_env=False).status_code==401
