@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "checks": [
+    "test seed retained",
+    "new account empty",
+    "account data persisted separately",
+    "switching back excludes other account records"
+  ],
+  "scope": "Local prototype state only; production migration and server authorization not implemented"
+}

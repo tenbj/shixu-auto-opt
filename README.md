@@ -4,11 +4,12 @@
 
 拾序帮助个人记录问题，把问题拆成行动，并在完成后验证是否真正改善。
 
-## 两个入口
+## 产品与设计入口
 
 | 目录 | 用途 | 使用说明 |
 |---|---|---|
 | [prototype/](prototype/) | v1.6.0 交互原型、需求、设计合同与验证材料 | [原型说明](prototype/README.md)，直接用浏览器打开 [prototype.html](prototype/prototype.html) |
+| [prototype-accounts/](prototype-accounts/) | v1.8.0 独立账号与 AI 接入原型（浏览器预览 v8） | [原型说明](prototype-accounts/README.md)，包含快速接入、设备管理、手动配置的离线演示 |
 | [application/](application/) | v2.4.0 可运行应用、HTTP API、MCP、测试与部署文档 | [应用安装与运行](application/README.md) |
 
 应用使用 Python 3.11+ 与独立 MySQL 8.0，页面、25 个 API 操作与 25 个 MCP 工具共用后端规则。默认入口 http://127.0.0.1:8765/，API 文档 `/docs`，MCP 默认随服务提供 `/mcp` HTTP 入口与访问密钥，同时保留 stdio。
@@ -26,3 +27,5 @@
 已发布的历史 ZIP 保持原有目录结构；当前源码采用上述并列目录。
 
 移动端预览：[mobile-preview.html](prototype/mobile-preview.html)，可切换360/390/430px并直接点击体验；应用已同步手机导航、紧凑菜单、回收站与下一步显示切换；本次冻结输入位于 application/reference/creator-source.html（创建身份）及trash-compact-source.html（回收站基线）。
+
+最新设计发布为原型 v1.8.0，演示一段提示词接入与账号授权流程。`/connect.md`、自动安装和授权验证为待实现设计，原型不会连接正式服务。系统发布版本仍为 v2.4.0。
