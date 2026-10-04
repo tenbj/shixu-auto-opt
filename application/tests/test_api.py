@@ -2,7 +2,7 @@ import json
 from concurrent.futures import ThreadPoolExecutor
 from uuid import uuid4
 import pytest
-from fastapi.testclient import TestClient
+from auth_client import TestClient
 from app.main import create_app
 
 
@@ -194,11 +194,11 @@ def test_unknown_ids_and_origin_protection(client):
 
 def test_lan_access_keeps_host_and_origin_checks(tmp_path, monkeypatch):
     monkeypatch.setenv('SHIXU_ALLOWED_HOSTS', '192.168.1.138,0.0.0.0')
-    with TestClient(create_app(tmp_path / 'lan.sqlite3'), base_url='http://192.168.1.138:8765') as lan:
+    with TestClient(create_app(tmp_path / 'lan.sqlite3'), base_url='https://192.168.1.138:8765') as lan:
         assert lan.get('/').status_code == 200
         assert lan.get('/api/health').status_code == 200
         body = {'title': '内网同源合成测试', 'expected_version': 0, 'request_id': str(uuid4())}
-        assert lan.post('/api/issues', json=body, headers={'Origin': 'http://192.168.1.138:8765'}).status_code == 200
+        assert lan.post('/api/issues', json=body, headers={'Origin': 'https://192.168.1.138:8765'}).status_code == 200
         assert lan.get('/api/workspace').json()['revision'] == 1
         assert lan.post('/api/issues', json=body, headers={'Origin': 'http://192.168.1.138:9999'}).status_code == 403
         assert lan.get('/api/health', headers={'Host': 'evil.example'}).status_code == 400

@@ -15,14 +15,27 @@ INFO = {
     'issue_history': ('HI', '状态历史', 50, 710, ['id','issue_id','position_number','from_status','to_status'], '问题内的状态变迁按 position_number 唯一排序。'),
     'issue_logs': ('LG', '问题日志', 1450, 70, ['issue_id','position_number','content'], '问题 ID 与位置序号组成联合主键。'),
     'task_dependencies': ('TD', '行动依赖', 1450, 710, ['task_id','dependency_id','position_number','deleted_at'], 'task_id 是当前行动，dependency_id 是前置行动；同一对任务保留原行；deleted_at标记已移除关系，可重新激活。'),
-    'workspace_meta': ('WM', '工作台元数据', 50, 1120, ['id','application_id','revision','next_issue_number'], 'id=1 单行；保存全局版本及编号计数，写事务对该行加锁。无物理外键。'),
+    'workspace_meta': ('WM', '工作台元数据', 50, 1120, ['id','application_id','revision','next_issue_number'], '每账号一行；保存独立版本及编号计数，写事务对该行加锁。无物理外键。'),
     'activity': ('AC', '操作审计', 750, 1120, ['revision','event_at','operation','resource_id'], '按 revision 记录操作；resource_id 为多态逻辑引用，非物理外键。'),
     'idempotency_requests': ('IR', '幂等请求', 1450, 1120, ['request_id','fingerprint','response'], '持久化请求指纹和响应；相同请求重试返回原结果。无物理外键。'),
 }
+
+INFO.update({
+'access_metadata':('AM','接入验证信息',750,2670,['access_id','last_seen_at','verified_at','skill_version'],'access_id逻辑关联account_access；最近访问不是在线；runtime与Skill版本是客户端声明。'),
+'oauth_refresh_tokens':('RT','OAuth刷新令牌',1450,2670,['digest','access_id','client_id','expires_at','used','revoked'],'同一access_id为授权族；摘要持久化、轮换保留旧行、重放整组撤销。关联由事务校验，无物理FK。'),
+'app_users':('US', '账号', 50, 1830, ['id', 'username', 'password_hash'], '认证与账号隔离。owner_id/client_id为应用事务校验的逻辑关联；不是物理外键。会话、令牌、授权码只保存摘要，敏感字段不经列表返回。'),
+'account_sessions':('SE', '网页登录会话', 750, 1830, ['digest', 'owner_id', 'csrf', 'expires_at', 'revoked'], '认证与账号隔离。owner_id/client_id为应用事务校验的逻辑关联；不是物理外键。会话、令牌、授权码只保存摘要，敏感字段不经列表返回。'),
+'account_access':('AK', 'MCP接入', 1450, 1830, ['id', 'owner_id', 'scope', 'digest', 'revoked'], '认证与账号隔离。owner_id/client_id为应用事务校验的逻辑关联；不是物理外键。会话、令牌、授权码只保存摘要，敏感字段不经列表返回。'),
+'oauth_clients':('OC', 'OAuth客户端', 50, 2250, ['id', 'name', 'redirects'], '认证与账号隔离。owner_id/client_id为应用事务校验的逻辑关联；不是物理外键。会话、令牌、授权码只保存摘要，敏感字段不经列表返回。'),
+'oauth_codes':('CD', '授权码', 750, 2250, ['digest', 'owner_id', 'client_id', 'challenge', 'used'], '认证与账号隔离。owner_id/client_id为应用事务校验的逻辑关联；不是物理外键。会话、令牌、授权码只保存摘要，敏感字段不经列表返回。'),
+'oauth_pending':('OP', '待确认授权', 1450, 2250, ['digest', 'payload', 'expires_at', 'used'], '认证与账号隔离。owner_id/client_id为应用事务校验的逻辑关联；不是物理外键。会话、令牌、授权码只保存摘要，敏感字段不经列表返回。'),
+'account_login_limits':('RL', '登录限流', 50, 2670, ['bucket', 'attempts', 'reset_at'], '认证与账号隔离。owner_id/client_id为应用事务校验的逻辑关联；不是物理外键。会话、令牌、授权码只保存摘要，敏感字段不经列表返回。'),
+})
 DESCRIPTIONS = {
+ 'access_id':'授权设备逻辑引用','last_seen_at':'最近认证访问Unix时间；非在线状态','verified_at':'通过MCP诊断工具的最近认证时间','runtime_name':'客户端自报名称','runtime_version':'客户端自报版本','skill_version':'客户端自报Skill版本','client_id':'OAuth客户端逻辑引用','resource':'精确绑定的MCP资源地址','digest':'令牌SHA256，不保存明文','expires_at':'Unix到期时间','used':'刷新令牌或授权码已使用','revoked':'撤销标记',
  'name':'自定义身份名称','kind':'person人 / agent AI','via':'手动或AI工具','model_name':'AI身份的默认模型名称/ID','model_provider':'AI身份的默认模型提供方','updated_at':'身份最后编辑的服务器UTC时间','created_by_actor_id':'实际提交身份的历史逻辑引用；非FK','initiated_by_person_id':'AI代录的人类发起者历史逻辑引用；非FK','creator_name':'创建人名称快照；不随身份改名改变','created_via':'创建来源快照；历史缺失为unknown','created_at':'服务器UTC创建时间；迁移历史未知为NULL','model_info':'JSON {name,provider}；手动或历史未知为NULL；AI空值表示未提供',
  'deleted_at':'软删除时间；NULL 为有效记录', 'deletion_batch':'删除批次 UUID；问题与当次关联行动一致', 'deleted_with_issue':'随删除问题的逻辑标识；非 FK；恢复时清空',
- 'id':'实体标识；元数据表固定为 1', 'number':'固定问题编号', 'title':'标题', 'description':'问题背景',
+ 'owner_id':'所属账号；所有访问由认证上下文限定','id':'实体标识', 'number':'固定问题编号', 'title':'标题', 'description':'问题背景',
  'priority':'优先级','tag':'分类标签','status':'当前状态，由领域规则约束', 'resolution':'验证结论',
  'next_step':'下一步','success_criteria':'成功标准','treatment':'处理说明','verification_method':'验证方法',
  'pause_reason':'暂缓原因','review_date':'复查日期；字符串','paused_from':'暂缓前状态','close_reason':'关闭原因',
@@ -32,7 +45,7 @@ DESCRIPTIONS = {
  'number_group':'行动编号分组','sequence_number':'分组内固定编号','task_id':'当前行动',
  'dependency_id':'前置行动','position_number':'实体内的顺序位置','content':'正文',
  'event_at':'事件时间；字符串','actor':'审计标签，不是用户账号外键','from_status':'原状态','to_status':'目标状态',
- 'reason':'流转原因','application_id':'应用身份标记','revision':'全局版本 / 审计事件号',
+ 'reason':'流转原因','application_id':'应用身份标记','revision':'账号内版本 / 审计事件号',
  'next_issue_number':'下一个问题编号','next_task_numbers':'各组行动编号计数 JSON',
  'operation':'操作类型','resource_id':'多态资源逻辑引用；非 FK','payload':'请求载荷 JSON',
  'request_id':'幂等请求标识','fingerprint':'请求 SHA-256 指纹','response':'已提交响应 JSON',
@@ -66,6 +79,8 @@ def model():
             f['keys'].append('FK')
             relations.append(dict(id=f'{alias}_{fk}',parent=INFO[parent][0],child=alias,pk=pk,fk=fk,optional=f['nullable']))
         tables.append(dict(id=alias,name=name,title=title,x=x,y=y,core=core,fields=fields,note=note,constraints=constraints))
+    for table in tables:
+        if any(f['name']=='owner_id' for f in table['fields']) and 'owner_id' not in table['core']:table['core'].append('owner_id')
     return dict(tables=tables,relations=relations)
 
 

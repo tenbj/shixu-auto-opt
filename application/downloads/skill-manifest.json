@@ -1,0 +1,12 @@
+{
+  "name": "shixu-issues",
+  "version": "1.4.0",
+  "filename": "shixu-issues-1.4.0.zip",
+  "sha256": "5260a3cc1bd116109ef1debae1bb0e01db5e58e5bbf548c269977c9d8ce4a4b4",
+  "source": "F02_拾序问题记录",
+  "sources": {
+    "SKILL.md": "a128215cb6f63a4ac7fcb3c8ca955cd6d17993ccd1727ce46b3e43b875996cc6",
+    "references/录入与分类规则.md": "03887c91da34095b2f84aec79b8d7583e9e6162a46030b00287235e292b416f0",
+    "references/创建身份与模型规则.md": "1eda7c62004afd99eddc8623f381bd424d66980e008a89ef420dd403b5cbfe44"
+  }
+}

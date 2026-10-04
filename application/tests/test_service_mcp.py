@@ -25,12 +25,19 @@ def test_service_start_stop_restart(tmp_path):
         return result.stdout
     started = False
     try:
-        for _ in range(2):
+        for attempt in range(2):
             service('start')
             started = True
             state = json.loads(service('status'))
             assert state['mcp']['running'] is True
             assert httpx.post(url+'/mcp', trust_env=False).status_code == 401
+            if attempt==0:
+                with httpx.Client(base_url=url,trust_env=False) as client:
+                    result=client.post('/api/auth/register',json={'username':'service_fixture','password':'fixture-password'}).json()
+                    client.headers['x-csrf-token']=result['csrf']
+                    access=client.post('/api/account/mcp-access',json={'name':'service SDK','scope':'read'}).json()
+                    config={'mcpServers':{'shixu':{'url':url+'/mcp','headers':{'Authorization':'Bearer '+access['token']}}}}
+                    (tmp_path/'mcp-client-default.json').write_text(json.dumps(config),encoding='utf-8')
             checked = subprocess.run([sys.executable, 'examples/http_mcp_client.py', '--config',
                                       str(tmp_path/'mcp-client-default.json')], cwd=ROOT, env=env,
                                      capture_output=True, text=True, encoding='utf-8', timeout=30)

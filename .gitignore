@@ -18,3 +18,4 @@ Thumbs.db
 
 # Local access verification may contain the real workspace.
 application/verification/frp-public.*
+*.log

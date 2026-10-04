@@ -15,7 +15,7 @@
     "unique": true,
     "integrity": true,
     "crowfeet": true,
-    "tables": 10,
+    "tables": 19,
     "relations": 6
   },
   "collapsed": {
@@ -27,19 +27,20 @@
     "unique": true,
     "integrity": true,
     "crowfeet": true,
-    "tables": 10,
+    "tables": 19,
     "relations": 6
   },
   "browser_errors": [],
   "external_requests": [],
   "live_schema": {
     "status": "pass",
-    "tables": 10,
-    "columns": 89,
+    "tables": 19,
+    "columns": 149,
     "foreign_keys": 6,
     "business_rows_read": 0,
     "writes": 0
   },
+  "delivery_id": "d22bcb32-463c-4c00-9e75-c7764eea4afe",
   "status": "pass",
   "passed": true
 }

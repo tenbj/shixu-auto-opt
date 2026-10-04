@@ -18,7 +18,7 @@ async def run(url, write_demo=False, report=None):
     async with Client(params) as client:
         tools = await client.list_tools()
         evidence['tools'] = [tool.name for tool in tools.tools]
-        assert len(evidence['tools']) == 25
+        assert len(evidence['tools']) == 26
 
         async def call(name, arguments=None, error=False):
             result = await client.call_tool(name, arguments or {})
@@ -32,6 +32,7 @@ async def run(url, write_demo=False, report=None):
             return content
 
         health = await call('get_system_status')
+        await call('get_connection_context')
         evidence['backend'] = health.get('backend')
         await call('list_issues')
         state = await call('get_workspace')

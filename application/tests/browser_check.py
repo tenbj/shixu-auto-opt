@@ -3,6 +3,7 @@ import argparse
 import json
 from pathlib import Path
 from uuid import uuid4
+from http_auth import Session
 import httpx
 from playwright.sync_api import sync_playwright, expect
 
@@ -10,7 +11,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def run(url):
-    backend = httpx.get(url + '/api/health', trust_env=False).raise_for_status().json()['backend']
+    expect.set_options(timeout=20000)
+    api=Session(url)
+    backend = api.get(url + '/api/health', trust_env=False).raise_for_status().json()['backend']
     report = {'kind': 'real-browser-api-' + backend, 'mock': False, 'simulated_fault': '仅响应丢失场景使用网络拦截模拟', 'checks': []}
     errors = []
     def passed(name):
@@ -20,7 +23,7 @@ def run(url):
         browser = playwright.chromium.launch()
         page = browser.new_page(viewport={'width': 1440, 'height': 1000})
         page.on('pageerror', lambda error: errors.append(str(error)))
-        page.goto(url)
+        api.cookies(page.context);page.goto(url)
         expect(page.locator('#sync-state')).to_contain_text('已同步')
         passed('首屏从真实 API 加载')
         page.locator('[data-action=new]').click()
@@ -28,7 +31,7 @@ def run(url):
         page.locator('#record-form [name=title]').fill(title)
         page.locator('#record-form [type=submit]').click()
         expect(page.locator('#modal')).not_to_be_visible()
-        data = httpx.get(url + '/api/workspace').json()['data']
+        data = api.get(url + '/api/workspace').json()['data']
         issue = next(p for p in data['issues'] if p['title'] == title)
         identifier = issue['id']
         passed('页面创建问题并通过 API 回读')
@@ -50,7 +53,7 @@ def run(url):
         form.locator('[name=title]').fill('浏览器验证行动')
         form.locator('[type=submit]').click()
         expect(page.locator('#child-modal')).not_to_be_visible()
-        task = next(t for t in httpx.get(url + '/api/tasks').json()['items'] if t['issueId'] == identifier)
+        task = next(t for t in api.get(url + '/api/tasks').json()['items'] if t['issueId'] == identifier)
         passed('子弹窗创建关联行动')
         page.locator(f'#modal [data-action=toggle][data-id="{task["id"]}"]').click()
         expect(page.locator('#modal')).to_contain_text('已完成')
@@ -73,7 +76,7 @@ def run(url):
         page.locator('#modal .modal-head [data-action=close]').click()
         for view in ['today', 'issues', 'tasks', 'analysis', 'review']:
             page.locator(f'#nav [data-id={view}]').click()
-            expect(page.locator('h1')).to_be_visible()
+            expect(page.locator('#app h1')).to_be_visible()
         passed('五个工作视图可用')
         page.locator('#nav [data-id=tasks]').click()
         page.locator('[data-action=task-grouping][data-id=calendar]').click()
@@ -98,8 +101,8 @@ def run(url):
         page.set_viewport_size({'width': 1440, 'height': 1000})
         page.locator('[data-action=new]').click()
         page.locator('#record-form [name=title]').fill('冲突草稿')
-        revision = httpx.get(url + '/api/workspace').json()['revision']
-        httpx.post(url + '/api/issues', json=dict(title='其他客户端的合成写入', expected_version=revision, request_id=str(uuid4()))).raise_for_status()
+        revision = api.get(url + '/api/workspace').json()['revision']
+        api.post(url + '/api/issues', json=dict(title='其他客户端的合成写入', expected_version=revision, request_id=str(uuid4()))).raise_for_status()
         page.locator('#record-form [type=submit]').click()
         expect(page.locator('#form-error')).to_contain_text('工作台已更新')
         expect(page.locator('#record-form [name=title]')).to_have_value('冲突草稿')
@@ -119,17 +122,17 @@ def run(url):
         expect(page.locator('#form-error')).to_contain_text('结果未确认')
         page.locator('#record-form [type=submit]').click()
         expect(page.locator('#modal')).not_to_be_visible()
-        assert len(httpx.get(url + '/api/issues', params={'q': lost_title}).json()['items']) == 1
+        assert len(api.get(url + '/api/issues', params={'q': lost_title}).json()['items']) == 1
         passed('响应丢失使用同号重试，不重复创建（此项模拟网络故障）')
         for width in [360, 390, 430]:
             context = browser.new_context(viewport={'width': width, 'height': 844}, is_mobile=True, has_touch=True)
             mobile = context.new_page()
             mobile.on('pageerror', lambda error: errors.append(str(error)))
-            mobile.goto(url)
+            api.cookies(mobile.context);mobile.goto(url)
             expect(mobile.locator('#mobile-sync-state')).to_contain_text('已同步')
             for view in ['today', 'issues', 'tasks', 'analysis', 'review']:
                 mobile.locator(f'.mobile-bottom [data-id={view}]').click()
-                expect(mobile.locator('h1')).to_be_visible()
+                expect(mobile.locator('#app h1')).to_be_visible()
                 assert mobile.evaluate('document.documentElement.scrollWidth <= innerWidth')
             passed(f'{width}px 五视图和底部导航无横向溢出')
             mobile.locator('.mobile-bottom [data-id=today]').click()
@@ -139,7 +142,7 @@ def run(url):
             assert mobile.locator('#modal').bounding_box()['width'] == width
             mobile.locator('#record-form [type=submit]').click()
             expect(mobile.locator('#modal')).not_to_be_visible()
-            mobile_issue = next(p for p in httpx.get(url+'/api/issues').json()['items'] if p['title']==mobile_title)
+            mobile_issue = next(p for p in api.get(url+'/api/issues').json()['items'] if p['title']==mobile_title)
             mobile.locator('.mobile-bottom [data-id=issues]').click()
             mobile.locator('#search').fill(mobile_title)
             mobile.locator(f'[data-action=detail][data-id="{mobile_issue["id"]}"]').first.click()
@@ -161,11 +164,11 @@ def run(url):
             card = mobile.locator('#app .mobile-task-card').first
             card.locator('[data-action=advance]').click()
             expect(card.locator('.mobile-task-state')).to_have_text('进行中')
-            task = next(t for t in httpx.get(url+'/api/tasks').json()['items'] if t['issueId']==mobile_issue['id'])
+            task = next(t for t in api.get(url+'/api/tasks').json()['items'] if t['issueId']==mobile_issue['id'])
             assert task['status']=='进行中'
             card.locator('[data-action=toggle]').click()
             expect(card.locator('.mobile-task-state')).to_have_text('已完成')
-            assert next(t for t in httpx.get(url+'/api/tasks').json()['items'] if t['id']==task['id'])['status']=='已完成'
+            assert next(t for t in api.get(url+'/api/tasks').json()['items'] if t['id']==task['id'])['status']=='已完成'
             passed(f'{width}px 行动卡片开始、完成写入真实API')
             mobile.locator('[data-action=task-grouping][data-id=calendar]').click()
             expect(mobile.locator('.mobile-agenda-toolbar')).to_be_visible()
@@ -178,13 +181,13 @@ def run(url):
             mobile.locator('#record-form [type=submit]').click()
             expect(mobile.locator('#modal')).not_to_be_visible()
             expect(mobile.locator('#app .mobile-task-card')).to_contain_text(f'手机{width}px已编辑行动')
-            mobile.locator('[data-action=mobile-more]').click()
-            expect(mobile.locator('#modal')).to_contain_text('记录由服务端保存')
+            mobile.locator('[data-account-action=toggle-menu]:visible').click()
+            mobile.locator('[data-account-action=menu-tools]').click()
             with mobile.expect_download() as download:
-                mobile.locator('#modal [data-action=export]').click()
+                mobile.locator('#account-dropdown [data-action=export]').click()
             downloaded=json.loads(Path(download.value.path()).read_text(encoding='utf-8'))
             assert any(t['id']==task['id'] for t in downloaded['tasks'])
-            mobile.locator('#modal [data-action=system-refresh]').click()
+            mobile.locator('[data-account-action=toggle-menu]:visible').click();mobile.locator('[data-account-action=menu-tools]').click();mobile.locator('#account-dropdown [data-action=system-refresh]').click()
             expect(mobile.locator('#mobile-sync-state')).to_contain_text('已同步')
             mobile.reload()
             expect(mobile.locator('#mobile-sync-state')).to_contain_text('已同步')

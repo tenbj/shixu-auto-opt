@@ -1,12 +1,16 @@
 # 拾序 API 中文说明
 
-版本 2.4.0 · 基地址 http://127.0.0.1:8765 · UTF-8 JSON。在线交互文档 `/docs`，机器Schema `/openapi.json`。
+版本 3.1.0 · 基地址 http://127.0.0.1:8765 · UTF-8 JSON。在线交互文档 `/docs`，机器Schema `/openapi.json`。
+
+## 账号认证
+
+登录注册和OAuth协议见账号与远程接入.md。网页用HttpOnly会话Cookie，写入附X-CSRF-Token；程序用Authorization: Bearer账号令牌。401表示需要登录，403表示CSRF或权限不足，跨账号资源返回404。owner不能由调用方指定。账号管理端点不使用业务revision/request_id；OAuth token使用表单格式。
 
 ## 并发、幂等与错误
 
-所有写入携带 `request_id`（8–120字符，推荐UUID）、`expected_version`（当前全局revision）与可选 `actor`（审计标签，默认未指定）。请求体不接受未声明字段。每个写入是一个MySQL InnoDB事务；返回 `revision`、`resource` 和事务提交时的 `data`。失败不改变数据、审计或版本。
+所有业务写入携带 `request_id`（8–120字符，推荐UUID）、`expected_version`（当前账号revision）与可选 `actor`（审计标签，默认未指定）。请求体不接受未声明字段。每个写入是一个MySQL InnoDB事务；返回 `revision`、`resource` 和事务提交时的 `data`。失败不改变数据、审计或版本。
 
-同一request_id及完全相同内容重放返回原始成功响应；request_id相同但内容不同返回409。网络超时保持请求内容和编号重试。全局版本是工作台版本，不是单个对象版本；任何对象写入都会递增。
+同一request_id及完全相同内容重放返回原始成功响应；request_id相同但内容不同返回409。网络超时保持请求内容和编号重试。账号内版本是工作台版本，不是单个对象版本；任何对象写入都会递增。
 
 | HTTP | 含义 | 处理 |
 |---|---|---|
@@ -29,6 +33,176 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 
 ## 接口目录
 
+### POST /api/auth/login
+
+账号登录。MCP：`账号或公开引导，不暴露为MCP工具`。
+
+请求体：`Credentials`；必填：username, password。
+
+| 字段 | 约束/默认 |
+|---|---|
+| `username` | {"type": "string", "maxLength": 40, "minLength": 2} |
+| `password` | {"type": "string", "maxLength": 128, "minLength": 1} |
+| `displayName` | {"type": "string", "maxLength": 60, "default": ""} |
+
+写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
+
+### POST /api/auth/register
+
+注册独立空工作台。MCP：`账号或公开引导，不暴露为MCP工具`。
+
+请求体：`Credentials`；必填：username, password。
+
+| 字段 | 约束/默认 |
+|---|---|
+| `username` | {"type": "string", "maxLength": 40, "minLength": 2} |
+| `password` | {"type": "string", "maxLength": 128, "minLength": 1} |
+| `displayName` | {"type": "string", "maxLength": 60, "default": ""} |
+
+写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
+
+### GET /api/auth/me
+
+当前登录账号。MCP：`账号或公开引导，不暴露为MCP工具`。
+
+### POST /api/auth/logout
+
+退出并撤销当前会话。MCP：`账号或公开引导，不暴露为MCP工具`。
+
+参数：`X-CSRF-Token`（header）。
+
+### PATCH /api/account
+
+修改账号显示名称。MCP：`账号或公开引导，不暴露为MCP工具`。
+
+参数：`X-CSRF-Token`（header）。
+
+请求体：`Profile`；必填：displayName。
+
+| 字段 | 约束/默认 |
+|---|---|
+| `displayName` | {"type": "string", "maxLength": 60, "minLength": 1} |
+
+写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
+
+### POST /api/account/password
+
+修改密码并撤销全部网页登录会话。MCP：`账号或公开引导，不暴露为MCP工具`。
+
+参数：`X-CSRF-Token`（header）。
+
+请求体：`Password`；必填：oldPassword, newPassword。
+
+| 字段 | 约束/默认 |
+|---|---|
+| `oldPassword` | {"type": "string", "maxLength": 128} |
+| `newPassword` | {"type": "string", "maxLength": 128, "minLength": 8} |
+
+写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
+
+### GET /api/account/mcp-access
+
+当前账号的MCP接入列表。MCP：`账号或公开引导，不暴露为MCP工具`。
+
+### POST /api/account/mcp-access
+
+发放独立访问令牌（仅本次返回明文）。MCP：`账号或公开引导，不暴露为MCP工具`。
+
+参数：`X-CSRF-Token`（header）。
+
+请求体：`Access`；必填：name。
+
+| 字段 | 约束/默认 |
+|---|---|
+| `name` | {"type": "string", "maxLength": 60, "minLength": 1} |
+| `scope` | {"type": "string", "default": "write"} |
+
+写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
+
+### POST /api/account/mcp-access/{access_id}/revoke
+
+撤销当前账号的接入。MCP：`账号或公开引导，不暴露为MCP工具`。
+
+参数：`access_id`（path）；`X-CSRF-Token`（header）。
+
+### PATCH /api/account/mcp-access/{access_id}
+
+重命名当前账号的接入设备。MCP：`账号或公开引导，不暴露为MCP工具`。
+
+参数：`access_id`（path）；`X-CSRF-Token`（header）。
+
+请求体：`Profile`；必填：displayName。
+
+| 字段 | 约束/默认 |
+|---|---|
+| `displayName` | {"type": "string", "maxLength": 60, "minLength": 1} |
+
+写入返回 `{revision,resource,data}`。参数与响应详见 OpenAPI。
+
+### GET /.well-known/oauth-protected-resource/mcp
+
+MCP资源元数据。MCP：`账号或公开引导，不暴露为MCP工具`。
+
+### GET /.well-known/oauth-protected-resource
+
+受保护资源元数据。MCP：`账号或公开引导，不暴露为MCP工具`。
+
+### GET /.well-known/oauth-authorization-server
+
+授权服务器元数据。MCP：`账号或公开引导，不暴露为MCP工具`。
+
+### POST /oauth/register
+
+注册公共OAuth客户端。MCP：`账号或公开引导，不暴露为MCP工具`。
+
+### GET /oauth/authorize
+
+开始客户端授权。MCP：`账号或公开引导，不暴露为MCP工具`。
+
+参数：`client_id`（query）；`redirect_uri`（query）；`code_challenge`（query）；`resource`（query）；`response_type`（query）；`code_challenge_method`（query）；`scope`（query）；`state`（query）。
+
+### GET /api/oauth/requests/{key}
+
+读取待确认授权。MCP：`账号或公开引导，不暴露为MCP工具`。
+
+参数：`key`（path）。
+
+### POST /api/oauth/requests/{key}
+
+允许或拒绝客户端授权。MCP：`账号或公开引导，不暴露为MCP工具`。
+
+参数：`key`（path）；`X-CSRF-Token`（header）。
+
+### POST /oauth/token
+
+交换授权码或轮换刷新令牌。MCP：`账号或公开引导，不暴露为MCP工具`。
+
+### GET /connect/manifest.json
+
+公开AI接入版本清单。MCP：`账号或公开引导，不暴露为MCP工具`。
+
+### GET /connect.md
+
+公开AI接入指南。MCP：`账号或公开引导，不暴露为MCP工具`。
+
+### GET /connect/runtimes/{name}.md
+
+运行环境适配说明。MCP：`账号或公开引导，不暴露为MCP工具`。
+
+参数：`name`（path）。
+
+### GET /downloads/{filename}
+
+下载固定版本的拾序Skill包。MCP：`账号或公开引导，不暴露为MCP工具`。
+
+参数：`filename`（path）。
+
+### GET /api/connection-context
+
+读取认证账号、权限和MCP连接证据。MCP：`get_connection_context`。
+
+参数：`runtime_name`（query）；`runtime_version`（query）；`skill_version`（query）。
+
 ### GET /api/health
 
 检查服务与数据库状态。MCP：`get_system_status`。
@@ -44,6 +218,8 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 ### POST /api/identities
 
 创建记录身份与默认工具模型。MCP：`create_identity`。
+
+参数：`X-CSRF-Token`（header）。
 
 请求体：`IdentityCreate`；必填：request_id, expected_version, name, kind。
 
@@ -64,7 +240,7 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 
 修改身份名称与新建默认值，保留历史快照。MCP：`update_identity`。
 
-参数：`identity_id`（path）。
+参数：`identity_id`（path）；`X-CSRF-Token`（header）。
 
 请求体：`IdentityUpdate`；必填：request_id, expected_version。
 
@@ -96,6 +272,8 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 
 创建待梳理问题。MCP：`create_issue`。
 
+参数：`X-CSRF-Token`（header）。
+
 请求体：`IssueCreate`；必填：request_id, expected_version, title。
 
 | 字段 | 约束/默认 |
@@ -115,7 +293,7 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 
 编辑问题内容与属性。MCP：`update_issue`。
 
-参数：`issue_id`（path）。
+参数：`issue_id`（path）；`X-CSRF-Token`（header）。
 
 请求体：`IssueUpdate`；必填：request_id, expected_version。
 
@@ -135,7 +313,7 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 
 按七状态规则流转问题。MCP：`transition_issue`。
 
-参数：`issue_id`（path）。
+参数：`issue_id`（path）；`X-CSRF-Token`（header）。
 
 请求体：`IssueTransition`；必填：request_id, expected_version, action。
 
@@ -162,7 +340,7 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 
 追加问题跟进记录。MCP：`add_followup`。
 
-参数：`issue_id`（path）。
+参数：`issue_id`（path）；`X-CSRF-Token`（header）。
 
 请求体：`Followup`；必填：request_id, expected_version, content。
 
@@ -191,6 +369,8 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 
 创建关联或独立行动。MCP：`create_task`。
 
+参数：`X-CSRF-Token`（header）。
+
 请求体：`TaskCreate`；必填：request_id, expected_version, title。
 
 | 字段 | 约束/默认 |
@@ -210,7 +390,7 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 
 编辑行动内容与关联。MCP：`update_task`。
 
-参数：`task_id`（path）。
+参数：`task_id`（path）；`X-CSRF-Token`（header）。
 
 请求体：`TaskUpdate`；必填：request_id, expected_version。
 
@@ -230,7 +410,7 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 
 推进取消或重新打开行动。MCP：`transition_task`。
 
-参数：`task_id`（path）。
+参数：`task_id`（path）；`X-CSRF-Token`（header）。
 
 请求体：`TaskTransition`；必填：request_id, expected_version, status。
 
@@ -248,7 +428,7 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 
 设置行动依赖并检查循环。MCP：`set_task_dependencies`。
 
-参数：`task_id`（path）。
+参数：`task_id`（path）；`X-CSRF-Token`（header）。
 
 请求体：`Dependencies`；必填：request_id, expected_version, dependsOn。
 
@@ -265,7 +445,7 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 
 调整同组行动显示顺序。MCP：`reorder_task`。
 
-参数：`task_id`（path）。
+参数：`task_id`（path）；`X-CSRF-Token`（header）。
 
 请求体：`Reorder`；必填：request_id, expected_version, target_id。
 
@@ -287,7 +467,7 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 
 软删除问题及关联行动。MCP：`delete_issue`。
 
-参数：`issue_id`（path）。
+参数：`issue_id`（path）；`X-CSRF-Token`（header）。
 
 请求体：`Write`；必填：request_id, expected_version。
 
@@ -303,7 +483,7 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 
 恢复问题及同批行动。MCP：`restore_issue`。
 
-参数：`issue_id`（path）。
+参数：`issue_id`（path）；`X-CSRF-Token`（header）。
 
 请求体：`Write`；必填：request_id, expected_version。
 
@@ -319,7 +499,7 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 
 软删除行动并检查依赖。MCP：`delete_task`。
 
-参数：`task_id`（path）。
+参数：`task_id`（path）；`X-CSRF-Token`（header）。
 
 请求体：`Write`；必填：request_id, expected_version。
 
@@ -335,7 +515,7 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 
 恢复独立删除的行动。MCP：`restore_task`。
 
-参数：`task_id`（path）。
+参数：`task_id`（path）；`X-CSRF-Token`（header）。
 
 请求体：`Write`；必填：request_id, expected_version。
 
@@ -371,12 +551,18 @@ pause要求reason和不早于Asia/Shanghai今天的reviewDate；resume恢复原�
 
 identity_profiles与问题/行动的身份ID为历史逻辑引用，由领域层创建时校验，不定义物理外键；独立保存名称、来源与model_info JSON，避免默认配置变化污染历史。
 
+## AI快速接入与授权续期
+
+公开入口 /connect、/connect.md、/connect/manifest.json 和 /downloads/{filename} 提供无凭据引导与固定版本Skill。三Tab分别处理快速接入、设备证据和手动配置。get_connection_context读取当前账号与scope，HTTP直接调用不能生成MCP验证标志。
+
+OAuth接受read、write或空格分隔集合，兼容write包含read。刷新令牌绑定客户端与resource，最长30天；每次刷新轮换，旧刷新令牌重放撤销同access_id授权族。PAT有效期1年。撤销即时阻止访问与刷新。设备最近访问不等于在线，runtime与Skill版本为客户端声明。具体请求体和返回见OpenAPI、docs/AI快速接入.md。
+
 ## MCP访问认证
 
-HTTP MCP随服务启动于 /mcp，需要 Authorization: Bearer 访问密钥；无效密钥返回401。stdio仍为本机子进程。密钥按接入端分发、逐次校验、可分别撤销，详见 MCP远程接入.md。此认证不覆盖网页与/api，不提供账号或角色权限，也不验证creation与模型声明。
+HTTP MCP随服务启动于 /mcp，需要 Authorization: Bearer 访问密钥；无效密钥返回401。stdio仍为本机子进程。密钥按接入端分发、逐次校验、可分别撤销，详见 MCP远程接入.md。网页/API使用会话或账号访问令牌；每个账号独立工作台。Cookie写入需要CSRF，令牌按read/write范围校验。creation仍是调用方声明。
 
 ## 示例与边界
 
 只读：`python examples/api_client.py`。合成写入：加 `--write-demo`。浏览器示例：服务运行后访问 `/examples/`。
 
-本版为共享工作台，支持显式配置0.0.0.0监听与内网Host允许列表；actor不是身份认证。正式存储为用户配置的MySQL专属新库，实体分表保存；SQLite仅用于隔离测试。提供回收站软删除与恢复，依赖关系移除也是软删除，数据库10表DELETE触发器与运行时SQL防护阻止物理删除。没有永久删除、导入、上传、登录或离线跨设备同步API。完整工作台/导出包含回收站，普通列表和详情仅限有效记录。恢复必要行动可重开验证，删除问题/恢复问题均原子处理同批关联行动。审计分页使用after=最后一条revision继续查询。完整备份使用MySQL专属库备份，页面JSON不含幂等表。
+本版为账号隔离工作台，支持显式配置0.0.0.0监听与内网Host允许列表；actor不是身份认证。正式存储为用户配置的MySQL专属新库，实体分表保存；SQLite仅用于隔离测试。提供回收站软删除与恢复，依赖关系移除也是软删除，数据库19表DELETE触发器与运行时SQL防护阻止物理删除。提供登录注册、会话管理、OAuth与访问令牌；没有永久删除、导入或离线跨设备同步API。完整工作台/导出包含回收站，普通列表和详情仅限有效记录。恢复必要行动可重开验证，删除问题/恢复问题均原子处理同批关联行动。审计分页使用after=最后一条revision继续查询。完整备份使用MySQL专属库备份，页面JSON不含幂等表。

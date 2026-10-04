@@ -14,7 +14,7 @@ async def check(config, write_demo=False):
     async with httpx2.AsyncClient(headers=settings['headers'], trust_env=False) as http:
         async with Client(streamable_http_client(settings['url'], http_client=http)) as client:
             tools = (await client.list_tools()).tools
-            assert len(tools) == 25
+            assert len(tools) == 26
             async def call(name, args):
                 result = await client.call_tool(name, args)
                 assert not result.is_error, 'MCP tool failed: ' + name
@@ -22,7 +22,7 @@ async def check(config, write_demo=False):
             health = await call('get_system_status', {})
             assert health['mcp']['running']
             await call('list_identities', {})
-            checks = ['authenticated SDK initialize', '25 tools discovered', 'health', 'identity list']
+            checks = ['authenticated SDK initialize', '26 tools discovered', 'health', 'identity list']
             if write_demo:
                 arguments = {'body': {'title': 'HTTP MCP隔离演示', 'tag': '合成验证',
                     'actor': 'HTTP MCP测试', 'expected_version': health['revision'], 'request_id': str(uuid4())}}

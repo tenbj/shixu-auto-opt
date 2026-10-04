@@ -12,7 +12,7 @@ REQUIRED=['README.md','CHANGELOG.md','LICENSE','.gitignore','.env.example',
           'docs/MCP远程接入.md','examples/http_mcp_client.py','scripts/mcp_access.py',
           'examples/api_client.py','examples/mcp_client.py','scripts/configure_mcp.py',
           'scripts/build_release.py','.github/workflows/ci.yml']
-CHECKS={'business','api','mcp','http_mcp','browser','persistence','portable','release_scan','trash_browser','diagrams','retention_mysql','architecture','erd','creators'}
+CHECKS={'business','api','mcp','http_mcp','browser','persistence','portable','release_scan','trash_browser','diagrams','retention_mysql','architecture','erd','creators','accounts','account_mcp','onboarding','dual_transport','public_http','f02'}
 
 
 def safe_path(root, value):
@@ -94,7 +94,7 @@ def validate(root):
         if not re.fullmatch('[0-9a-f]{64}',contract.get('prototype',{}).get('sha256','')):errors.append('缺少有效原型SHA256')
         if contract.get('prototype',{}).get('source_modified') is not False:errors.append('原型保留状态必须明确为false')
         snapshot=contract.get('prototype',{}).get('reference_snapshot','')
-        if not snapshot or not safe_path(root,snapshot).is_file() or hashlib.sha256(safe_path(root,snapshot).read_bytes()).hexdigest()!=contract['prototype']['sha256']:
+        if not snapshot or not safe_path(root,snapshot).is_file() or hashlib.sha256(safe_path(root,snapshot).read_bytes()).hexdigest()!=contract['prototype'].get('snapshot_sha256',contract['prototype']['sha256']):
             errors.append('冻结源原型与hash不一致')
         ops=contract.get('operations',[])
         if not ops:errors.append('没有业务操作映射')

@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "delivery_id": "d22bcb32-463c-4c00-9e75-c7764eea4afe",
+  "checks": [
+    {
+      "scheme": "http",
+      "passed": true,
+      "scope": "Non-loopback browser origin; register/login session, mobile tabs, generated URL, 26 MCP tools, create/read, revoke, logout and Cookie attributes"
+    },
+    {
+      "scheme": "https",
+      "passed": true,
+      "scope": "Non-loopback browser origin; register/login session, mobile tabs, generated URL, 26 MCP tools, create/read, revoke, logout and Cookie attributes"
+    }
+  ],
+  "browser_errors": [],
+  "public_tls_deployed": false,
+  "production_writes": 0,
+  "tls": "Real TLS with ephemeral self-signed test certificate; MCP verifies test CA; no change to public TLS",
+  "forwarded_header_spoof_rejected": true
+}

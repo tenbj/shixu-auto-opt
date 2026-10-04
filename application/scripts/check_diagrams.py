@@ -65,16 +65,16 @@ def main():
         report['checks'].append('20 consecutive field toggles; exact layout restored')
 
         page.locator('.entity[data-id="IS"]').click()
-        assert page.locator('#detail tbody tr').count()==27
+        assert page.locator('#detail tbody tr').count()==28
         assert '非 FK' in page.locator('#detail').inner_text()
         page.locator('#detail .close').click()
         page.locator('.entity[data-id="TA"]').hover()
         assert page.locator('.edge.active').count()==3
         page.locator('.entity[data-id="TA"]').click(button='right')
         page.locator('#hide').click()
-        assert page.locator('.entity').count()==9 and page.locator('.edge').count()==3
+        assert page.locator('.entity').count()==18 and page.locator('.edge').count()==3
         page.locator('#show').click()
-        assert page.locator('.entity').count()==10 and page.locator('.edge').count()==6
+        assert page.locator('.entity').count()==19 and page.locator('.edge').count()==6
         report['checks'].append('Full field details, linked highlighting, context hide and restore')
 
         def drag(x,y,dx,dy,kind):
@@ -134,14 +134,15 @@ def main():
         import hashlib
         contract=json.loads((ROOT/'project-contract.json').read_text(encoding='utf-8'))
         contract['diagrams']={}
-        for kind,skill,files in [('architecture','D04',['app/main.py','app/domain.py','app/mysql_store.py','mcp_server.py','app/mcp_http.py','app/mcp_access.py','scripts/service.py']),('erd','G02',['data/mysql-schema.sql','scripts/migrate_creators.py','app/mysql_store.py'])]:
+        for kind,skill,files in [('architecture','D04',['app/main.py','app/domain.py','app/mysql_store.py','mcp_server.py','app/mcp_http.py','app/account_api.py','app/accounts.py','app/account_context.py','scripts/service.py','app/onboarding.py','app/onboarding_auth.py']),('erd','G02',['data/mysql-schema.sql','scripts/migrate_accounts.py','scripts/migrate_onboarding.py','app/onboarding_auth.py','app/accounts.py','app/mysql_store.py'])]:
             path='static/diagrams/'+kind+'.html'
             sources=[dict(path=f,sha256=hashlib.sha256((ROOT/f).read_bytes()).hexdigest()) for f in files]
             sha=hashlib.sha256((ROOT/path).read_bytes()).hexdigest()
-            contract['diagrams'][kind]=dict(skill=skill,path=path,sha256=sha,maintenance='updated' if kind=='architecture' else 'reviewed_unchanged',change_note='2.4.0 MCP HTTP与API同生命周期，独立Bearer密钥；无DDL变化，ER仍为10实体6物理外键',sources=sources)
+            contract['diagrams'][kind]=dict(skill=skill,path=path,sha256=sha,maintenance='updated',change_note='AI接入、公开引导与Skill分发、OAuth刷新/轮换/设备证据更新；19实体6物理外键，新增两表仅逻辑关联',sources=sources)
             evidence=dict(passed=True,delivery_id=contract['delivery_id'],diagram_sha256=sha,sources=sources,source_consistent=True,details='verification/diagrams/report.json',scope='真实浏览器离线几何与交互；源码、DDL、迁移、元数据核对',live_schema=report.get('live_schema'))
             (OUT/(kind+'-report.json')).write_text(json.dumps(evidence,ensure_ascii=False,indent=2),encoding='utf-8')
         (ROOT/'project-contract.json').write_text(json.dumps(contract,ensure_ascii=False,indent=2),encoding='utf-8')
+        report['delivery_id']=contract['delivery_id']
         report['status']='pass'
         report['passed']=True
         (OUT/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')

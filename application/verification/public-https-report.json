@@ -1,0 +1,14 @@
+{
+  "https_login_secure_cookie": true,
+  "pat_sdk_tools": 26,
+  "pat_sdk_read_workspace": true,
+  "oauth_pkce_exchange_and_read": true,
+  "mysql_refresh_rotation_and_replay_revocation": true,
+  "anonymous_guide_and_bundle_hash": true,
+  "business_data_unchanged": true,
+  "temporary_tokens_revoked": true,
+  "old_http_login_and_read": true,
+  "passed": true,
+  "delivery_id": "d22bcb32-463c-4c00-9e75-c7764eea4afe",
+  "business_writes": 0
+}

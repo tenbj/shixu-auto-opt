@@ -1,0 +1,400 @@
+{
+  "version": "1.8.0",
+  "runtime": "offline-localStorage; no HTTP requests",
+  "interactions": [
+    {
+      "id": "EVT-FIELD",
+      "component_id": "field-control",
+      "trigger": "input/change",
+      "from_state": "editing",
+      "to_state": "editing",
+      "action": "编辑表单值并清除旧校验提示，提交时统一校验",
+      "requirement_ids": [
+        "REQ-001",
+        "REQ-003",
+        "REQ-005",
+        "REQ-007",
+        "REQ-008",
+        "REQ-010",
+        "REQ-011",
+        "REQ-012",
+        "REQ-013",
+        "REQ-015",
+        "REQ-017"
+      ]
+    },
+    {
+      "id": "EVT-ACTION",
+      "component_id": "action-control",
+      "trigger": "click",
+      "from_state": "ready",
+      "to_state": "ready",
+      "actions": {
+        "nav": "切换 today/issues/tasks/review 页面",
+        "new": "新建问题",
+        "new-task": "新建独立或关联行动",
+        "new-linked": "从问题新增行动",
+        "detail": "显示问题及行动与处理记录",
+        "edit-task": "编辑行动",
+        "edit-issue": "编辑问题",
+        "close": "取消并关闭弹窗",
+        "toggle": "完成/重开行动；必要时重开问题",
+        "advance": "待办与进行中切换",
+        "resolve": "已解决",
+        "reopen": "已解决重开到处理中；已关闭重开到待梳理",
+        "export": "下载当前JSON记录",
+        "triage": "待处理",
+        "start": "处理中",
+        "verify": "待验证",
+        "reject": "处理中",
+        "pause": "已暂缓",
+        "resume": "pausedFrom",
+        "close-issue": "已关闭",
+        "retriage": "待梳理",
+        "cancel-task": "打开取消原因表单",
+        "status-filter": "按状态过滤",
+        "followup": "打开单正文跟进表单",
+        "edit-background": "打开背景表单",
+        "overview-state": "清除query/priority/category，设置scope后到问题池",
+        "overview-category": "清除query/priority/scope，设置category后到问题池",
+        "analysis-tab": "切换问题/行动分析页签",
+        "overview-task-status": "设置taskFilter.status并打开看板",
+        "overview-task-due": "设置taskFilter.due并打开未完成行动看板",
+        "clear-task-filter": "清除行动筛选",
+        "edit-attributes": "打开预填属性表单",
+        "workflow-guide": "打开问题整体流转图",
+        "issue-guide": "打开流转图并保留详情返回入口",
+        "guide-tab": "切换流转图",
+        "mobile-more": "打开更多功能",
+        "mobile-task-menu": "打开行动操作菜单",
+        "mobile-go-analysis": "关闭菜单并切换统计",
+        "clear-creator-filter": "清除当前视图创建人和来源过滤",
+        "identity-settings": "打开通用身份管理",
+        "add-profile": "新增人或AI身份",
+        "edit-profile": "编辑配置，不改历史快照",
+        "use-profile": "选择身份，保存新建默认上下文"
+      },
+      "branches": {
+        "workflow-form": "editing",
+        "detail": "detail",
+        "error": "error",
+        "successful-mutation": "success",
+        "followup-form": "editing"
+      },
+      "requirement_ids": [
+        "REQ-001",
+        "REQ-003",
+        "REQ-004",
+        "REQ-005",
+        "REQ-006",
+        "REQ-007",
+        "REQ-008",
+        "REQ-010",
+        "REQ-011",
+        "REQ-012",
+        "REQ-013",
+        "REQ-014",
+        "REQ-015",
+        "REQ-016",
+        "REQ-017"
+      ]
+    },
+    {
+      "id": "EVT-FILTER",
+      "component_id": "filter-control",
+      "trigger": "input/change",
+      "from_state": "ready",
+      "to_state": "ready",
+      "action": "搜索/优先级/分类重新渲染；状态使用EVT-ACTION快捷标签；无结果为empty",
+      "requirement_ids": [
+        "REQ-002",
+        "REQ-007",
+        "REQ-008",
+        "REQ-010",
+        "REQ-011",
+        "REQ-013"
+      ]
+    },
+    {
+      "id": "EVT-KIND",
+      "component_id": "kind-control",
+      "trigger": "change",
+      "from_state": "editing",
+      "to_state": "editing",
+      "action": "切换问题/行动表单；保留标题，其他可选字段重新设置",
+      "requirement_ids": [
+        "REQ-001",
+        "REQ-007",
+        "REQ-008",
+        "REQ-010",
+        "REQ-011",
+        "REQ-013"
+      ]
+    },
+    {
+      "id": "EVT-SUBMIT",
+      "component_id": "record-form",
+      "trigger": "submit",
+      "from_state": "editing",
+      "to_state": "success",
+      "action": "校验记录、工作流或取消行动表单；原子更新内存与日志后持久保存",
+      "guards": [
+        "新问题默认待梳理",
+        "校验当前状态允许动作",
+        "原因/梳理/验证字段非空",
+        "仅本轮必要且未完成/未取消行动阻止验证",
+        "暂停日期校验",
+        "关闭前处置未完成行动"
+      ],
+      "requirement_ids": [
+        "REQ-001",
+        "REQ-003",
+        "REQ-005",
+        "REQ-006",
+        "REQ-007",
+        "REQ-008",
+        "REQ-010",
+        "REQ-011",
+        "REQ-012",
+        "REQ-013",
+        "REQ-015",
+        "REQ-017"
+      ]
+    },
+    {
+      "id": "EVT-BOARD-FILTER",
+      "component_id": "board-filter-control",
+      "trigger": "change",
+      "from_state": "ready",
+      "to_state": "ready",
+      "action": "按关联问题筛选手机行动列表；桌面按问题状态筛选",
+      "requirement_ids": [
+        "REQ-016"
+      ]
+    },
+    {
+      "id": "EVT-MOBILE-PROBLEM",
+      "component_id": "mobile-problem-control",
+      "trigger": "change",
+      "from_state": "ready",
+      "to_state": "ready",
+      "action": "更新selectedTaskIssue并渲染手机行动；不复用桌面状态筛选事件",
+      "requirement_ids": [
+        "REQ-016"
+      ]
+    },
+    {
+      "id": "EVT-IDENTITY",
+      "component_id": "identity-control",
+      "trigger": "change",
+      "from_state": "ready",
+      "to_state": "ready",
+      "action": "切换身份类型，人或AI；通用身份支持自定义名称、工具和模型",
+      "requirement_ids": [
+        "REQ-017"
+      ]
+    },
+    {
+      "id": "EVT-CREATION",
+      "component_id": "creation-control",
+      "trigger": "change",
+      "from_state": "editing",
+      "to_state": "editing",
+      "action": "选择来源和发起者，手动来源不允许AI自主身份；新建时保存创建快照；AI来源额外选填实际模型名称/ID及提供方，未知不猜测",
+      "requirement_ids": [
+        "REQ-017"
+      ]
+    },
+    {
+      "id": "EVT-CREATOR-FILTER",
+      "component_id": "creator-filter-control",
+      "trigger": "change",
+      "from_state": "ready",
+      "to_state": "ready",
+      "action": "对当前问题或行动独立组合筛选创建人和工具来源",
+      "requirement_ids": [
+        "REQ-017"
+      ]
+    },
+    {
+      "id": "EVT-ACCOUNT",
+      "component_id": "account-control",
+      "trigger": "click/input/change/submit",
+      "from_state": "signed_out",
+      "to_state": "ready",
+      "action": "登录/注册；账号切换只加载对应工作台；设置、令牌生成/复制下载/撤销、登录授权确认与拒绝",
+      "requirement_ids": [
+        "REQ-018",
+        "REQ-019",
+        "REQ-020",
+        "REQ-021"
+      ],
+      "api_paths": [
+        "/auth/login",
+        "/auth/register",
+        "/auth/logout",
+        "/account",
+        "/account/password",
+        "/account/mcp-access",
+        "/account/mcp-access/{access_id}/revoke",
+        "/oauth/authorize"
+      ]
+    },
+    {
+      "id": "EVT-AI-CONNECT",
+      "component_id": "ai-connect-control",
+      "trigger": "click/change/submit",
+      "from_state": "connection_quick",
+      "to_state": "connection_ready",
+      "action": "复制预览提示词、公开安装指引、准备/同意/拒绝/只读、失败重试及重载恢复、管理演示设备；不连接正式服务",
+      "requirement_ids": [
+        "REQ-022",
+        "REQ-023",
+        "REQ-024",
+        "REQ-025"
+      ],
+      "api_paths": [
+        "/connect",
+        "/connect.md",
+        "/connect/manifest.json",
+        "/account/mcp-access",
+        "/oauth/authorize",
+        "/oauth/token",
+        "/mcp"
+      ]
+    }
+  ],
+  "issue_transitions": {
+    "triage": {
+      "from": [
+        "待梳理"
+      ],
+      "to": "待处理",
+      "required": [
+        "nextStep",
+        "successCriteria"
+      ]
+    },
+    "start": {
+      "from": [
+        "待处理"
+      ],
+      "to": "处理中",
+      "guard": "nextStep与successCriteria已填写"
+    },
+    "verify": {
+      "from": [
+        "待梳理",
+        "待处理",
+        "处理中"
+      ],
+      "to": "待验证",
+      "required": [
+        "successCriteria",
+        "treatment",
+        "verificationMethod"
+      ],
+      "guard": "无未完成必要行动；前两种源状态仅在零关联行动时允许直接观察验证"
+    },
+    "resolve": {
+      "from": [
+        "待验证"
+      ],
+      "to": "已解决",
+      "required": [
+        "resolution"
+      ],
+      "guard": "无未完成必要行动"
+    },
+    "reject": {
+      "from": [
+        "待验证"
+      ],
+      "to": "处理中",
+      "required": [
+        "reason"
+      ]
+    },
+    "pause": {
+      "from": [
+        "待梳理",
+        "待处理",
+        "处理中",
+        "待验证"
+      ],
+      "to": "已暂缓",
+      "required": [
+        "reason",
+        "reviewDate"
+      ],
+      "guard": "回看日期不得早于今天；保存pausedFrom"
+    },
+    "resume": {
+      "from": [
+        "已暂缓"
+      ],
+      "to": "pausedFrom",
+      "guard": "恢复待验证时若有未完成必要行动则退回处理中"
+    },
+    "close-issue": {
+      "from": [
+        "待梳理",
+        "待处理",
+        "处理中",
+        "待验证",
+        "已暂缓"
+      ],
+      "to": "已关闭",
+      "required": [
+        "reason",
+        "closeType"
+      ],
+      "guard": "重复需duplicateOf，存在未完成行动需taskPolicy=detach或cancel"
+    },
+    "reopen": {
+      "from": [
+        "已解决",
+        "已关闭"
+      ],
+      "to": "已解决重开到处理中；已关闭重开到待梳理",
+      "required": [
+        "reason"
+      ]
+    },
+    "retriage": {
+      "from": [
+        "待处理"
+      ],
+      "to": "待梳理",
+      "required": [
+        "reason"
+      ]
+    }
+  },
+  "followup_submit": {
+    "form": "followup-form",
+    "event": "EVT-SUBMIT",
+    "validation": "content.trim length 1..5000",
+    "success": "append issue.followups, save, return detail timeline",
+    "failure": "inline validation; persistence failure shows export warning",
+    "status_change": false
+  },
+  "background_submit": {
+    "form": "background-form",
+    "event": "EVT-SUBMIT",
+    "field": "description",
+    "validation": "optional, maximum 5000 chars",
+    "success": "save description only, log, return detail; status and followups unchanged"
+  },
+  "attributes_submit": {
+    "form": "attributes-form",
+    "event": "EVT-SUBMIT",
+    "validation": "priority in 高/中/低; trimmed category <=40 chars; blank becomes 未分类",
+    "success": "update priority/tag, save, return to prior list/detail",
+    "preserve": [
+      "status",
+      "description",
+      "followups"
+    ]
+  }
+}

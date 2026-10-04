@@ -1,11 +1,11 @@
 {
   "passed": true,
-  "delivery_id": "f09f717a-c941-456c-a07e-e76603bbf495",
-  "diagram_sha256": "c9341f4e51700352b41364f18d635cf62791ae68173421060ef5c166c0ab641e",
+  "delivery_id": "d22bcb32-463c-4c00-9e75-c7764eea4afe",
+  "diagram_sha256": "3c95af828621925ec741f0995f2a70f71ecd40cd5b54dda11af732369f2b034d",
   "sources": [
     {
       "path": "app/main.py",
-      "sha256": "947016e586de02e0724c3ab6777056bf5ccbd921e03d952f442850ae3a5428a8"
+      "sha256": "5ee28d53b1fd20c8eed37116e72f20990786ed786dda421a56d2389be4389de9"
     },
     {
       "path": "app/domain.py",
@@ -13,23 +13,39 @@
     },
     {
       "path": "app/mysql_store.py",
-      "sha256": "88f28a9ef778e096fbe537d3027363b080da9a2e2210354c0e0923099ad8cbbe"
+      "sha256": "9d5692bc9f4751eb3c9211beb0095071fd531611c51c7ccee0ec8a9e3e071c8d"
     },
     {
       "path": "mcp_server.py",
-      "sha256": "db769d1e119e23465606587cba12ddcd657c310cf137313f7c62cdeb551d3484"
+      "sha256": "870044689c9003cc39336e9c8c83410249bbc47a884aea3b42fac6a2aa68b51d"
     },
     {
       "path": "app/mcp_http.py",
-      "sha256": "70039b14f525b7c133cb8474f4ee62b90ee87e16409f7b0ea1c78d92e2d061b3"
+      "sha256": "c8cff4096f6469b2b06ce80cc00e22bf3553098cdac56c7125f224954c582957"
     },
     {
-      "path": "app/mcp_access.py",
-      "sha256": "3271569fd5506dea2c8121e2b2293b439e641c3b81480ce8d8172fa33c415da9"
+      "path": "app/account_api.py",
+      "sha256": "64a61b40a307ad496f82a07559e3f805b756e6039bf746cdb42fe8e9824dba4b"
+    },
+    {
+      "path": "app/accounts.py",
+      "sha256": "76a1e4a23d9363c31cbe5e9078559d414ba828cfae50f1438065524533815f63"
+    },
+    {
+      "path": "app/account_context.py",
+      "sha256": "aa4587152684213f0723122204458ecd98709342b84a333625282ead97d8dd8a"
     },
     {
       "path": "scripts/service.py",
-      "sha256": "48179ce0c9c3d36cb12abff9ea80544657eae88c85f0aa8b4e8b545ece651e26"
+      "sha256": "78c11c48b77469b7d28bfaf2e737ed4f38cb365ec03e965f55175eeba34ac33c"
+    },
+    {
+      "path": "app/onboarding.py",
+      "sha256": "447124a5ff26a776a3483c32f93d1be1a0ca0893eada70646dc0e69f8f27e22c"
+    },
+    {
+      "path": "app/onboarding_auth.py",
+      "sha256": "65f91815c63d078d3af989abab9e1b2f4f94910f5d004866e515d0d3dd47576c"
     }
   ],
   "source_consistent": true,
@@ -37,8 +53,8 @@
   "scope": "真实浏览器离线几何与交互；源码、DDL、迁移、元数据核对",
   "live_schema": {
     "status": "pass",
-    "tables": 10,
-    "columns": 89,
+    "tables": 19,
+    "columns": 149,
     "foreign_keys": 6,
     "business_rows_read": 0,
     "writes": 0

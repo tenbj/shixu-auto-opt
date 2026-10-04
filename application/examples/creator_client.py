@@ -1,12 +1,13 @@
 """默认只读列出身份；--write-demo 创建合成Elias/Codex身份及问题，回读模型快照。"""
 import argparse,json
 from uuid import uuid4
+import os
 import httpx
 
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--url',default='http://127.0.0.1:8765');p.add_argument('--write-demo',action='store_true');args=p.parse_args()
-    with httpx.Client(base_url=args.url,trust_env=False,timeout=30) as client:
+    with httpx.Client(headers={'Authorization':'Bearer '+os.environ['SHIXU_MCP_TOKEN']},base_url=args.url,trust_env=False,timeout=30) as client:
         identities=client.get('/api/identities').raise_for_status().json()
         if not args.write_demo:print(json.dumps(identities,ensure_ascii=False));return
         revision=identities['revision']

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "codex",
+    "name": "Codex",
+    "mode": "native-oauth",
+    "status": "documented",
+    "verifiedVersions": [],
+    "guide": "/connect/runtimes/codex.md",
+    "install": "https://developers.openai.com/codex/"
+  },
+  {
+    "id": "workbuddy",
+    "name": "WorkBuddy",
+    "mode": "guided-import",
+    "status": "documented-manual",
+    "verifiedVersions": [],
+    "guide": "/connect/runtimes/workbuddy.md",
+    "install": "https://www.codebuddy.cn/workbuddy"
+  },
+  {
+    "id": "claude",
+    "name": "Claude Code",
+    "mode": "manual",
+    "status": "not-verified",
+    "verifiedVersions": [],
+    "guide": "/connect/runtimes/claude.md",
+    "install": "https://code.claude.com/docs/en/overview"
+  },
+  {
+    "id": "other",
+    "name": "其他 AI / 服务器",
+    "mode": "manual",
+    "status": "capability-detection",
+    "verifiedVersions": [],
+    "guide": "/connect/runtimes/other.md",
+    "install": null
+  }
+]

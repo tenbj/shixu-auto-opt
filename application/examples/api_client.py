@@ -2,6 +2,7 @@
 import argparse
 import json
 from uuid import uuid4
+import os
 import httpx
 
 
@@ -10,7 +11,7 @@ def main():
     parser.add_argument('--url', default='http://127.0.0.1:8765')
     parser.add_argument('--write-demo', action='store_true')
     args = parser.parse_args()
-    with httpx.Client(base_url=args.url, timeout=15, trust_env=False) as client:
+    with httpx.Client(headers={'Authorization':'Bearer '+os.environ['SHIXU_MCP_TOKEN']},base_url=args.url, timeout=15, trust_env=False) as client:
         for path in ['/api/health', '/api/issues', '/api/trash', '/openapi.json']:
             result = client.get(path).raise_for_status().json()
             print(path, 'OK', len(result))

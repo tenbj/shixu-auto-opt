@@ -1,0 +1,31 @@
+{
+  "passed": true,
+  "checks": [
+    "360: clipboard contains selected runtime and no token",
+    "360: denial creates none; retry reuses authorized device",
+    "360: revocation affects device only; business records unchanged",
+    "360: focus restoration, draft cancel and keyboard tabs",
+    "360: runtime-specific config download",
+    "390: clipboard contains selected runtime and no token",
+    "390: denial creates none; retry reuses authorized device",
+    "390: revocation affects device only; business records unchanged",
+    "390: focus restoration, draft cancel and keyboard tabs",
+    "390: runtime-specific config download",
+    "430: clipboard contains selected runtime and no token",
+    "430: denial creates none; retry reuses authorized device",
+    "430: revocation affects device only; business records unchanged",
+    "430: focus restoration, draft cancel and keyboard tabs",
+    "430: runtime-specific config download",
+    "537: clipboard contains selected runtime and no token",
+    "537: denial creates none; retry reuses authorized device",
+    "537: revocation affects device only; business records unchanged",
+    "537: focus restoration, draft cancel and keyboard tabs",
+    "537: runtime-specific config download",
+    "1440: clipboard contains selected runtime and no token",
+    "1440: denial creates none; retry reuses authorized device",
+    "1440: revocation affects device only; business records unchanged",
+    "1440: focus restoration, draft cancel and keyboard tabs",
+    "1440: runtime-specific config download"
+  ],
+  "scope": "Offline prototype in Chromium; no real installation, authorization, MCP or business writes; no physical mobile keyboard test"
+}

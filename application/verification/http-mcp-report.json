@@ -1,10 +1,10 @@
 {
   "passed": true,
   "transport": "streamable-http",
-  "tools": 25,
+  "tools": 26,
   "checks": [
     "authenticated SDK initialize",
-    "25 tools discovered",
+    "26 tools discovered",
     "health",
     "identity list",
     "real API write",
@@ -12,5 +12,6 @@
     "readback"
   ],
   "scope": "SDK固定序列；不代表AI自主验收",
-  "token_printed": false
+  "token_printed": false,
+  "delivery_id": "d22bcb32-463c-4c00-9e75-c7764eea4afe"
 }

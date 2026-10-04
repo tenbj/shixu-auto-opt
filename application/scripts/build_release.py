@@ -14,7 +14,7 @@ import httpx
 from check import stop
 
 ROOT = Path(__file__).resolve().parents[1]
-INCLUDE_DIRS = {'app', 'static', 'docs', 'examples', 'tests', 'verification', 'scripts', 'data', 'reference', '.github'}
+INCLUDE_DIRS = {'app', 'static', 'docs', 'examples', 'tests', 'verification', 'scripts', 'data', 'reference', 'downloads', '.github'}
 INCLUDE_FILES = {'README.md', 'CHANGELOG.md', 'LICENSE', '.gitignore', '.env.example', 'requirements.txt',
                  'requirements-dev.txt', 'requirements-lock.txt', 'project-contract.json', 'mcp_server.py'}
 SKIP_PARTS = {'__pycache__', '.pytest_cache', 'runtime', 'private', '.venv', '.git', 'dist'}
@@ -34,7 +34,7 @@ def files():
 
 def scan(paths):
     findings = []
-    patterns = [r'-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----', r'(?<![A-Za-z])sk-[A-Za-z0-9_-]{25,}', r'ghp_[A-Za-z0-9]{30,}', r'sx_[A-Za-z0-9_-]{43}']
+    patterns = [r'-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----', r'(?<![A-Za-z])sk-[A-Za-z0-9_-]{25,}', r'ghp_[A-Za-z0-9]{30,}', r'sx(?:r)?_[A-Za-z0-9_-]{43}']
     for path in paths:
         if path.is_symlink():
             findings.append(str(path.relative_to(ROOT)) + ': symlink')
@@ -64,7 +64,7 @@ def portable(zip_path, temporary):
         sock.bind(('127.0.0.1', 0))
         port = sock.getsockname()[1]
     url = f'http://127.0.0.1:{port}'
-    env = dict(os.environ, PYTHONIOENCODING='utf-8', SHIXU_BACKEND='sqlite')
+    env = dict(os.environ, PYTHONIOENCODING='utf-8', SHIXU_BACKEND='sqlite', SHIXU_SKIP_DOTENV='true')
     env.pop('SHIXU_DB', None)
     env.pop('SHIXU_MCP_KEYS_PATH', None)
     env['SHIXU_API_URL'] = url
@@ -82,11 +82,16 @@ def portable(zip_path, temporary):
                 time.sleep(.1)
         else:
             raise RuntimeError('Portable service timeout')
-        assert response.json()['revision'] == 0
+        assert response.json()['revision'] is None
         assert httpx.get(url, trust_env=False).status_code == 200
         from uuid import uuid4
-        created = httpx.post(url + '/api/issues', json=dict(title='便携验证合成对象', expected_version=0, request_id=str(uuid4())), trust_env=False).raise_for_status().json()
-        assert httpx.get(url + '/api/issues/' + created['resource']['id'], trust_env=False).raise_for_status().json()['item']['title'] == '便携验证合成对象'
+        with httpx.Client(base_url=url,trust_env=False) as client:
+            auth=client.post('/api/auth/register',json=dict(username='portable',password=uuid4().hex)).raise_for_status().json()
+            client.headers['X-CSRF-Token']=auth['csrf']
+            assert client.get('/api/workspace').json()['revision']==0
+            created=client.post('/api/issues',json=dict(title='便携验证合成对象',expected_version=0,request_id=str(uuid4()))).raise_for_status().json()
+            assert client.get('/api/issues/'+created['resource']['id']).raise_for_status().json()['item']['title']=='便携验证合成对象'
+
     finally:
         stop(process)
     return {'passed': True, 'scope': 'ZIP解压到另一临时目录，复用当前已安装依赖的Python；显式SQLite测试适配器启动、真实HTTP首页、创建与回读通过；MySQL真实联调另见mysql-report.json',
@@ -105,18 +110,21 @@ def main():
         candidate = Path(temporary) / 'candidate.zip'
         archive(candidate, files())
         result = portable(candidate, temporary)
+    delivery=json.loads((ROOT/'project-contract.json').read_text(encoding='utf-8'))['delivery_id']
+    result['delivery_id']=delivery;report['delivery_id']=delivery
     (ROOT / 'verification/portable-report.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
     (ROOT / 'verification/release-scan.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
     subprocess.run([sys.executable, 'scripts/generate_docs.py'], cwd=ROOT, check=True)
     subprocess.run([sys.executable, 'scripts/validate_project.py', '--project-dir', '.', '--report', 'verification/contract-report.json'], cwd=ROOT, check=True)
     final_files = files()
     report = scan(final_files)
+    report['delivery_id']=delivery
     if not report['passed']:
         raise SystemExit('Final package scan failed')
     (ROOT / 'verification/release-scan.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
     directory = ROOT / 'dist'
     directory.mkdir(exist_ok=True)
-    target = directory / 'shixu-system-2.4.0.zip'
+    target = directory / 'shixu-system-3.1.0.zip'
     archive(target, files())
     digest = hashlib.sha256(target.read_bytes()).hexdigest()
     (directory / 'SHA256SUMS.txt').write_text(digest + '  ' + target.name + '\n', encoding='utf-8')

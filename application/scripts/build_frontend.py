@@ -107,5 +107,7 @@ html = html.replace('const date=d=>{const x=new Date();x.setDate(x.getDate()+d);
 html = html.replace('</style>', '@media(max-width:700px){.mobile-sync-state{font-size:11px;font-weight:400;letter-spacing:0;color:var(--muted)}.mobile-brand{gap:8px}.banner{margin-bottom:16px}}\n</style>')
 from creator_frontend import integrate
 html = integrate(html, ROOT)
+from account_frontend import integrate as integrate_accounts
+html = integrate_accounts(html, ROOT)
 (ROOT / 'static' / 'index.html').write_text(html, encoding='utf-8')
 print('Generated static/index.html; prototype unchanged')

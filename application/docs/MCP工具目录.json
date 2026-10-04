@@ -5,9 +5,9 @@
     "streamable-http",
     "stdio"
   ],
-  "authentication": "HTTP: per-client Bearer key; stdio: local process",
+  "authentication": "HTTP OAuth/PAT bound to account; stdio SHIXU_MCP_TOKEN",
   "command": "python /absolute/path/application/mcp_server.py",
-  "url": "http://127.0.0.1:8765/mcp",
+  "url": "https://shixu.eliasliu.cc/mcp",
   "instructions": "先 health，再 list/get 获取 revision，写入携带 request_id 和 expected_version。重试同号；409重读，422修正输入，503不得声称成功。提交验证必须填写处理说明、方法；确认解决必须填写验证依据。actor仅为审计标签。创建前list_identities；creation.identityId指定实际提交身份，initiatedByPersonId可指定人类发起者；modelInfo记录实际模型，空对象表示未提供，不能从工具名猜测。",
   "tools": [
     {
@@ -31,6 +31,74 @@
         "inputSchema": {
           "properties": {},
           "title": "get_system_statusArguments",
+          "type": "object"
+        },
+        "execution": null,
+        "outputSchema": null,
+        "icons": null,
+        "annotations": {
+          "title": null,
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "_meta": null
+      }
+    },
+    {
+      "name": "get_connection_context",
+      "kind": "read",
+      "purpose": "接入后先调用。只读当前认证账号、权限、接口版本，登记本次连通时间；客户端/Skill版本是自报，不能证明Skill已加载。不写问题行动。",
+      "when_to_use": "接入后先调用。只读当前认证账号、权限、接口版本，登记本次连通时间；客户端/Skill版本是自报，不能证明Skill已加载。不写问题行动。",
+      "input": {
+        "properties": {
+          "runtime_name": {
+            "default": "",
+            "title": "Runtime Name",
+            "type": "string"
+          },
+          "runtime_version": {
+            "default": "",
+            "title": "Runtime Version",
+            "type": "string"
+          },
+          "skill_version": {
+            "default": "",
+            "title": "Skill Version",
+            "type": "string"
+          }
+        },
+        "title": "get_connection_contextArguments",
+        "type": "object"
+      },
+      "returns": "见API响应；写入返回resource/data/revision",
+      "side_effect": "无",
+      "order": "先health，再list/get版本，再写入",
+      "error_handling": "404检查ID；409重读；422修正输入；503不确认成功、同号重试",
+      "protocol": {
+        "name": "get_connection_context",
+        "title": null,
+        "description": "接入后先调用。只读当前认证账号、权限、接口版本，登记本次连通时间；客户端/Skill版本是自报，不能证明Skill已加载。不写问题行动。",
+        "inputSchema": {
+          "properties": {
+            "runtime_name": {
+              "default": "",
+              "title": "Runtime Name",
+              "type": "string"
+            },
+            "runtime_version": {
+              "default": "",
+              "title": "Runtime Version",
+              "type": "string"
+            },
+            "skill_version": {
+              "default": "",
+              "title": "Skill Version",
+              "type": "string"
+            }
+          },
+          "title": "get_connection_contextArguments",
           "type": "object"
         },
         "execution": null,

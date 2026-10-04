@@ -1,108 +1,36 @@
 # 拾序 · 系统 + API + MCP
 
-版本 2.4.0 · 基于通用创建身份原型，保留回收站与紧凑菜单 · 单机服务 + MySQL 实体存储
+版本3.1.0，按已确认的AI接入原型v8（v1.8.0）更新。保留五视图、七状态流转、回收站、编号、依赖、日历、跟进及创建来源；页面、API与MCP共用按账号隔离的MySQL事务。
 
-系统保留今日概览、问题池、行动看板、统计分析、复盘记录，以及七状态流转、问题与行动固定编号、依赖、排序、日历、跟进和背景/属性编辑。页面和 MCP 共用同一套 API 与 MySQL 实体数据库。每次读取来自数据库，每次写入事务提交；内存仅作为单次请求的计算空间。
+右上角账号卡片打开下拉菜单，账号设置和AI接入采用弹窗Tab。手机工作台工具放在二级菜单，退出登录放在账号菜单。关闭弹窗保留页面与筛选。
 
-## 创建身份与模型
+账号决定数据归属，记录身份说明创建人、AI工具和模型。迁移前记录归到test，原有创建快照不改变；注册账号从空工作台开始。
 
-右上角“记录身份”可添加姓名、昵称或AI助手。人使用手动来源；AI选择工具、模型名称/ID和提供方。新建问题/行动自动带入当前身份，展开创建信息可指定人类发起者及本次实际模型。例如：Elias 经 Codex 创建 · GPT-6.1 Sol。模型由调用方提供，不从工具名推断。
+## 部署和使用
 
-创建信息保存服务器快照，旧记录不会随身份改名或默认模型变化。没有来源信息的历史记录保留未知。身份登记不等于账号认证；当前工作台共享全部记录。
+安装Python3.11+及requirements.txt，连接私有MySQL8.0专属库。执行 scripts/service.py start、status、stop 管理服务。从2.4升级须停服、私有输入初始密码并执行 scripts/migrate_accounts.py，详见下方账号说明。通过SHIXU_ALLOW_HTTP_AUTH=true显式开启公网HTTP登录及PAT/API/MCP；HTTPS继续支持，标准远程OAuth仍需HTTPS。
 
-从2.2.1升级：先停止API，执行 `python scripts/migrate_creators.py`，再启动。脚本先在本机 `runtime/backups/` 保存表结构、记录和触发器快照，再追加结构并比对所有原列；不会把生产数据放入Git或ZIP。DDL可重复补齐，但不能事务回滚；恢复到旧版本时优先保留新增列并运行旧代码，数据回滚应由数据库备份恢复到独立新库后核对，避免覆盖新写入。
-
-冻结源原型在 `reference/creator-source.html`，原文件 `../prototype/prototype.html` 保持未修改。页面生成器复用回收站基线并合入创建身份展示，通过API替换本地存储。双图本轮证据及来源哈希见 `project-contract.json` 与 `verification/diagrams/`。
-
-## 移动端
-
-700px以内使用底部五视图导航、今日行动卡片、按日期分组的日程及全屏详情。手机新增、编辑、流转、跟进和导出均使用真实服务端工作台；顶部显示同步状态，更多菜单可刷新数据。桌面布局保持原有操作方式。
-
-从2.1升级先停止服务，执行 python scripts/migrate_trash.py，再重启。迁移仅追加可空软删除字段与索引，保留业务记录、编号和历史。新增回收站支持同批恢复，操作菜单在桌面就地展开、手机使用底部操作面板；问题列表下一步默认隐藏。
-
-## 安装与运行
-
-要求 Python 3.11+、MySQL 8.0 和现代浏览器。无 Node 构建步骤。首次安装须配置仓库外私有连接，并新建专属数据库；分发包不包含任何使用者的连接凭据。
-
-在当前 `application` 目录执行：
-
-```powershell
-python -m venv .venv
-.venv\Scripts\python -m pip install -r requirements.txt
-# 新环境先配置仓库外私有环境文件及专属空MySQL库，见 docs/MySQL部署说明.md。
-.venv\Scripts\python scripts/service.py start
-.venv\Scripts\python scripts/service.py status
-# 结束时
-.venv\Scripts\python scripts/service.py stop
-```
-
-macOS/Linux 使用 `.venv/bin/python` 代替 `.venv\Scripts\python`。本次实际验证环境为 Windows / Python 3.11；未声称已在其他操作系统实测。
-
-- 系统：http://127.0.0.1:8765/
-- API 交互文档：http://127.0.0.1:8765/docs
-- OpenAPI：http://127.0.0.1:8765/openapi.json
-- 健康检查：http://127.0.0.1:8765/api/health
-- HTML 示例：http://127.0.0.1:8765/examples/
-- MCP：随服务启动 `http://127.0.0.1:8765/mcp`，需要访问密钥；本机 stdio 仍兼容。见 [MCP远程接入](docs/MCP远程接入.md)。
-- ER 图：http://127.0.0.1:8765/static/diagrams/erd.html
-- 架构图：http://127.0.0.1:8765/static/diagrams/architecture.html
-
-### 内网访问
-
-在本机 `.env` 或私有环境文件中配置：
-
-```dotenv
-SHIXU_HOST=0.0.0.0
-SHIXU_ALLOWED_HOSTS=192.168.1.138,0.0.0.0
-```
-
-将示例 IP 替换为服务器实际内网 IP，然后执行 `service.py stop`、`service.py start`。也可用 `python scripts/service.py start --host 0.0.0.0` 临时覆盖监听地址。`0.0.0.0` 表示监听全部 IPv4 网卡；其他设备用服务器内网 IP 访问，本机仍可使用 `127.0.0.1`。默认未配置时只监听回环地址。Host 允许列表和同源写入检查继续生效。
-
-当前为无账号认证的个人工作台，内网访问面向可信网络。HTTP MCP与API共用同一端口和进程，访问 `/mcp` 必须携带Bearer密钥。网页和业务API仍无账号认证；MCP密钥不覆盖它们。
-
-新环境初始化后为空工作台。可选合成演示（仅空库可用）：
-
-```powershell
-.venv\Scripts\python scripts/seed_demo.py
-```
-
-前台调试：`python -m uvicorn app.main:app --host 127.0.0.1 --port 8765`，Ctrl+C 停止。更换端口时，service 的 start/status/stop 都传同一个 `--port`。
-
-## 数据与使用
-
-正式记录保存到配置的专属 MySQL 库，实体分为 issues、tasks、task_dependencies、issue_followups、issue_history、issue_logs，新增 identity_profiles 保存人/AI身份及默认模型；另有 workspace_meta、activity、idempotency_requests。关闭服务、刷新页面和重启后保留。InnoDB 事务同时提交实体、审计和幂等结果，元数据行锁保护并发版本。操作人是审计标签，本版没有账号身份认证。按中国时区判断“今天”和回看日期。
-
-浏览器只保存当前记录身份ID和布局偏好；身份配置保存在服务端。其他页面或 MCP 修改后，点击“刷新数据”读取最新版本；并发写入冲突会拒绝并提示重新检查，不覆盖他人修改。若网络中断导致保存结果未知，保留页面并重试相同操作，客户端会复用幂等编号。
-
-导出记录可从页面右上角下载 JSON。完整备份使用 MySQL 对专属库进行一致性备份，恢复只面向该专属库。当前系统原有 SQLite 数据已只读迁入新库，源 SQLite 文件保留；API 提供软删除和恢复端点，没有永久删除或导入端点，原型浏览器内的历史记录未自动读取或迁移。
-
-## 接入与验证
-
-- [中文 API 文档](docs/API中文说明.md)
-- [中文 AI/MCP 接入与工具决策表](docs/AI接入与调用指南.md)
-- [需求与能力映射](docs/需求与能力映射.md)
-- [MySQL部署与数据边界](docs/MySQL部署说明.md)
+- [账号、迁移和远程接入](docs/账号与远程接入.md)
+- [MySQL部署](docs/MySQL部署说明.md)
+- [中文API](docs/API中文说明.md)
+- [AI调用指南](docs/AI接入与调用指南.md)
+- [需求映射](docs/需求与能力映射.md)
 - [机器合同](project-contract.json)
-- [验证报告](verification/summary.json)
 
-```powershell
-python -m pip install -r requirements-dev.txt
-python -m playwright install chromium
-python scripts/check.py
-# 已配置MySQL且对应_test库已初始化时，执行真实MySQL集成测试：
-python scripts/check.py --mysql
-python scripts/generate_diagrams.py
-python scripts/check_diagrams.py --live-schema
-python scripts/generate_docs.py
-python scripts/build_release.py
-```
+本机系统 http://127.0.0.1:8765/，MCP /mcp，API交互 /docs，Schema /openapi.json，示例 /examples/，双图 /static/diagrams/architecture.html 与 /static/diagrams/erd.html。
 
-`check.py` 默认使用显式 SQLite 测试适配器和随机端口，让无私有凭据的 CI 可运行；正式服务默认使用 MySQL。`--mysql` 在专门新建的 `_test` 库执行真实 HTTP、浏览器、25 个 MCP 工具、MySQL 并发/回滚/实体表及进程重启持久化检查。浏览器响应丢失场景通过网络拦截模拟；其余核心链路连接真实 MySQL。测试记录不会进入日常工作台。
+支持OAuth的客户端填写HTTPS MCP地址后登录授权；其他客户端和服务器在网页AI接入弹窗生成只读/读写PAT配置。新机器不需要项目源码或发放脚本。旧全局文件密钥停用。Python/stdio示例读取私有环境SHIXU_MCP_TOKEN；网页示例复用登录会话。
 
-## 交付边界
+## 验证与交付
 
-这是单服务、共享工作台的系统，默认绑定 127.0.0.1，可显式配置 0.0.0.0 用于可信内网访问，并拒绝外站浏览器写入；数据写入指定 MySQL。MCP已提供可分别撤销的访问密钥；未实现网页/API账号认证、角色权限、离线跨设备同步、附件、通知服务、自动 AI 拆解或高可用。全局版本适合个人规模，大数据/多人场景需分资源并发控制。MySQL TLS 条件由部署配置指定，默认校验证书。
+依次执行 scripts/check.py --mysql、scripts/generate_diagrams.py、scripts/check_diagrams.py --live-schema、scripts/generate_docs.py、scripts/build_release.py。默认check使用SQLite测试适配器，MySQL验证只写专属_test库。证据在verification，19表定义在data/mysql-schema.sql。源原型未修改，分发的冻结快照已脱敏。
 
-已交付 MCP 协议与工具调用验证；AI 自主选择工具完成任务的验收尚未执行。AI 客户端需按接入文档自行配置，项目尚未授予开放源代码许可。分发 ZIP 排除本机数据库、日志、私有原型副本、凭据、真实工作台访问截图和依赖缓存；只保留合成数据与验证证据。
+业务删除与依赖移除保留原行，数据库DELETE触发器阻止物理删除。每个账号独立revision、编号、身份、审计和幂等，数据归属只能来自认证上下文。
 
-所有业务删除均为软删除，包括移除行动依赖。deleted_at为空表示有效，非空表示删除；恢复清空标识，编号与历史保留。数据库10表DELETE触发器与应用SQL防护阻止物理删除，不提供永久清空功能。已有2.2.0库先停止服务，执行 scripts/migrate_trash.py 追加依赖删除字段和数据库保护，再启动。
+本次为Windows/Python3.11单机交付。未做AI自主任务、各客户端OAuth兼容性、大负载或高可用验收；不支持共享账号工作台、管理员角色、找回密码、永久删除。MySQL连接尚未启用TLS。项目包排除凭据、真实数据及依赖；未授予开放许可证。
+
+## 3.1 快速接入
+
+新设备打开 [公开接入页](https://shixu.eliasliu.cc/connect)，选择runtime并复制提示词交给AI。网页提供公开指南、能力矩阵及带SHA256的固定版本独立Skill包；OAuth由用户在浏览器完成。账号菜单 → AI接入，使用快速接入、我的设备、手动配置三个Tab。
+
+从3.0升级先停服，运行 `python scripts/migrate_onboarding.py`，确认原有17表保留核对通过，再启动服务。新增设备证据和刷新令牌两表；迁移前自动保存私有快照。详见 [AI快速接入](docs/AI快速接入.md)。

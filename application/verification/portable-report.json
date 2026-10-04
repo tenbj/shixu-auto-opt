@@ -4,5 +4,6 @@
   "dependency_install_verified_separately": false,
   "os": "win32",
   "python": "3.11.7",
-  "not_claimed": "不是免安装exe；未在Linux/macOS实测；最终包的运行源码与此候选相同，仅补充报告和ready合同"
+  "not_claimed": "不是免安装exe；未在Linux/macOS实测；最终包的运行源码与此候选相同，仅补充报告和ready合同",
+  "delivery_id": "d22bcb32-463c-4c00-9e75-c7764eea4afe"
 }

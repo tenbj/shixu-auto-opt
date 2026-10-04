@@ -1,0 +1,5 @@
+# 其他运行环境与无头服务器
+
+先确认实际harness名称/版本，原生MCP传输、凭据存储、执行能力和Skill加载方式。deepseek-harness名称不证明模型或MCP能力。支持Streamable HTTP时使用清单地址；无浏览器环境优先访问令牌，通过用户私有配置交付，不要求聊天发送秘密。没有MCP支持则明确不支持，不伪装成Codex或无提示安装SDK桥接。
+
+重载后get_connection_context核对账号/权限，再list_issues。Skill加载必须独立确认。接入默认不写业务数据，只有用户明确记录请求才写入并回读。

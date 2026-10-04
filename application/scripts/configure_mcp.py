@@ -1,4 +1,4 @@
-"""仅打印 MCP 配置片段，不自动修改任何客户端配置。"""
+"""仅打印stdio兼容配置；另须私有环境SHIXU_MCP_TOKEN，推荐网页下载HTTP配置。"""
 import argparse
 import json
 from pathlib import Path

@@ -8,6 +8,11 @@
       "expected_error": false
     },
     {
+      "tool": "get_connection_context",
+      "passed": true,
+      "expected_error": false
+    },
+    {
       "tool": "list_issues",
       "passed": true,
       "expected_error": false
@@ -190,6 +195,7 @@
   ],
   "tools": [
     "get_system_status",
+    "get_connection_context",
     "list_identities",
     "create_identity",
     "update_identity",
@@ -216,5 +222,6 @@
     "restore_task"
   ],
   "backend": "mysql",
-  "passed": true
+  "passed": true,
+  "delivery_id": "d22bcb32-463c-4c00-9e75-c7764eea4afe"
 }

@@ -1,0 +1,253 @@
+{
+  "checked_at": "2026-10-04T06:09:57.771198+00:00",
+  "status": "passed",
+  "passed": true,
+  "prototype_sha256": "101395e22fd413be60975fab7488d1bc069d6ca5fb42704aa3aba932de8816e5",
+  "config_sha256": "bd3fb165b26d35cbdaf171f72c11d7c2a90e746c8be779bbbce26da3abc78ec0",
+  "results": [
+    {
+      "width": 360,
+      "height": 844,
+      "passed": true,
+      "scenarios": [
+        {
+          "id": "account-login-error-success",
+          "passed": true
+        },
+        {
+          "id": "workspace-create",
+          "passed": true
+        },
+        {
+          "id": "new-account-empty",
+          "passed": true
+        },
+        {
+          "id": "ai-quick-copy",
+          "passed": true
+        },
+        {
+          "id": "ai-authorize-verify-manage",
+          "passed": true
+        },
+        {
+          "id": "ai-deny-readonly",
+          "passed": true
+        },
+        {
+          "id": "ai-fail-retry",
+          "passed": true
+        },
+        {
+          "id": "ai-reload",
+          "passed": true
+        },
+        {
+          "id": "ai-manual-token",
+          "passed": true
+        },
+        {
+          "id": "ai-public-guide",
+          "passed": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "passed": true,
+      "scenarios": [
+        {
+          "id": "account-login-error-success",
+          "passed": true
+        },
+        {
+          "id": "workspace-create",
+          "passed": true
+        },
+        {
+          "id": "new-account-empty",
+          "passed": true
+        },
+        {
+          "id": "ai-quick-copy",
+          "passed": true
+        },
+        {
+          "id": "ai-authorize-verify-manage",
+          "passed": true
+        },
+        {
+          "id": "ai-deny-readonly",
+          "passed": true
+        },
+        {
+          "id": "ai-fail-retry",
+          "passed": true
+        },
+        {
+          "id": "ai-reload",
+          "passed": true
+        },
+        {
+          "id": "ai-manual-token",
+          "passed": true
+        },
+        {
+          "id": "ai-public-guide",
+          "passed": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "width": 430,
+      "height": 844,
+      "passed": true,
+      "scenarios": [
+        {
+          "id": "account-login-error-success",
+          "passed": true
+        },
+        {
+          "id": "workspace-create",
+          "passed": true
+        },
+        {
+          "id": "new-account-empty",
+          "passed": true
+        },
+        {
+          "id": "ai-quick-copy",
+          "passed": true
+        },
+        {
+          "id": "ai-authorize-verify-manage",
+          "passed": true
+        },
+        {
+          "id": "ai-deny-readonly",
+          "passed": true
+        },
+        {
+          "id": "ai-fail-retry",
+          "passed": true
+        },
+        {
+          "id": "ai-reload",
+          "passed": true
+        },
+        {
+          "id": "ai-manual-token",
+          "passed": true
+        },
+        {
+          "id": "ai-public-guide",
+          "passed": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "width": 537,
+      "height": 884,
+      "passed": true,
+      "scenarios": [
+        {
+          "id": "account-login-error-success",
+          "passed": true
+        },
+        {
+          "id": "workspace-create",
+          "passed": true
+        },
+        {
+          "id": "new-account-empty",
+          "passed": true
+        },
+        {
+          "id": "ai-quick-copy",
+          "passed": true
+        },
+        {
+          "id": "ai-authorize-verify-manage",
+          "passed": true
+        },
+        {
+          "id": "ai-deny-readonly",
+          "passed": true
+        },
+        {
+          "id": "ai-fail-retry",
+          "passed": true
+        },
+        {
+          "id": "ai-reload",
+          "passed": true
+        },
+        {
+          "id": "ai-manual-token",
+          "passed": true
+        },
+        {
+          "id": "ai-public-guide",
+          "passed": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "height": 1000,
+      "passed": true,
+      "scenarios": [
+        {
+          "id": "account-login-error-success",
+          "passed": true
+        },
+        {
+          "id": "workspace-create",
+          "passed": true
+        },
+        {
+          "id": "new-account-empty",
+          "passed": true
+        },
+        {
+          "id": "ai-quick-copy",
+          "passed": true
+        },
+        {
+          "id": "ai-authorize-verify-manage",
+          "passed": true
+        },
+        {
+          "id": "ai-deny-readonly",
+          "passed": true
+        },
+        {
+          "id": "ai-fail-retry",
+          "passed": true
+        },
+        {
+          "id": "ai-reload",
+          "passed": true
+        },
+        {
+          "id": "ai-manual-token",
+          "passed": true
+        },
+        {
+          "id": "ai-public-guide",
+          "passed": true
+        }
+      ],
+      "errors": []
+    }
+  ],
+  "errors": [],
+  "engine_sha256": "6617c1acda7652009e45f8794995a4c33424d65d4769ddf3404237e66561225e",
+  "scope": "本地自包含HTML、Chromium视口/触摸模拟；不代表iOS、软键盘或真机验收",
+  "browser_version": "153.0.8010.12"
+}

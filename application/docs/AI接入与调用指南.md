@@ -1,8 +1,12 @@
 # 拾序 AI 与 MCP 接入
 
-## 安装服务与注册客户端
+## 新设备快速接入
 
-2.4.0起，HTTP MCP默认随API在同一进程启动，地址为 `/mcp`，需要Bearer访问密钥。其他电脑可以使用HTTP接入，详见 [MCP远程接入](MCP远程接入.md)。本机仍可使用下面的stdio方式，由客户端启动适配器子进程。两种方式共用25个工具和业务规则；客户端均不需要数据库密码。
+首选 [公开接入页](https://shixu.eliasliu.cc/connect) 复制提示词；AI按 `/connect.md` 检测runtime、配置远程MCP、安装独立Skill、引导用户授权并调用 `get_connection_context` 核对工作台与scope。无需获取服务端项目或数据库配置。详见 [AI快速接入](AI快速接入.md)。
+
+## 服务端维护与本地stdio接入
+
+3.0起，HTTP MCP默认随API在同一进程启动，地址为 `/mcp`，需要当前账号的OAuth或PAT。详见 [账号与远程接入](账号与远程接入.md)。其他电脑可以使用HTTP接入，详见 [MCP远程接入](MCP远程接入.md)。本机仍可使用下面的stdio方式，由客户端启动适配器子进程。两种方式共用26个工具和业务规则；客户端均不需要数据库密码。
 
 在 system 目录内使用实际安装依赖的 Python：
 
@@ -11,7 +15,7 @@ python scripts/configure_mcp.py --format json
 python scripts/configure_mcp.py --format toml
 ```
 
-脚本只输出配置片段，不写入任何客户端配置。JSON 格式给支持 `mcpServers` 的客户端；TOML 片段的服务名为 `shixu`。路径由当前 Python 和项目位置生成，复制后按客户端的 MCP 配置入口添加并重新连接。默认 stdio 命令为 `python /绝对路径/application/mcp_server.py`，环境变量 `SHIXU_API_URL=http://127.0.0.1:8765`。
+脚本只输出配置片段，不写入任何客户端配置。JSON 格式给支持 `mcpServers` 的客户端；TOML 片段的服务名为 `shixu`。路径由当前 Python 和项目位置生成，复制后按客户端的 MCP 配置入口添加并重新连接。默认 stdio 命令为 `python /绝对路径/application/mcp_server.py`，环境变量 `SHIXU_API_URL=http://127.0.0.1:8765`，并在私有环境提供 `SHIXU_MCP_TOKEN`。
 
 实现基于 [官方 MCP Python SDK v2 文档](https://py.sdk.modelcontextprotocol.io/)。版本固定在 requirements.txt；stdio 由官方 SDK 处理初始化、工具发现与调用。
 
@@ -19,7 +23,7 @@ python scripts/configure_mcp.py --format toml
 
 1. `get_system_status` 确认 API 与数据库可用。
 2. `list_issues` / `list_tasks` 定位对象，`get_issue` / `get_task` 获取详情与最新 `revision`。
-3. 写工具传 `body` 对象，其中 `expected_version` 为最近读取的全局 `revision`，`request_id` 使用新的 UUID，`actor` 标记调用来源。
+3. 写工具传 `body` 对象，其中 `expected_version` 为最近读取的当前账号 `revision`，`request_id` 使用新的 UUID，`actor` 标记调用来源。
 4. 保存后使用返回的 `revision` 作为下次写入版本，或重新读取目标。
 5. 相同请求因超时重试时保持完整参数和 `request_id` 不变。内容变化使用新编号。409 先重读并评估冲突；422 修改参数/满足业务条件；503 或断连不声称成功，恢复后同号重试。
 
@@ -29,6 +33,7 @@ python scripts/configure_mcp.py --format toml
 
 | 工具 | 何时使用 | 主要输入 | 返回 | 副作用 |
 |---|---|---|---|---|
+| get_connection_context | 接入授权后只读核对 | runtime_name/runtime_version/skill_version可选 | account/scopes/accessId/interfaceVersion/verifiedAt | 更新接入诊断元数据，不写业务记录 |
 | get_system_status | 首次调用/恢复连接 | 无 | status、revision | 无 |
 | list_identities | 新建前选择人/AI身份 | 无 | items、revision | 无 |
 | create_identity | 登记通用身份 | body.name/kind/via/modelName/modelProvider | resource、data、revision | 新增身份 |
@@ -68,7 +73,7 @@ python scripts/configure_mcp.py --format toml
 
 ## 可复制安装与演示任务
 
-> 进入拾序 system 目录，用独立 Python 环境安装 requirements.txt，启动 scripts/service.py start，检查 /api/health。运行 scripts/configure_mcp.py 获取 stdio 配置，根据我的客户端注册该 MCP，不写入密钥。重新连接后 list_tools，先检查健康与列表。若我要求演示写入，只创建新的演示对象，不修改历史真实记录；每步读取版本，重试保持 request_id，填写真实验证依据。最后回读对象与审计，不把固定 SDK 测试当作 AI 自主验收。
+> 进入拾序 system 目录，用独立 Python 环境安装 requirements.txt，启动 scripts/service.py start，检查 /api/health。运行 scripts/configure_mcp.py 获取 stdio 配置，根据我的客户端注册该 MCP，使用网页生成的账号令牌，通过私有环境SHIXU_MCP_TOKEN注入，不把凭据写入源码。重新连接后 list_tools，先检查健康与列表。若我要求演示写入，只创建新的演示对象，不修改历史真实记录；每步读取版本，重试保持 request_id，填写真实验证依据。最后回读对象与审计，不把固定 SDK 测试当作 AI 自主验收。
 
 本项目提供 `python examples/mcp_client.py` 只读检查；加 `--write-demo` 才创建合成问题与行动。该脚本是固定序列协议测试，AI 自主任务验收仍待执行。
 
@@ -88,6 +93,6 @@ python scripts/configure_mcp.py --format toml
 
 creation只用于创建，后续PATCH不能改写来源字段。API/MCP输出createdByActorId、initiatedByPersonId、creatorName、createdVia、createdAt、modelInfo。legacy调用不传creation仍兼容，但明确记录为unknown。actor仍仅是本次操作审计标签，不能替代创建身份。所有身份均为调用方声明，不证明登录用户、真实工具执行环境或模型真实性。
 
-25个工具都经HTTP共用同一事务与规则。Claude Code、WorkBuddy、Codex和DeepSeek Harness以各客户端实际支持的MCP配置方式接入同一工具集（本机stdio或带密钥的HTTP入口）；这些是来源选项，未声称逐一完成四种客户端兼容验证。接入时登记对应via及真实模型，不将Codex示例用作其他工具默认值。
+26个工具都经HTTP共用同一事务与规则。Claude Code、WorkBuddy、Codex和DeepSeek Harness以各客户端实际支持的MCP配置方式接入同一工具集（本机stdio或带密钥的HTTP入口）；这些是来源选项，未声称逐一完成四种客户端兼容验证。接入时登记对应via及真实模型，不将Codex示例用作其他工具默认值。
 
 可运行 `python examples/creator_client.py` 只读查看身份，加 `--write-demo` 才创建合成身份与问题；`/examples/`也可选择已登记的AI和人类发起者。历史记录没有自动导入原型浏览器存储。

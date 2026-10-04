@@ -1,4 +1,4 @@
-"""MySQL实体存储：元数据行锁保护单人工作台的全局并发版本。"""
+"""MySQL实体存储：元数据行锁保护账号工作台的独立并发版本。"""
 from contextlib import contextmanager
 import hashlib
 import json
@@ -85,41 +85,50 @@ class MySQLStore:
         finally:
             connection.close()
 
+    def for_owner(self, identifier):
+        import copy
+        scoped = copy.copy(self)
+        scoped.owner_id = identifier
+        return scoped
+
+    def _scope(self):
+        return getattr(self, 'owner_id', 'test')
+
     def _read(self, cur, lock=False):
-        cur.execute('SELECT * FROM workspace_meta WHERE id=1' + (' FOR UPDATE' if lock else ''))
+        cur.execute('SELECT * FROM workspace_meta WHERE owner_id=%s' + (' FOR UPDATE' if lock else ''), (self._scope(),))
         meta = cur.fetchone()
         domain.require(meta and meta['application_id'] == APP_ID, '数据库身份校验失败', 503)
         state = domain.empty_state()
         state['nextIssueNumber'] = meta['next_issue_number']
         state['nextTaskNumbers'] = json.loads(meta['next_task_numbers'])
-        cur.execute('SELECT * FROM issues ORDER BY number DESC')
+        cur.execute('SELECT * FROM issues WHERE owner_id=%s ORDER BY number DESC', (self._scope(),))
         state['issues'] = [{key: row[column] for key, column in ISSUE_FIELDS.items()} for row in cur.fetchall()]
         for item in state['issues']:
             item['modelInfo'] = json.loads(item['modelInfo']) if item['modelInfo'] is not None else None
         index = {p['id']: p for p in state['issues']}
         for issue in state['issues']:
             issue.update(logs=[], history=[], followups=[])
-        cur.execute('SELECT * FROM issue_logs ORDER BY issue_id,position_number')
+        cur.execute('SELECT * FROM issue_logs WHERE issue_id IN (SELECT id FROM issues WHERE owner_id=%s) ORDER BY issue_id,position_number', (self._scope(),))
         for row in cur.fetchall():
             index[row['issue_id']]['logs'].append(row['content'])
-        cur.execute('SELECT * FROM issue_history ORDER BY issue_id,position_number')
+        cur.execute('SELECT * FROM issue_history WHERE issue_id IN (SELECT id FROM issues WHERE owner_id=%s) ORDER BY issue_id,position_number', (self._scope(),))
         for row in cur.fetchall():
             index[row['issue_id']]['history'].append(dict(id=row['id'], **{'from': row['from_status']}, to=row['to_status'],
                                                          reason=row['reason'], at=row['event_at'], actor=row['actor']))
-        cur.execute('SELECT * FROM issue_followups ORDER BY issue_id,event_at DESC,id')
+        cur.execute('SELECT * FROM issue_followups WHERE issue_id IN (SELECT id FROM issues WHERE owner_id=%s) ORDER BY issue_id,event_at DESC,id', (self._scope(),))
         for row in cur.fetchall():
             index[row['issue_id']]['followups'].append({key: row[column] for key, column in dict(id='id',content='content',at='event_at',actor='actor').items()})
-        cur.execute('SELECT * FROM tasks ORDER BY row_order DESC')
+        cur.execute('SELECT * FROM tasks WHERE owner_id=%s ORDER BY row_order DESC', (self._scope(),))
         state['tasks'] = [{key: row[column] for key, column in TASK_FIELDS.items()} for row in cur.fetchall()]
         tasks = {t['id']: t for t in state['tasks']}
         for task in state['tasks']:
             task['modelInfo'] = json.loads(task['modelInfo']) if task['modelInfo'] is not None else None
             task['required'] = bool(task['required'])
             task['dependsOn'] = []
-        cur.execute('SELECT * FROM task_dependencies WHERE deleted_at IS NULL ORDER BY task_id,position_number')
+        cur.execute('SELECT * FROM task_dependencies WHERE deleted_at IS NULL AND task_id IN (SELECT id FROM tasks WHERE owner_id=%s) ORDER BY task_id,position_number', (self._scope(),))
         for row in cur.fetchall():
             tasks[row['task_id']]['dependsOn'].append(row['dependency_id'])
-        cur.execute('SELECT * FROM identity_profiles ORDER BY created_at,id')
+        cur.execute('SELECT * FROM identity_profiles WHERE owner_id=%s ORDER BY created_at,id', (self._scope(),))
         state['identityProfiles'] = [{key: row[column] for key,column in IDENTITY_FIELDS.items()} for row in cur.fetchall()]
         return dict(revision=meta['revision'], data=state)
 
@@ -129,11 +138,15 @@ class MySQLStore:
 
     def activity(self, after=0, limit=100):
         with self.connect() as connection, connection.cursor() as cur:
-            cur.execute('SELECT revision,event_at AS at,actor,operation,resource_id FROM activity WHERE revision>%s ORDER BY revision LIMIT %s', (after, limit))
+            cur.execute('SELECT revision,event_at AS at,actor,operation,resource_id FROM activity WHERE owner_id=%s AND revision>%s ORDER BY revision LIMIT %s', (self._scope(), after, limit))
             return list(cur.fetchall())
 
-    @staticmethod
-    def _upsert(cur, table, fields, item):
+    def _upsert(self, cur, table, fields, item):
+        cur.execute(f'SELECT owner_id FROM `{table}` WHERE id=%s', (item['id'],))
+        existing = cur.fetchone()
+        domain.require(not existing or existing['owner_id'] == self._scope(), '资源不存在', 404)
+        fields = dict(fields, owner_id='owner_id')
+        item = dict(item, owner_id=self._scope())
         columns = ','.join('`'+column+'`' for column in fields.values())
         placeholders = ','.join(['%s'] * len(fields))
         updates = ','.join('`'+column+'`=VALUES(`'+column+'`)' for key, column in fields.items() if key != 'id')
@@ -173,8 +186,8 @@ class MySQLStore:
                 if task['dependsOn']:
                     cur.executemany('INSERT INTO task_dependencies (task_id,dependency_id,position_number,deleted_at) VALUES (%s,%s,%s,NULL) ON DUPLICATE KEY UPDATE position_number=VALUES(position_number),deleted_at=NULL',
                                     [(task['id'], key, index) for index, key in enumerate(task['dependsOn'])])
-        cur.execute('UPDATE workspace_meta SET next_issue_number=%s,next_task_numbers=%s WHERE id=1',
-                    (state['nextIssueNumber'], dumps(state['nextTaskNumbers'])))
+        cur.execute('UPDATE workspace_meta SET next_issue_number=%s,next_task_numbers=%s WHERE owner_id=%s',
+                    (state['nextIssueNumber'], dumps(state['nextTaskNumbers']), self._scope()))
 
     def mutate(self, operation, identifier, body):
         import copy
@@ -183,7 +196,7 @@ class MySQLStore:
         fingerprint = hashlib.sha256(dumps([operation, identifier, expected, actor, body]).encode()).hexdigest()
         with self.connect() as connection, connection.cursor() as cur:
             snapshot = self._read(cur, lock=True)
-            cur.execute('SELECT fingerprint,response FROM idempotency_requests WHERE request_id=%s', (request_id,))
+            cur.execute('SELECT fingerprint,response FROM idempotency_requests WHERE owner_id=%s AND request_id=%s', (self._scope(), request_id))
             previous = cur.fetchone()
             if previous:
                 domain.require(previous['fingerprint'] == fingerprint, 'request_id 已用于不同请求，请使用新编号', 409)
@@ -195,7 +208,7 @@ class MySQLStore:
             revision = snapshot['revision'] + 1
             self._persist(cur, state, original)
             response = dict(revision=revision, resource=resource, data=state)
-            cur.execute('UPDATE workspace_meta SET revision=%s WHERE id=1', (revision,))
-            cur.execute('INSERT INTO activity VALUES (%s,%s,%s,%s,%s,%s)', (revision, domain.now(), actor, operation, resource['id'], dumps(body)))
-            cur.execute('INSERT INTO idempotency_requests VALUES (%s,%s,%s)', (request_id, fingerprint, dumps(response)))
+            cur.execute('UPDATE workspace_meta SET revision=%s WHERE owner_id=%s', (revision, self._scope()))
+            cur.execute('INSERT INTO activity (revision,event_at,actor,operation,resource_id,payload,owner_id) VALUES (%s,%s,%s,%s,%s,%s,%s)', (revision, domain.now(), actor, operation, resource['id'], dumps(body), self._scope()))
+            cur.execute('INSERT INTO idempotency_requests (request_id,fingerprint,response,owner_id) VALUES (%s,%s,%s,%s)', (request_id, fingerprint, dumps(response), self._scope()))
             return response

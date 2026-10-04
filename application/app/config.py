@@ -7,6 +7,8 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def load_environment():
+    if os.getenv('SHIXU_SKIP_DOTENV', '').lower() == 'true':
+        return
     load_dotenv(ROOT / '.env', override=False)
     private = os.getenv('SHIXU_ENV_FILE')
     if private:

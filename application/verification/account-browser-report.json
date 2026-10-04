@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "width": 1440,
+      "passed": true,
+      "scope": "注册/退出/登录、右上角账号卡片、二级菜单返回、弹窗Tab与筛选保留、PAT发放回读/只读/撤销"
+    },
+    {
+      "width": 537,
+      "passed": true,
+      "scope": "注册/退出/登录、右上角账号卡片、二级菜单返回、弹窗Tab与筛选保留、PAT发放回读/只读/撤销"
+    },
+    {
+      "width": 390,
+      "passed": true,
+      "scope": "注册/退出/登录、右上角账号卡片、二级菜单返回、弹窗Tab与筛选保留、PAT发放回读/只读/撤销"
+    },
+    {
+      "width": 360,
+      "passed": true,
+      "scope": "注册/退出/登录、右上角账号卡片、二级菜单返回、弹窗Tab与筛选保留、PAT发放回读/只读/撤销"
+    }
+  ],
+  "browser_errors": [],
+  "production_writes": 0,
+  "delivery_id": "d22bcb32-463c-4c00-9e75-c7764eea4afe"
+}
