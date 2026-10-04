@@ -14,7 +14,7 @@ import httpx
 from check import stop
 
 ROOT = Path(__file__).resolve().parents[1]
-INCLUDE_DIRS = {'app', 'static', 'docs', 'examples', 'tests', 'verification', 'scripts', 'data', 'reference', 'downloads', '.github'}
+INCLUDE_DIRS = {'skills', 'app', 'static', 'docs', 'examples', 'tests', 'verification', 'scripts', 'data', 'reference', 'downloads', '.github'}
 INCLUDE_FILES = {'README.md', 'CHANGELOG.md', 'LICENSE', '.gitignore', '.env.example', 'requirements.txt',
                  'requirements-dev.txt', 'requirements-lock.txt', 'project-contract.json', 'mcp_server.py'}
 SKIP_PARTS = {'__pycache__', '.pytest_cache', 'runtime', 'private', '.venv', '.git', 'dist'}
@@ -124,7 +124,7 @@ def main():
     (ROOT / 'verification/release-scan.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
     directory = ROOT / 'dist'
     directory.mkdir(exist_ok=True)
-    target = directory / 'shixu-system-3.1.0.zip'
+    target = directory / 'shixu-system-3.2.0.zip'
     archive(target, files())
     digest = hashlib.sha256(target.read_bytes()).hexdigest()
     (directory / 'SHA256SUMS.txt').write_text(digest + '  ' + target.name + '\n', encoding='utf-8')

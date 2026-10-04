@@ -18,7 +18,7 @@ async def run(url, write_demo=False, report=None):
     async with Client(params) as client:
         tools = await client.list_tools()
         evidence['tools'] = [tool.name for tool in tools.tools]
-        assert len(evidence['tools']) == 26
+        assert len(evidence['tools']) == 29
 
         async def call(name, arguments=None, error=False):
             result = await client.call_tool(name, arguments or {})
@@ -33,6 +33,8 @@ async def run(url, write_demo=False, report=None):
 
         health = await call('get_system_status')
         await call('get_connection_context')
+        await call('get_connection_updates',dict(skill_version='1.4.0',mcp_url='https://old.invalid/mcp'))
+        await call('list_ai_tools')
         evidence['backend'] = health.get('backend')
         await call('list_issues')
         state = await call('get_workspace')
@@ -53,6 +55,10 @@ async def run(url, write_demo=False, report=None):
                 result = await call(name, dict(ids, body=dict(values, request_id=str(uuid4()), expected_version=revision, actor='MCP隔离验证')))
                 revision = result['revision']
                 return result['resource']
+            tool = await write('create_ai_tool',dict(name='SDK custom tool'))
+            custom = await write('create_identity',dict(name='SDK custom identity',kind='agent',via=tool['id']))
+            custom_record = await write('create_issue',dict(title='SDK custom source',creation=dict(identityId=custom['id'])))
+            assert custom_record['createdVia']==tool['id']
             human = await write('create_identity', dict(name='Elias（合成验证）',kind='person',via='manual'))
             agent = await write('create_identity', dict(name='Codex',kind='agent',via='codex',modelName='GPT-6.1 Sol',modelProvider='OpenAI'))
             await call('list_identities')

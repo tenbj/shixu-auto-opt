@@ -18,7 +18,7 @@ from .mysql_store import MySQLStore
 ROOT = Path(__file__).resolve().parents[1]
 
 
-from .models import (Write, IssueCreate, IssueUpdate, IssueTransition, Followup, TaskCreate, TaskUpdate, TaskTransition, Dependencies, Reorder, IdentityCreate, IdentityUpdate)
+from .models import (Write, IssueCreate, IssueUpdate, IssueTransition, Followup, TaskCreate, TaskUpdate, TaskTransition, Dependencies, Reorder, IdentityCreate, IdentityUpdate, AIToolCreate)
 
 
 def create_app(db_path=None):
@@ -31,7 +31,7 @@ def create_app(db_path=None):
             finally:
                 application.state.mcp_running = False
 
-    app = FastAPI(title='拾序系统 API', version='3.1.0', lifespan=lifespan,
+    app = FastAPI(title='拾序系统 API', version='3.2.0', lifespan=lifespan,
                   description='账号独立工作台；会话或令牌认证，按账号隔离版本、编号与幂等。')
     load_environment()
     if db_path is not None or os.getenv('SHIXU_BACKEND') == 'sqlite':
@@ -82,7 +82,7 @@ def create_app(db_path=None):
         with app.state.accounts.connection() as connection:
             app.state.accounts.query(connection, 'SELECT 1')
         state = app.state.store.read() if principal.get() else {}
-        return {'status': 'ok', 'version': '3.1.0', 'revision': state.get('revision'), 'mode': 'account-isolated',
+        return {'status': 'ok', 'version': '3.2.0', 'revision': state.get('revision'), 'mode': 'account-isolated',
                 'backend': getattr(app.state.store, 'backend', 'sqlite-test'),
                 'database': getattr(app.state.store, 'database', None),
                 'pid': os.getpid(), 'instance': os.getenv('SHIXU_INSTANCE', ''),
@@ -92,6 +92,16 @@ def create_app(db_path=None):
     @app.get('/api/workspace', summary='读取完整工作台与并发版本')
     def workspace():
         return app.state.store.read()
+
+    @app.get('/api/ai-tools', summary='查询预设及账号自定义AI工具')
+    def ai_tools():
+        from .domain import PRESET_TOOLS
+        result = app.state.store.read()
+        return {'revision': result['revision'], 'items': [dict(id=key, name=name, custom=key.startswith('custom:')) for key,name in dict(PRESET_TOOLS, **result['data'].get('customTools',{})).items()]}
+
+    @app.post('/api/ai-tools', summary='添加或复用AI工具，账号内名称不区分大小写')
+    def ai_tool_create(body: AIToolCreate):
+        return write('create_ai_tool', None, body)
 
     @app.get('/api/identities', summary='查询通用人类与AI记录身份')
     def identities():

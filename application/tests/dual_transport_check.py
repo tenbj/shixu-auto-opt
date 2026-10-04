@@ -39,7 +39,7 @@ async def mcp_check(url,token,verify):
                 r=await client.call_tool(name,args or {})
                 assert not r.is_error
                 return r.structured_content or json.loads(r.content[0].text)
-            tools=await client.list_tools();assert len(tools.tools)==26
+            tools=await client.list_tools();assert len(tools.tools)==29
             state=await call('get_workspace')
             made=await call('create_issue',{'body':dict(title='Synthetic dual transport',expected_version=state['revision'],request_id=str(uuid4()))})
             assert (await call('get_issue',{'issue_id':made['resource']['id']}))['item']['title']=='Synthetic dual transport'
@@ -107,7 +107,7 @@ def main():
                     assert cookie['secure']==(scheme=='https') and cookie['httpOnly']
                     page.locator('[data-account-action=close-account-panel]').click();page.locator('.account-pill:visible').click();page.locator('#account-dropdown [data-account-action=logout]').click()
                     expect(page.locator('#account-auth')).to_be_visible()
-                    checks.append(dict(scheme=scheme,passed=True,scope='Non-loopback browser origin; register/login session, mobile tabs, generated URL, 26 MCP tools, create/read, revoke, logout and Cookie attributes'))
+                    checks.append(dict(scheme=scheme,passed=True,scope='Non-loopback browser origin; register/login session, mobile tabs, generated URL, 29 MCP tools, create/read, revoke, logout and Cookie attributes'))
                     context.close()
                 browser.close()
             assert not errors,errors

@@ -71,7 +71,7 @@ def connection_context(accounts, user, runtime_name='', runtime_version='', skil
                                (int(time.time()), runtime_name, runtime_version, skill_version, key))
             evidence = accounts.one(c, 'SELECT verified_at FROM access_metadata WHERE access_id=?', (key,))
     return dict(account={k: user[k] for k in ('id', 'username', 'displayName')},
-                scopes=scope_text(user['scope']).split(), accessId=key, interfaceVersion='3.1.0',
+                scopes=scope_text(user['scope']).split(), accessId=key, interfaceVersion='3.2.0',
                 verifiedAt=evidence['verified_at'] if evidence else None,
                 runtime={'name': runtime_name, 'version': runtime_version, 'skillVersion': skill_version, 'source': 'client-declared'},
                 verification='authenticated-mcp-call' if verified else 'authenticated-api-read')

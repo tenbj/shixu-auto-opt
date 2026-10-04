@@ -43,7 +43,7 @@ def valid_date(value):
 
 
 def empty_state():
-    return dict(version=1, schemaVersion=3, identityProfiles=[], nextIssueNumber=1, nextTaskNumbers={}, issues=[], tasks=[])
+    return dict(version=1, schemaVersion=4, customTools={}, identityProfiles=[], nextIssueNumber=1, nextTaskNumbers={}, issues=[], tasks=[])
 
 
 CREATION_DEFAULTS = dict(createdByActorId=None, initiatedByPersonId=None, creatorName=None,
@@ -52,7 +52,8 @@ CREATION_DEFAULTS = dict(createdByActorId=None, initiatedByPersonId=None, creato
 
 def normalize_state(state):
     state.setdefault('identityProfiles', [])
-    state['schemaVersion'] = 3
+    state.setdefault('customTools', {})
+    state['schemaVersion'] = 4
     for row in state['issues'] + state['tasks']:
         for key, value in CREATION_DEFAULTS.items():
             row.setdefault(key, value)
@@ -65,13 +66,31 @@ def identity(state, identifier):
     return row
 
 
+PRESET_TOOLS = dict(claude_code='Claude Code', workbuddy='WorkBuddy', codex='Codex', deepseek_harness='DeepSeek Harness')
+
+
+def save_tool(state, name):
+    name = text(name, '工具名称', 80, True)
+    tools = dict(PRESET_TOOLS, **state.setdefault('customTools', {}))
+    existing = next((key for key,label in tools.items() if label.casefold()==name.casefold()), None)
+    identifier = existing or 'custom:'+str(uuid4())
+    if not existing: state['customTools'][identifier] = name
+    return dict(id=identifier, name=tools.get(identifier, name))
+
+
 def save_identity(state, identifier, values):
     old = identity(state, identifier) if identifier else None
     row = dict(old) if old else dict(id=str(uuid4()), createdAt=now())
     row.update(values)
     require(row.get('kind') in ['person','agent'], '身份类型无效')
     row['name'] = text(row.get('name'), '身份名称', 60, True)
-    require(row.get('via') in ['manual','claude_code','workbuddy','codex','deepseek_harness'], '来源无效')
+    tool_name = row.pop('toolName', None)
+    if row.get('via') == '__custom__':
+        require(row['kind']=='agent', '只有AI身份可以新增工具')
+        row['via'] = save_tool(state, tool_name)['id']
+    else:
+        require(not tool_name, '仅新增自定义工具时填写toolName')
+    require(row.get('via') in {'manual', *PRESET_TOOLS, *state.get('customTools', {})}, '来源无效')
     require((row['kind']=='person') == (row['via']=='manual'), '人类身份必须使用手动来源，AI身份必须指定AI工具')
     for key, limit in [('modelName',160),('modelProvider',80)]:
         row[key] = text(row.get(key,''), key, limit)
@@ -428,6 +447,8 @@ def restore_record(state, kind, identifier, actor):
 
 def apply(state, operation, identifier, values, actor):
     normalize_state(state)
+    if operation == 'create_ai_tool':
+        return save_tool(state, values['name'])
     if operation in ['create_identity','update_identity']:
         return save_identity(state, identifier, values)
     if operation in ['delete_issue','delete_task','restore_issue','restore_task']:

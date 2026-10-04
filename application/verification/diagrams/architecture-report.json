@@ -1,23 +1,23 @@
 {
   "passed": true,
-  "delivery_id": "d22bcb32-463c-4c00-9e75-c7764eea4afe",
-  "diagram_sha256": "3c95af828621925ec741f0995f2a70f71ecd40cd5b54dda11af732369f2b034d",
+  "delivery_id": "5c1c2eda-e1c7-4f15-8ba0-e95295f32551",
+  "diagram_sha256": "192aa26faedeacc3ca7bc82ec5adf538d891d2c50f08994f00e9fc9ec8cdd4cf",
   "sources": [
     {
       "path": "app/main.py",
-      "sha256": "5ee28d53b1fd20c8eed37116e72f20990786ed786dda421a56d2389be4389de9"
+      "sha256": "99193ead3e6def30d9269e9a2406e0282bfe426669a0b0172eaa8afbc3540c84"
     },
     {
       "path": "app/domain.py",
-      "sha256": "2a3156a80c83ab833e53264ab284150417670e2d1a8a52765a9509e2c79d2455"
+      "sha256": "849f8bea36e63f00884989f695d81f7419c08f8c777824fcfc4c12c4e5cd8de8"
     },
     {
       "path": "app/mysql_store.py",
-      "sha256": "9d5692bc9f4751eb3c9211beb0095071fd531611c51c7ccee0ec8a9e3e071c8d"
+      "sha256": "dcb2bb301e64488bccadc11c78dbc65a02480f5c76065df0e8655a88e602ec6b"
     },
     {
       "path": "mcp_server.py",
-      "sha256": "870044689c9003cc39336e9c8c83410249bbc47a884aea3b42fac6a2aa68b51d"
+      "sha256": "b0f0d8495f60b6c63bdb2b499f985cd0072cb587218c82cb52809d49b0ba7da5"
     },
     {
       "path": "app/mcp_http.py",
@@ -37,15 +37,15 @@
     },
     {
       "path": "scripts/service.py",
-      "sha256": "78c11c48b77469b7d28bfaf2e737ed4f38cb365ec03e965f55175eeba34ac33c"
+      "sha256": "5569117d3681f7be55103be9c287869545ee2be52083131362377d4b71de3230"
     },
     {
       "path": "app/onboarding.py",
-      "sha256": "447124a5ff26a776a3483c32f93d1be1a0ca0893eada70646dc0e69f8f27e22c"
+      "sha256": "7ec23d86eef26da6d21f9e91507a392dfbb710ba6be965031dd11137c32005dc"
     },
     {
       "path": "app/onboarding_auth.py",
-      "sha256": "65f91815c63d078d3af989abab9e1b2f4f94910f5d004866e515d0d3dd47576c"
+      "sha256": "4fe9603fc8cab1743efd5056929059c704403d48752c66d77e821c4ab6ca8bce"
     }
   ],
   "source_consistent": true,
@@ -53,8 +53,8 @@
   "scope": "真实浏览器离线几何与交互；源码、DDL、迁移、元数据核对",
   "live_schema": {
     "status": "pass",
-    "tables": 19,
-    "columns": 149,
+    "tables": 20,
+    "columns": 153,
     "foreign_keys": 6,
     "business_rows_read": 0,
     "writes": 0

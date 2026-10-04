@@ -9,7 +9,7 @@ def integrate(html, root):
     helpers = helpers[:a]+'''let profiles=[],activeProfileId='';
 try{activeProfileId=localStorage.getItem('shixu-system-active-identity')||''}catch{}
 const currentProfile=()=>profiles.find(p=>p.id===activeProfileId)||{id:'',name:'未设置',kind:'person',via:'manual'};
-function syncProfiles(){profiles=db.identityProfiles||[];if(!profiles.some(x=>x.id===activeProfileId))activeProfileId=''}
+function syncProfiles(){profiles=db.identityProfiles||[];restoreCustomTools(profiles,db.customTools||{});if(!profiles.some(x=>x.id===activeProfileId))activeProfileId=''}
 ''' + helpers[b:]
     def fn(name, value):
         nonlocal helpers
@@ -23,14 +23,14 @@ function syncProfiles(){profiles=db.identityProfiles||[];if(!profiles.some(x=>x.
     helpers=helpers.replace('name="profileKind" data-event-id="EVT-IDENTITY"','name="profileKind" ${x?\'disabled\':\'\'} data-event-id="EVT-IDENTITY"')
     a=helpers.index("document.addEventListener('change'");b=helpers.index("document.addEventListener('click'",a)
     helpers=helpers[:a]+'''document.addEventListener('change',e=>{
-const el=e.target;if(el.name==='profileKind')el.closest('form').querySelector('.profile-ai-fields').classList.toggle('hidden',el.value!=='agent');
+const el=e.target;if(el.name==='profileKind'){el.closest('form').querySelector('.profile-ai-fields').classList.toggle('hidden',el.value!=='agent');syncCustomToolField(el.closest('form'))}if(el.name==='profileVia')syncCustomToolField(el.closest('form'));
 if(el.dataset.eventId==='EVT-CREATOR-FILTER'){creatorFilters[el.dataset.kind][el.dataset.filter]=el.value;render()}
 if(el.name==='creationIdentity'){const f=el.closest('form'),p=profiles.find(x=>x.id===el.value);f.elements.creationPerson.disabled=p?.kind!=='agent';f.elements.creationPerson.value='ai';f.querySelector('.model-fields').classList.toggle('hidden',p?.kind!=='agent');f.elements.modelName.value=p?.modelName||'';f.elements.modelProvider.value=p?.modelProvider||'';f.querySelector('summary').textContent='创建信息 · '+(p?.name||'未指定')}
 });
 ''' + helpers[b:]
     a=helpers.index("document.addEventListener('submit'")
     helpers=helpers[:a]+'''document.addEventListener('submit',async e=>{if(e.target.id!=='profile-form')return;e.preventDefault();const f=e.target,v=Object.fromEntries(new FormData(f)),old=profiles.find(p=>p.id===f.dataset.id),kind=old?.kind||v.profileKind;
-const values={name:v.profileName,via:kind==='person'?'manual':v.profileVia,modelName:kind==='person'?'':v.profileModel,modelProvider:kind==='person'?'':v.profileProvider};if(!old)values.kind=kind;
+const values={name:v.profileName,via:kind==='person'?'manual':v.profileVia,modelName:kind==='person'?'':v.profileModel,modelProvider:kind==='person'?'':v.profileProvider};if(!old)values.kind=kind;if(kind==='agent'&&v.profileVia==='__custom__')values.toolName=v.profileCustomTool?.trim()||'';
 const b=f.querySelector('[type=submit]');b.disabled=true;
 try{const result=await mutate('/api/identities'+(old?'/'+old.id:''),old?'PATCH':'POST',values);activeProfileId=result.resource.id;persistProfiles();closeDialog();render();toast('记录身份已保存')}
 catch(e){f.querySelector('#form-error').textContent=e.message}finally{b.disabled=false}

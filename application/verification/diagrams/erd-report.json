@@ -1,23 +1,27 @@
 {
   "passed": true,
-  "delivery_id": "d22bcb32-463c-4c00-9e75-c7764eea4afe",
-  "diagram_sha256": "c2af24189d8680883f5264a58c0ab74d7972aa571b7981932b7be655f65f7b6d",
+  "delivery_id": "5c1c2eda-e1c7-4f15-8ba0-e95295f32551",
+  "diagram_sha256": "49ad2f75b392cae4cd1f232f1fb7714b3a1602933807b812f6565d21b700b385",
   "sources": [
     {
       "path": "data/mysql-schema.sql",
-      "sha256": "fa5933580bb57ff7d2a84d21c5b98cb0811373ed98f02daa7c310a26965b1fed"
+      "sha256": "884a7fef8c21324e2f734902880f62e0dbf215a97702dd5fb9f2cb6a060ebbdc"
     },
     {
       "path": "scripts/migrate_accounts.py",
-      "sha256": "10ed677317ef9f513589816ec49747f9096f904bc47184f876d5f066e2bcda9d"
+      "sha256": "efa2ce8567b2ffd7a6e056ef74cc43555f3e43c055312d1d67730f94f478bfa0"
     },
     {
       "path": "scripts/migrate_onboarding.py",
-      "sha256": "9366f98ffb4086d5701ab0a2f067c63443beca4e7f5316715b0d2d59ef285ef9"
+      "sha256": "51a77198d75188e5261b4680902c8a63aad84e6a82b3e83d004ced51dae25339"
+    },
+    {
+      "path": "scripts/migrate_custom_tools.py",
+      "sha256": "7a7c1d6bb974e2e5cd69afd09773358682bb6a8f9a12a949bfb49796b532d371"
     },
     {
       "path": "app/onboarding_auth.py",
-      "sha256": "65f91815c63d078d3af989abab9e1b2f4f94910f5d004866e515d0d3dd47576c"
+      "sha256": "4fe9603fc8cab1743efd5056929059c704403d48752c66d77e821c4ab6ca8bce"
     },
     {
       "path": "app/accounts.py",
@@ -25,7 +29,7 @@
     },
     {
       "path": "app/mysql_store.py",
-      "sha256": "9d5692bc9f4751eb3c9211beb0095071fd531611c51c7ccee0ec8a9e3e071c8d"
+      "sha256": "dcb2bb301e64488bccadc11c78dbc65a02480f5c76065df0e8655a88e602ec6b"
     }
   ],
   "source_consistent": true,
@@ -33,8 +37,8 @@
   "scope": "真实浏览器离线几何与交互；源码、DDL、迁移、元数据核对",
   "live_schema": {
     "status": "pass",
-    "tables": 19,
-    "columns": 149,
+    "tables": 20,
+    "columns": 153,
     "foreign_keys": 6,
     "business_rows_read": 0,
     "writes": 0

@@ -9,11 +9,20 @@ CREATE TABLE workspace_meta (
   UNIQUE KEY uq_workspace_owner(owner_id)
 ) ENGINE=InnoDB;
 
+CREATE TABLE ai_tools (
+  id VARCHAR(80) NOT NULL PRIMARY KEY,
+  owner_id VARCHAR(36) NOT NULL,
+  name VARCHAR(80) NOT NULL,
+  name_key CHAR(64) NOT NULL,
+  UNIQUE KEY uq_ai_tool_name(owner_id,name_key)
+) ENGINE=InnoDB;
+CREATE TRIGGER shixu_no_delete_ai_tools BEFORE DELETE ON ai_tools FOR EACH ROW SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Physical deletion is disabled';
+
 CREATE TABLE identity_profiles (
   id VARCHAR(36) PRIMARY KEY,
   name VARCHAR(60) NOT NULL,
   kind VARCHAR(8) NOT NULL,
-  via VARCHAR(32) NOT NULL,
+  via VARCHAR(80) NOT NULL,
   model_name VARCHAR(160) NOT NULL,
   model_provider VARCHAR(80) NOT NULL,
   created_at VARCHAR(40) NOT NULL,
@@ -43,7 +52,7 @@ CREATE TABLE issues (
   created_by_actor_id VARCHAR(36) NULL,
   initiated_by_person_id VARCHAR(36) NULL,
   creator_name VARCHAR(60) NULL,
-  created_via VARCHAR(32) NOT NULL DEFAULT 'unknown',
+  created_via VARCHAR(80) NOT NULL DEFAULT 'unknown',
   created_at VARCHAR(40) NULL,
   model_info JSON NULL,
   deleted_at VARCHAR(40) NULL,
@@ -71,7 +80,7 @@ CREATE TABLE tasks (
   created_by_actor_id VARCHAR(36) NULL,
   initiated_by_person_id VARCHAR(36) NULL,
   creator_name VARCHAR(60) NULL,
-  created_via VARCHAR(32) NOT NULL DEFAULT 'unknown',
+  created_via VARCHAR(80) NOT NULL DEFAULT 'unknown',
   created_at VARCHAR(40) NULL,
   model_info JSON NULL,
   deleted_at VARCHAR(40) NULL,
@@ -132,7 +141,7 @@ CREATE TABLE activity (
   event_at VARCHAR(40) NOT NULL,
   actor VARCHAR(80) NOT NULL,
   operation VARCHAR(80) NOT NULL,
-  resource_id VARCHAR(36) NULL,
+  resource_id VARCHAR(80) NULL,
   payload JSON NOT NULL,
   owner_id VARCHAR(36) NOT NULL,
   PRIMARY KEY(owner_id,revision)

@@ -130,6 +130,8 @@ class MySQLStore:
             tasks[row['task_id']]['dependsOn'].append(row['dependency_id'])
         cur.execute('SELECT * FROM identity_profiles WHERE owner_id=%s ORDER BY created_at,id', (self._scope(),))
         state['identityProfiles'] = [{key: row[column] for key,column in IDENTITY_FIELDS.items()} for row in cur.fetchall()]
+        cur.execute('SELECT id,name FROM ai_tools WHERE owner_id=%s ORDER BY id', (self._scope(),))
+        state['customTools'] = {row['id']:row['name'] for row in cur.fetchall()}
         return dict(revision=meta['revision'], data=state)
 
     def read(self):
@@ -153,6 +155,9 @@ class MySQLStore:
         cur.execute(f'INSERT INTO `{table}` ({columns}) VALUES ({placeholders}) ON DUPLICATE KEY UPDATE {updates}', tuple(dumps(item[key]) if key=='modelInfo' and item.get(key) is not None else item.get(key) for key in fields))
 
     def _persist(self, cur, state, previous):
+        for identifier,name in state.get('customTools',{}).items():
+            if identifier not in previous.get('customTools',{}):
+                self._upsert(cur,'ai_tools',dict(id='id',name='name',nameKey='name_key'),dict(id=identifier,name=name,nameKey=hashlib.sha256(name.casefold().encode()).hexdigest()))
         old_profiles = {p['id']:p for p in previous.get('identityProfiles',[])}
         for profile in state.get('identityProfiles',[]):
             if profile != old_profiles.get(profile['id']):

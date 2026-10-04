@@ -2,8 +2,8 @@
   "passed": true,
   "backend": "mysql",
   "scope": "旧进程树退出且端口不再响应，重新启动得到不同PID，数据库完整工作台回读相等",
-  "revision": 15,
-  "issues": 3,
-  "tasks": 4,
-  "delivery_id": "d22bcb32-463c-4c00-9e75-c7764eea4afe"
+  "revision": 111,
+  "issues": 22,
+  "tasks": 19,
+  "delivery_id": "5c1c2eda-e1c7-4f15-8ba0-e95295f32551"
 }

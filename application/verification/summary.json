@@ -1,8 +1,8 @@
 {
   "passed": true,
-  "business_api_tests": 81,
+  "business_api_tests": 89,
   "browser_checks": 31,
-  "mcp_tools": 26,
+  "mcp_tools": 29,
   "integration_backend": "mysql",
   "mysql_checks": 5,
   "persistence": "passed",
@@ -12,5 +12,5 @@
     "python": "3.11.7"
   },
   "scope": "单机服务；MySQL模式在新建_test库真实联调；浏览器响应丢失使用网络拦截模拟；未做AI自主任务验收",
-  "delivery_id": "d22bcb32-463c-4c00-9e75-c7764eea4afe"
+  "delivery_id": "5c1c2eda-e1c7-4f15-8ba0-e95295f32551"
 }

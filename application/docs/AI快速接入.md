@@ -1,4 +1,4 @@
-# AI快速接入 · 3.1.0
+# AI快速接入 · 3.2.0
 
 ## 用户操作
 
@@ -15,7 +15,7 @@ AI先读取 `/connect.md` 和 `/connect/manifest.json`，检查目标runtime已�
 | 页面 | 复制提示词、人工授权、查看/撤销设备 | /connect和账号弹窗 |
 | 服务 | 公开指南、接入能力、令牌验证、账号隔离、真实工具调用 | HTTPS /mcp及API |
 | runtime | 读取配置、保存授权、发现工具、执行调用 | 适配说明，按本机版本检测 |
-| 独立Skill | 记录规则、分类、身份与模型来源、幂等写入及回读 | shixu-issues-1.4.0.zip |
+| 独立Skill | 记录规则、分类、身份与模型来源、幂等写入及回读 | shixu-issues-1.5.0.zip |
 | 工作区F02 | 保留本工作区记忆与备份规则，并复用上述业务规则 | 本地技能入口 |
 
 独立Skill没有E盘路径或B系列工作区依赖，包内只有文本。manifest公布版本、文件名和SHA256；下载端点仅允许清单中的文件且核对摘要。更新本地F02后，运行其 `scripts/build_portable.py --help` 查看构建参数，重新打包并同步manifest。先核对哈希再安装。
@@ -40,3 +40,7 @@ AI先读取 `/connect.md` 和 `/connect/manifest.json`，检查目标runtime已�
 从3.0升级须先停服，运行 `python scripts/migrate_onboarding.py`；脚本私有备份原表、添加access_metadata/oauth_refresh_tokens及禁止DELETE触发器、核对原17表内容，之后再启动。MySQL DDL不是整体事务，失败时保留快照并在独立库核对恢复。SQLite仅用于隔离测试。
 
 自动化覆盖临时数据库、专用MySQL测试库、OAuth轮换/重放/范围/并发、真实MCP SDK、HTTP与TLS浏览器、公开下载摘要和五种视口。支持矩阵区分官方文档支持与实机验证；未把SDK测试当成Codex/WorkBuddy完整安装测试，未声称所有runtime或空白实体电脑已验收。公开矩阵中的verifiedVersions为空时应按本机能力检测并报告人工步骤。
+
+## 用户驱动更新（3.2）
+
+用户要求更新或修复时，先读取当前公开清单或调用get_connection_updates。Skill1.5.0带可选更新脚本，默认只读，--apply执行哈希校验、修改保护、备份与替换。MCP地址以当前清单为准，由客户端原生能力合并拾序配置；跨域需核实并重新授权，不转移旧令牌。完成后重载并回读账号和权限，Skill可发现状态单独确认。详见 [更新指南](connect/updates.md)。

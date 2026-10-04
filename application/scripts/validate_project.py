@@ -12,7 +12,7 @@ REQUIRED=['README.md','CHANGELOG.md','LICENSE','.gitignore','.env.example',
           'docs/MCP远程接入.md','examples/http_mcp_client.py','scripts/mcp_access.py',
           'examples/api_client.py','examples/mcp_client.py','scripts/configure_mcp.py',
           'scripts/build_release.py','.github/workflows/ci.yml']
-CHECKS={'business','api','mcp','http_mcp','browser','persistence','portable','release_scan','trash_browser','diagrams','retention_mysql','architecture','erd','creators','accounts','account_mcp','onboarding','dual_transport','public_http','f02'}
+CHECKS={'business','api','mcp','http_mcp','browser','persistence','portable','release_scan','trash_browser','diagrams','retention_mysql','architecture','erd','creators','accounts','account_mcp','onboarding','dual_transport','f02'}
 
 
 def safe_path(root, value):
@@ -126,6 +126,7 @@ def validate(root):
             if check.get('status')!='passed':errors.append('验收未通过：'+name)
             evidence=check.get('evidence','')
             if not evidence or not safe_path(root,evidence).is_file():errors.append('验收证据缺失：'+name)
+        if checks.get('public_http',{}).get('status')!='passed':warnings.append('本轮线上部署未验收；安装包ready不表示已上线')
         if checks.get('ai_task',{}).get('status')!='passed':warnings.append('尚未完成AI自主选择工具的任务验收，交付时必须明示')
         if not isinstance(contract.get('limits'),list):errors.append('缺少limits数组')
     except (ValueError,KeyError,TypeError) as exc:

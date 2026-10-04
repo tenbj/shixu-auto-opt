@@ -12,7 +12,7 @@ async function loginAccount(result){
 }
 async function logoutAccount(){
  try{await request('/api/auth/logout',{method:'POST',body:'{}'})}catch(e){if(e.status!==401){toast(e.message);return}}
- currentUser=null;csrfToken='';loaded=false;profiles=[];activeProfileId='';db={issues:[],tasks:[],identityProfiles:[]};pendingWrite=null;lastPreviewConfig=null;
+ currentUser=null;csrfToken='';loaded=false;profiles=[];restoreCustomTools([],{});activeProfileId='';db={issues:[],tasks:[],identityProfiles:[]};pendingWrite=null;lastPreviewConfig=null;
  document.querySelectorAll('dialog[open]').forEach(d=>d.close());showLogin();window.scrollTo(0,0);
 }
 async function bootAccount(){try{const result=await request('/api/auth/me');await loginAccount(result)}catch(e){showLogin('login',e.status===401?'':e.message)}}

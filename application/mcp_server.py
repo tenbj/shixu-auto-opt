@@ -6,13 +6,13 @@ from mcp.server import MCPServer
 from mcp.server.mcpserver.exceptions import ToolError
 from mcp.types import ToolAnnotations
 from app.models import (IssueCreate, IssueUpdate, IssueTransition, Followup, TaskCreate,
-                        TaskUpdate, TaskTransition, Dependencies, Reorder, IdentityCreate, IdentityUpdate, Write)
+                        TaskUpdate, TaskTransition, Dependencies, Reorder, IdentityCreate, IdentityUpdate, Write, AIToolCreate)
 
 def create_server(api_transport=None):
     BASE = os.getenv('SHIXU_API_URL', 'http://127.0.0.1:8765').rstrip('/')
     if urlparse(BASE).hostname not in ['127.0.0.1', 'localhost', '::1']:
         raise ValueError('本地版本 MCP 只连接回环地址')
-    server = MCPServer('shixu', version='3.1.0', instructions='先 health，再 list/get 获取 revision，写入携带 request_id 和 expected_version。重试同号；409重读，422修正输入，503不得声称成功。提交验证必须填写处理说明、方法；确认解决必须填写验证依据。actor仅为审计标签。创建前list_identities；creation.identityId指定实际提交身份，initiatedByPersonId可指定人类发起者；modelInfo记录实际模型，空对象表示未提供，不能从工具名猜测。')
+    server = MCPServer('shixu', version='3.2.0', instructions='先 health，再 list/get 获取 revision，写入携带 request_id 和 expected_version。重试同号；409重读，422修正输入，503不得声称成功。提交验证必须填写处理说明、方法；确认解决必须填写验证依据。actor仅为审计标签。创建前list_identities；creation.identityId指定实际提交身份，initiatedByPersonId可指定人类发起者；modelInfo记录实际模型，空对象表示未提供，不能从工具名猜测。')
     READ = ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False)
     WRITE = ToolAnnotations(readOnlyHint=False, destructiveHint=False, idempotentHint=True, openWorldHint=False)
 
@@ -57,6 +57,21 @@ def create_server(api_transport=None):
 
 
     @server.tool(annotations=READ)
+    async def get_connection_updates(skill_version: str = '', mcp_url: str = '') -> dict:
+        """用户要求接入、修复或更新时查询当前Skill包、SHA256、MCP地址及更新指引；只读，不修改客户端文件。"""
+        return await call('GET', '/api/connection-updates', params=dict(skill_version=skill_version,mcp_url=mcp_url))
+
+    @server.tool(annotations=READ)
+    async def list_ai_tools() -> dict:
+        """查询预设与当前账号自定义AI工具及revision。自定义工具不跨账号共享。"""
+        return await call('GET','/api/ai-tools')
+
+    @server.tool(annotations=WRITE)
+    async def create_ai_tool(body: AIToolCreate) -> dict:
+        """添加或复用1至80字工具名，忽略首尾空格与大小写。先读revision；重试同request_id。"""
+        return await call('POST','/api/ai-tools',payload(body))
+
+    @server.tool(annotations=READ)
     async def list_identities() -> dict:
         """查询人/AI记录身份及默认模型、revision。创建问题或行动前选择真实提交身份；不推测模型。"""
         return await call('GET','/api/identities')
@@ -64,7 +79,7 @@ def create_server(api_transport=None):
 
     @server.tool(annotations=WRITE)
     async def create_identity(body: IdentityCreate) -> dict:
-        """新增自定义人或AI身份。人使用manual；AI指定工具与实际模型（可空）。不做身份认证。写入并审计，409重读，同请求同号重试。"""
+        """新增自定义人或AI身份。人使用manual；AI使用list_ai_tools返回的ID或via=__custom__、toolName原子添加工具；实际模型可空。不做身份认证。写入并审计，409重读，同请求同号重试。"""
         return await call('POST','/api/identities',payload(body))
 
 
