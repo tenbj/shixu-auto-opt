@@ -313,6 +313,15 @@
           "编辑和身份设置不改历史信息；JSON导出包含配置",
           "仅一条未知演示，其余按Codex/GPT-6/OpenAI创建"
         ]
+      },
+      {
+        "id": "REQ-090",
+        "statement": "AI工具支持其他与自定义，账号独立保存和复用",
+        "acceptance_criteria": [
+          "保存复用、刷新恢复、来源筛选",
+          "同名复用与失败保留草稿",
+          "独立工具字典、历史来源保留和账号隔离"
+        ]
       }
     ]
   },
@@ -326,5 +335,6 @@
   ],
   "capabilities": [
     "responsive-web-v1"
-  ]
+  ],
+  "prototype_release": "1.9.0"
 }

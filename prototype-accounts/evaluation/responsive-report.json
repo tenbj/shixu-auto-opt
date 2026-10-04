@@ -1,9 +1,9 @@
 {
-  "checked_at": "2026-10-04T06:09:57.771198+00:00",
+  "checked_at": "2026-10-04T14:54:01.297845+00:00",
   "status": "passed",
   "passed": true,
-  "prototype_sha256": "101395e22fd413be60975fab7488d1bc069d6ca5fb42704aa3aba932de8816e5",
-  "config_sha256": "bd3fb165b26d35cbdaf171f72c11d7c2a90e746c8be779bbbce26da3abc78ec0",
+  "prototype_sha256": "1e69489fb4fce7eebf3f956ae6c3a7bcd43dca49739786af0bce778b5624fd40",
+  "config_sha256": "83d8b6b69d354e5375a7ce366e49676f111b540f02d2dfc69d629df761b865c6",
   "results": [
     {
       "width": 360,
@@ -48,6 +48,10 @@
         },
         {
           "id": "ai-public-guide",
+          "passed": true
+        },
+        {
+          "id": "custom-tool-add",
           "passed": true
         }
       ],
@@ -97,6 +101,10 @@
         {
           "id": "ai-public-guide",
           "passed": true
+        },
+        {
+          "id": "custom-tool-add",
+          "passed": true
         }
       ],
       "errors": []
@@ -144,6 +152,10 @@
         },
         {
           "id": "ai-public-guide",
+          "passed": true
+        },
+        {
+          "id": "custom-tool-add",
           "passed": true
         }
       ],
@@ -193,6 +205,10 @@
         {
           "id": "ai-public-guide",
           "passed": true
+        },
+        {
+          "id": "custom-tool-add",
+          "passed": true
         }
       ],
       "errors": []
@@ -241,6 +257,10 @@
         {
           "id": "ai-public-guide",
           "passed": true
+        },
+        {
+          "id": "custom-tool-add",
+          "passed": true
         }
       ],
       "errors": []
@@ -249,5 +269,5 @@
   "errors": [],
   "engine_sha256": "6617c1acda7652009e45f8794995a4c33424d65d4769ddf3404237e66561225e",
   "scope": "本地自包含HTML、Chromium视口/触摸模拟；不代表iOS、软键盘或真机验收",
-  "browser_version": "153.0.8010.12"
+  "browser_version": "131.0.6778.33"
 }

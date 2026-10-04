@@ -54,3 +54,6 @@ CREATE TABLE issue_followup(
  created_at TEXT NOT NULL, actor TEXT NOT NULL
 );
 CREATE INDEX ix_followup_issue_time ON issue_followup(issue_id,created_at DESC);
+
+-- REQ-090: prototype-only tool registry stored in local identity profiles.
+-- Future implementation: owner-scoped stable source ID and display name; no production migration in this change.

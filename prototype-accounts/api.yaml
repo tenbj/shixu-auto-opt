@@ -762,14 +762,15 @@ components:
           readOnly: true
         createdVia: &id003
           type: string
-          enum:
+          readOnly: true
+          x-preset-values:
           - manual
           - claude_code
           - workbuddy
           - codex
           - deepseek_harness
           - unknown
-          readOnly: true
+          description: Preset source ID or owner-scoped custom:<uuid> source ID
         createdAt: &id004
           type: string
           format: date-time
@@ -1088,3 +1089,11 @@ x-ai-onboarding:
     a successful connection
   secrets: Public prompts/manifest/skill contain no credentials
   preferred_mcp: https://shixu.eliasliu.cc/mcp
+x-custom-tools:
+  requirement: REQ-090
+  prototype-only: true
+  identity-profile-field: toolName
+  source-id: custom:<uuid>
+  name-max-length: 80
+  deduplication: trim, case-insensitive
+  application-status: not implemented in this change

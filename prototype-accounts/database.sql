@@ -23,3 +23,6 @@ CREATE TABLE mcp_device_observation(access_id TEXT PRIMARY KEY REFERENCES mcp_ac
 CREATE TABLE oauth_refresh_token(token_hash TEXT PRIMARY KEY,access_id TEXT NOT NULL REFERENCES mcp_access(id),family_id TEXT NOT NULL,expires_at TEXT NOT NULL,used_at TEXT,revoked_at TEXT,replaced_by_hash TEXT);
 -- Runtime/Skill observations are client-reported, not verified model-execution provenance.
 -- Refresh reuse detection and family revocation must be transactional and account scoped.
+
+-- REQ-090: prototype-only tool registry stored in local identity profiles.
+-- Future implementation: owner-scoped stable source ID and display name; no production migration in this change.

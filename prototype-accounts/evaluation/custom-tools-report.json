@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "checks": [
+    "prototype 360: custom, validation, edit, reload, dedup, record, filter, failure",
+    "prototype 390: custom, validation, edit, reload, dedup, record, filter, failure",
+    "prototype 430: custom, validation, edit, reload, dedup, record, filter, failure",
+    "prototype 1440: custom, validation, edit, reload, dedup, record, filter, failure",
+    "prototype-accounts 360: custom, validation, edit, reload, dedup, record, filter, failure, account isolation",
+    "prototype-accounts 390: custom, validation, edit, reload, dedup, record, filter, failure, account isolation",
+    "prototype-accounts 430: custom, validation, edit, reload, dedup, record, filter, failure, account isolation",
+    "prototype-accounts 1440: custom, validation, edit, reload, dedup, record, filter, failure, account isolation"
+  ],
+  "errors": []
+}
