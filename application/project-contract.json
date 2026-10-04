@@ -3,14 +3,179 @@
   "project_name": "拾序系统",
   "status": "ready",
   "prototype": {
-    "path": "reference/creator-source.html（冻结创建身份原型）",
-    "sha256": "922e5068eceba00909ad67f4aa7856baeb9ab6d710ca05f8ec344af72e811001",
-    "title": "拾序通用创建身份与模型原型",
+    "path": "../prototype-accounts/prototype.html（原始源；分发快照已脱敏）",
+    "sha256": "101395e22fd413be60975fab7488d1bc069d6ca5fb42704aa3aba932de8816e5",
     "source_modified": false,
-    "version": "481bc92",
-    "reference_snapshot": "reference/creator-source.html"
+    "reference_snapshot": "reference/accounts-source.html",
+    "title": "账号与AI快速接入，三Tab与新设备引导",
+    "version": "1.8.0",
+    "snapshot_sha256": "23999ae68f8373b6a40804cda9706c0fc6dad4b7241a255758bde4b29f7b80b0",
+    "snapshot_redactions": [
+      "移除与部署初始凭据相同的演示密码，替换为DEMO_PASSWORD；源H01文件未修改"
+    ]
   },
   "operations": [
+    {
+      "id": "login",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "mcp_tool": null,
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "register",
+      "method": "POST",
+      "path": "/api/auth/register",
+      "mcp_tool": null,
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "me",
+      "method": "GET",
+      "path": "/api/auth/me",
+      "mcp_tool": null,
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "logout",
+      "method": "POST",
+      "path": "/api/auth/logout",
+      "mcp_tool": null,
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "profile",
+      "method": "PATCH",
+      "path": "/api/account",
+      "mcp_tool": null,
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "password",
+      "method": "POST",
+      "path": "/api/account/password",
+      "mcp_tool": null,
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "access_list",
+      "method": "GET",
+      "path": "/api/account/mcp-access",
+      "mcp_tool": null,
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "issue_access",
+      "method": "POST",
+      "path": "/api/account/mcp-access",
+      "mcp_tool": null,
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "revoke_access",
+      "method": "POST",
+      "path": "/api/account/mcp-access/{access_id}/revoke",
+      "mcp_tool": null,
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "rename_access",
+      "method": "PATCH",
+      "path": "/api/account/mcp-access/{access_id}",
+      "mcp_tool": null,
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "resource_metadata",
+      "method": "GET",
+      "path": "/.well-known/oauth-protected-resource/mcp",
+      "mcp_tool": null,
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "resource_metadata",
+      "method": "GET",
+      "path": "/.well-known/oauth-protected-resource",
+      "mcp_tool": null,
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "server_metadata",
+      "method": "GET",
+      "path": "/.well-known/oauth-authorization-server",
+      "mcp_tool": null,
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "register_client",
+      "method": "POST",
+      "path": "/oauth/register",
+      "mcp_tool": null,
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "authorize",
+      "method": "GET",
+      "path": "/oauth/authorize",
+      "mcp_tool": null,
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "consent_info",
+      "method": "GET",
+      "path": "/api/oauth/requests/{key}",
+      "mcp_tool": null,
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "consent",
+      "method": "POST",
+      "path": "/api/oauth/requests/{key}",
+      "mcp_tool": null,
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "exchange",
+      "method": "POST",
+      "path": "/oauth/token",
+      "mcp_tool": null,
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "connect_manifest",
+      "method": "GET",
+      "path": "/connect/manifest.json",
+      "mcp_tool": null,
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "connect_guide",
+      "method": "GET",
+      "path": "/connect.md",
+      "mcp_tool": null,
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "runtime_guide",
+      "method": "GET",
+      "path": "/connect/runtimes/{name}.md",
+      "mcp_tool": null,
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "skill_download",
+      "method": "GET",
+      "path": "/downloads/{filename}",
+      "mcp_tool": null,
+      "python_example": "examples/api_client.py"
+    },
+    {
+      "id": "context",
+      "method": "GET",
+      "path": "/api/connection-context",
+      "mcp_tool": "get_connection_context",
+      "python_example": "examples/api_client.py"
+    },
     {
       "id": "health",
       "method": "GET",
@@ -254,6 +419,36 @@
       "evidence": "verification/creator-browser-report.json"
     },
     {
+      "name": "accounts",
+      "status": "passed",
+      "evidence": "verification/account-browser-report.json"
+    },
+    {
+      "name": "account_mcp",
+      "status": "passed",
+      "evidence": "verification/account-mcp-report.json"
+    },
+    {
+      "name": "dual_transport",
+      "status": "passed",
+      "evidence": "verification/dual-transport-report.json"
+    },
+    {
+      "name": "public_http",
+      "status": "passed",
+      "evidence": "verification/public-http-report.json"
+    },
+    {
+      "name": "f02",
+      "status": "passed",
+      "evidence": "verification/f02-report.json"
+    },
+    {
+      "name": "onboarding",
+      "status": "passed",
+      "evidence": "verification/onboarding-report.json"
+    },
+    {
       "name": "ai_task",
       "status": "not_run",
       "evidence": "",
@@ -271,34 +466,32 @@
     }
   ],
   "limits": [
-    "单机服务连接专属MySQL实体库，不等同生产就绪；MCP有独立密钥，但网页/API无账号认证、多人权限或高可用",
-    "全局revision适合个人规模，未做大数据负载验收",
-    "未导入原型浏览器中的真实记录；已将当前系统SQLite记录只读迁入新MySQL库，原SQLite保留",
-    "当前用户MySQL实例未启用TLS；凭据仅存仓库外私有配置，ZIP不含连接凭据",
-    "MCP支持HTTP Bearer密钥与本机stdio；静态密钥非OAuth，不支持仅OAuth客户端；未自动注册客户端，AI自主任务验收未执行",
-    "仅Windows/Python3.11实测；便携验证指ZIP解压换目录复用已安装依赖运行，不是免安装exe",
-    "支持0.0.0.0监听与明确Host允许列表；内网访问面向可信网络，同源写入校验继续启用",
-    "许可证未选择；生产凭据、本机数据库和真实工作台访问截图不入包"
+    "HTTP兼容开关支持网页登录和PAT/API/MCP；标准远程OAuth仍要求HTTPS。HTTPS优先入口shixu.eliasliu.cc，HTTP明文兼容入口保留",
+    "OAuth动态注册与S256 PKCE、read/write集合兼容；访问令牌1小时、刷新轮换最长30天，重放/撤销使授权整组失效；PAT1年",
+    "当前MySQL连接未启用TLS；凭据仅从私有环境读取",
+    "Windows/Python3.11服务端与SDK验收；干净实体电脑及全部runtime实机、AI自主安装任务未验收，支持矩阵不得冒充验证通过",
+    "账号归属在应用事务校验，ER仅展示数据库真实物理外键，owner_id为逻辑关联",
+    "未选择开放许可证；脱敏源快照使用独立hash，原始原型保持未修改"
   ],
   "storage": {
     "production": "mysql-entity-tables",
     "schema": "data/mysql-schema.sql",
-    "tables": 10,
+    "tables": 19,
     "test_adapter": "SQLite仅用于隔离测试与无凭据分发包检查"
   },
-  "version": "2.4.0",
-  "delivery_id": "f09f717a-c941-456c-a07e-e76603bbf495",
+  "version": "3.1.0",
+  "delivery_id": "d22bcb32-463c-4c00-9e75-c7764eea4afe",
   "diagrams": {
     "architecture": {
       "skill": "D04",
       "path": "static/diagrams/architecture.html",
-      "sha256": "c9341f4e51700352b41364f18d635cf62791ae68173421060ef5c166c0ab641e",
+      "sha256": "3c95af828621925ec741f0995f2a70f71ecd40cd5b54dda11af732369f2b034d",
       "maintenance": "updated",
-      "change_note": "2.4.0 MCP HTTP与API同生命周期，独立Bearer密钥；无DDL变化，ER仍为10实体6物理外键",
+      "change_note": "AI接入、公开引导与Skill分发、OAuth刷新/轮换/设备证据更新；19实体6物理外键，新增两表仅逻辑关联",
       "sources": [
         {
           "path": "app/main.py",
-          "sha256": "947016e586de02e0724c3ab6777056bf5ccbd921e03d952f442850ae3a5428a8"
+          "sha256": "5ee28d53b1fd20c8eed37116e72f20990786ed786dda421a56d2389be4389de9"
         },
         {
           "path": "app/domain.py",
@@ -306,46 +499,75 @@
         },
         {
           "path": "app/mysql_store.py",
-          "sha256": "88f28a9ef778e096fbe537d3027363b080da9a2e2210354c0e0923099ad8cbbe"
+          "sha256": "9d5692bc9f4751eb3c9211beb0095071fd531611c51c7ccee0ec8a9e3e071c8d"
         },
         {
           "path": "mcp_server.py",
-          "sha256": "db769d1e119e23465606587cba12ddcd657c310cf137313f7c62cdeb551d3484"
+          "sha256": "870044689c9003cc39336e9c8c83410249bbc47a884aea3b42fac6a2aa68b51d"
         },
         {
           "path": "app/mcp_http.py",
-          "sha256": "70039b14f525b7c133cb8474f4ee62b90ee87e16409f7b0ea1c78d92e2d061b3"
+          "sha256": "c8cff4096f6469b2b06ce80cc00e22bf3553098cdac56c7125f224954c582957"
         },
         {
-          "path": "app/mcp_access.py",
-          "sha256": "3271569fd5506dea2c8121e2b2293b439e641c3b81480ce8d8172fa33c415da9"
+          "path": "app/account_api.py",
+          "sha256": "64a61b40a307ad496f82a07559e3f805b756e6039bf746cdb42fe8e9824dba4b"
+        },
+        {
+          "path": "app/accounts.py",
+          "sha256": "76a1e4a23d9363c31cbe5e9078559d414ba828cfae50f1438065524533815f63"
+        },
+        {
+          "path": "app/account_context.py",
+          "sha256": "aa4587152684213f0723122204458ecd98709342b84a333625282ead97d8dd8a"
         },
         {
           "path": "scripts/service.py",
-          "sha256": "48179ce0c9c3d36cb12abff9ea80544657eae88c85f0aa8b4e8b545ece651e26"
+          "sha256": "78c11c48b77469b7d28bfaf2e737ed4f38cb365ec03e965f55175eeba34ac33c"
+        },
+        {
+          "path": "app/onboarding.py",
+          "sha256": "447124a5ff26a776a3483c32f93d1be1a0ca0893eada70646dc0e69f8f27e22c"
+        },
+        {
+          "path": "app/onboarding_auth.py",
+          "sha256": "65f91815c63d078d3af989abab9e1b2f4f94910f5d004866e515d0d3dd47576c"
         }
       ]
     },
     "erd": {
       "skill": "G02",
       "path": "static/diagrams/erd.html",
-      "sha256": "375efa13b60c420cfc392573bc98a32bb3a52dfbc0dd9add133bd180c5e6c8cc",
-      "maintenance": "reviewed_unchanged",
-      "change_note": "2.4.0 MCP HTTP与API同生命周期，独立Bearer密钥；无DDL变化，ER仍为10实体6物理外键",
+      "sha256": "c2af24189d8680883f5264a58c0ab74d7972aa571b7981932b7be655f65f7b6d",
+      "maintenance": "updated",
+      "change_note": "AI接入、公开引导与Skill分发、OAuth刷新/轮换/设备证据更新；19实体6物理外键，新增两表仅逻辑关联",
       "sources": [
         {
           "path": "data/mysql-schema.sql",
-          "sha256": "cb5bb7963e469d9c8ae346c97071af136d2ab9509ceda2ba4b30e8c5014fdcb1"
+          "sha256": "fa5933580bb57ff7d2a84d21c5b98cb0811373ed98f02daa7c310a26965b1fed"
         },
         {
-          "path": "scripts/migrate_creators.py",
-          "sha256": "1bc4b108510aab80c1144029c4d0046f4a4b10c8aab9eb6fc8f337cbab88edf4"
+          "path": "scripts/migrate_accounts.py",
+          "sha256": "10ed677317ef9f513589816ec49747f9096f904bc47184f876d5f066e2bcda9d"
+        },
+        {
+          "path": "scripts/migrate_onboarding.py",
+          "sha256": "9366f98ffb4086d5701ab0a2f067c63443beca4e7f5316715b0d2d59ef285ef9"
+        },
+        {
+          "path": "app/onboarding_auth.py",
+          "sha256": "65f91815c63d078d3af989abab9e1b2f4f94910f5d004866e515d0d3dd47576c"
+        },
+        {
+          "path": "app/accounts.py",
+          "sha256": "76a1e4a23d9363c31cbe5e9078559d414ba828cfae50f1438065524533815f63"
         },
         {
           "path": "app/mysql_store.py",
-          "sha256": "88f28a9ef778e096fbe537d3027363b080da9a2e2210354c0e0923099ad8cbbe"
+          "sha256": "9d5692bc9f4751eb3c9211beb0095071fd531611c51c7ccee0ec8a9e3e071c8d"
         }
       ]
     }
-  }
+  },
+  "iteration": "HTTP/HTTPS compatibility; source prototype unchanged"
 }

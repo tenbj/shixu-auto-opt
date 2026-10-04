@@ -65,7 +65,9 @@ def main():
                SHIXU_API_URL=url, PYTHONIOENCODING='utf-8')
     kwargs = {'creationflags': subprocess.CREATE_NO_WINDOW} if os.name == 'nt' else {'start_new_session': True}
     with (runtime / f'service-{args.port}.log').open('ab') as log:
-        process = subprocess.Popen([sys.executable, '-m', 'uvicorn', 'app.main:app', '--host', args.host, '--port', str(args.port)],
+        # TCP tunnels may preserve caller-supplied headers. Trust no proxy by default.
+        process = subprocess.Popen([sys.executable, '-m', 'uvicorn', 'app.main:app', '--host', args.host, '--port', str(args.port),
+                                    '--forwarded-allow-ips', os.getenv('SHIXU_TRUSTED_PROXY_IPS', '')],
                                    cwd=ROOT, env=env, stdout=log, stderr=log, stdin=subprocess.DEVNULL, **kwargs)
     for _ in range(80):
         if process.poll() is not None:

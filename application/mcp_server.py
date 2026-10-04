@@ -12,7 +12,7 @@ def create_server(api_transport=None):
     BASE = os.getenv('SHIXU_API_URL', 'http://127.0.0.1:8765').rstrip('/')
     if urlparse(BASE).hostname not in ['127.0.0.1', 'localhost', '::1']:
         raise ValueError('本地版本 MCP 只连接回环地址')
-    server = MCPServer('shixu', version='2.4.0', instructions='先 health，再 list/get 获取 revision，写入携带 request_id 和 expected_version。重试同号；409重读，422修正输入，503不得声称成功。提交验证必须填写处理说明、方法；确认解决必须填写验证依据。actor仅为审计标签。创建前list_identities；creation.identityId指定实际提交身份，initiatedByPersonId可指定人类发起者；modelInfo记录实际模型，空对象表示未提供，不能从工具名猜测。')
+    server = MCPServer('shixu', version='3.1.0', instructions='先 health，再 list/get 获取 revision，写入携带 request_id 和 expected_version。重试同号；409重读，422修正输入，503不得声称成功。提交验证必须填写处理说明、方法；确认解决必须填写验证依据。actor仅为审计标签。创建前list_identities；creation.identityId指定实际提交身份，initiatedByPersonId可指定人类发起者；modelInfo记录实际模型，空对象表示未提供，不能从工具名猜测。')
     READ = ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False)
     WRITE = ToolAnnotations(readOnlyHint=False, destructiveHint=False, idempotentHint=True, openWorldHint=False)
 
@@ -20,7 +20,12 @@ def create_server(api_transport=None):
     async def call(method, path, body=None, params=None):
         try:
             async with httpx.AsyncClient(timeout=15, trust_env=False, transport=api_transport) as client:
-                response = await client.request(method, BASE + path, json=body, params=params)
+                from app.account_context import bearer, mcp_call
+                token = bearer.get() or os.getenv('SHIXU_MCP_TOKEN', '')
+                context_token=mcp_call.set(api_transport is not None)
+                try:
+                    response = await client.request(method, BASE + path, json=body, params=params, headers={'Authorization': 'Bearer '+token} if token else {})
+                finally:mcp_call.reset(context_token)
             if response.is_error:
                 detail = response.json().get('detail', '请求失败')
                 raise ToolError(f'HTTP {response.status_code}: {detail}')
@@ -43,6 +48,12 @@ def create_server(api_transport=None):
     async def get_system_status() -> dict:
         """先检查服务/数据库可用性，返回 status、revision；只读。"""
         return await call('GET', '/api/health')
+
+
+    @server.tool(annotations=READ)
+    async def get_connection_context(runtime_name: str = '', runtime_version: str = '', skill_version: str = '') -> dict:
+        """接入后先调用。只读当前认证账号、权限、接口版本，登记本次连通时间；客户端/Skill版本是自报，不能证明Skill已加载。不写问题行动。"""
+        return await call('GET', '/api/connection-context', params=dict(runtime_name=runtime_name, runtime_version=runtime_version, skill_version=skill_version))
 
 
     @server.tool(annotations=READ)

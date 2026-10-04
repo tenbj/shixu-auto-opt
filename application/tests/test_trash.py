@@ -1,7 +1,7 @@
 """回收站事务、依赖、批次和验证门槛回归。"""
 import pytest
 from uuid import uuid4
-from fastapi.testclient import TestClient
+from auth_client import TestClient
 from app.main import create_app
 from test_api import client, write, issue, task, triage, stage, verify
 

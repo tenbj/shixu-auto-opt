@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "delivery_id": "d22bcb32-463c-4c00-9e75-c7764eea4afe",
+  "unit_and_real_stdio_tests": 7,
+  "portable_bundle_hash": "5260a3cc1bd116109ef1debae1bb0e01db5e58e5bbf548c269977c9d8ce4a4b4",
+  "scope": "F02 source/creation/snapshot/replay/readback and portable bundle path independence; runtime Skill discovery not claimed"
+}

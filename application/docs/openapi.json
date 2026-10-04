@@ -2,10 +2,973 @@
   "openapi": "3.1.0",
   "info": {
     "title": "拾序系统 API",
-    "description": "共享记录工作台；写入使用全局版本与持久化幂等请求。",
-    "version": "2.4.0"
+    "description": "账号独立工作台；会话或令牌认证，按账号隔离版本、编号与幂等。",
+    "version": "3.1.0"
   },
   "paths": {
+    "/api/auth/login": {
+      "post": {
+        "summary": "账号登录",
+        "operationId": "login_api_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Credentials"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "summary": "注册独立空工作台",
+        "operationId": "register_api_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Credentials"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "summary": "当前登录账号",
+        "operationId": "me_api_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "summary": "退出并撤销当前会话",
+        "operationId": "logout_api_auth_logout_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "使用网页登录Cookie时必填；业务Bearer请求无需此字段"
+          }
+        ]
+      }
+    },
+    "/api/account": {
+      "patch": {
+        "summary": "修改账号显示名称",
+        "operationId": "profile_api_account_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Profile"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "使用网页登录Cookie时必填；业务Bearer请求无需此字段"
+          }
+        ]
+      }
+    },
+    "/api/account/password": {
+      "post": {
+        "summary": "修改密码并撤销全部网页登录会话",
+        "operationId": "password_api_account_password_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Password"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "使用网页登录Cookie时必填；业务Bearer请求无需此字段"
+          }
+        ]
+      }
+    },
+    "/api/account/mcp-access": {
+      "get": {
+        "summary": "当前账号的MCP接入列表",
+        "operationId": "access_list_api_account_mcp_access_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "发放独立访问令牌（仅本次返回明文）",
+        "operationId": "issue_access_api_account_mcp_access_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Access"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "使用网页登录Cookie时必填；业务Bearer请求无需此字段"
+          }
+        ]
+      }
+    },
+    "/api/account/mcp-access/{access_id}/revoke": {
+      "post": {
+        "summary": "撤销当前账号的接入",
+        "operationId": "revoke_access_api_account_mcp_access__access_id__revoke_post",
+        "parameters": [
+          {
+            "name": "access_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Access Id"
+            }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "使用网页登录Cookie时必填；业务Bearer请求无需此字段"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
+      }
+    },
+    "/api/account/mcp-access/{access_id}": {
+      "patch": {
+        "summary": "重命名当前账号的接入设备",
+        "operationId": "rename_access_api_account_mcp_access__access_id__patch",
+        "parameters": [
+          {
+            "name": "access_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Access Id"
+            }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "使用网页登录Cookie时必填；业务Bearer请求无需此字段"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Profile"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
+      }
+    },
+    "/.well-known/oauth-protected-resource/mcp": {
+      "get": {
+        "summary": "MCP资源元数据",
+        "operationId": "resource_metadata__well_known_oauth_protected_resource_mcp_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/.well-known/oauth-protected-resource": {
+      "get": {
+        "summary": "受保护资源元数据",
+        "operationId": "resource_metadata__well_known_oauth_protected_resource_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/.well-known/oauth-authorization-server": {
+      "get": {
+        "summary": "授权服务器元数据",
+        "operationId": "server_metadata__well_known_oauth_authorization_server_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/register": {
+      "post": {
+        "summary": "注册公共OAuth客户端",
+        "operationId": "register_client_oauth_register_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth/authorize": {
+      "get": {
+        "summary": "开始客户端授权",
+        "operationId": "authorize_oauth_authorize_get",
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Client Id"
+            }
+          },
+          {
+            "name": "redirect_uri",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Redirect Uri"
+            }
+          },
+          {
+            "name": "code_challenge",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Code Challenge"
+            }
+          },
+          {
+            "name": "resource",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Resource"
+            }
+          },
+          {
+            "name": "response_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "code",
+              "title": "Response Type"
+            }
+          },
+          {
+            "name": "code_challenge_method",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "S256",
+              "title": "Code Challenge Method"
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "read",
+              "title": "Scope"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "State"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/oauth/requests/{key}": {
+      "get": {
+        "summary": "读取待确认授权",
+        "operationId": "consent_info_api_oauth_requests__key__get",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "允许或拒绝客户端授权",
+        "operationId": "consent_api_oauth_requests__key__post",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Key"
+            }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "使用网页登录Cookie时必填；业务Bearer请求无需此字段"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
+      }
+    },
+    "/oauth/token": {
+      "post": {
+        "summary": "交换授权码或轮换刷新令牌",
+        "operationId": "exchange_oauth_token_post",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "properties": {
+                  "grant_type": {
+                    "type": "string",
+                    "enum": [
+                      "authorization_code",
+                      "refresh_token"
+                    ]
+                  },
+                  "client_id": {
+                    "type": "string"
+                  },
+                  "code": {
+                    "type": "string"
+                  },
+                  "redirect_uri": {
+                    "type": "string"
+                  },
+                  "code_verifier": {
+                    "type": "string"
+                  },
+                  "resource": {
+                    "type": "string"
+                  },
+                  "refresh_token": {
+                    "type": "string"
+                  },
+                  "scope": {
+                    "type": "string",
+                    "description": "read、write或空格分隔集合；续期仅能缩小范围"
+                  }
+                },
+                "type": "object",
+                "required": [
+                  "grant_type",
+                  "client_id"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "新的访问令牌及轮换刷新令牌；Cache-Control: no-store",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "access_token": {
+                      "type": "string"
+                    },
+                    "refresh_token": {
+                      "type": "string"
+                    },
+                    "token_type": {
+                      "type": "string"
+                    },
+                    "expires_in": {
+                      "type": "integer"
+                    },
+                    "scope": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connect/manifest.json": {
+      "get": {
+        "summary": "公开AI接入版本清单",
+        "operationId": "connect_manifest_connect_manifest_json_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connect.md": {
+      "get": {
+        "summary": "公开AI接入指南",
+        "operationId": "connect_guide_connect_md_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connect/runtimes/{name}.md": {
+      "get": {
+        "summary": "运行环境适配说明",
+        "operationId": "runtime_guide_connect_runtimes__name__md_get",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/downloads/{filename}": {
+      "get": {
+        "summary": "下载固定版本的拾序Skill包",
+        "operationId": "skill_download_downloads__filename__get",
+        "parameters": [
+          {
+            "name": "filename",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Filename"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/connection-context": {
+      "get": {
+        "summary": "读取认证账号、权限和MCP连接证据",
+        "operationId": "context_api_connection_context_get",
+        "parameters": [
+          {
+            "name": "runtime_name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 60,
+              "default": "",
+              "title": "Runtime Name"
+            }
+          },
+          {
+            "name": "runtime_version",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 80,
+              "default": "",
+              "title": "Runtime Version"
+            }
+          },
+          {
+            "name": "skill_version",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 40,
+              "default": "",
+              "title": "Skill Version"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
+      }
+    },
     "/api/health": {
       "get": {
         "summary": "检查服务与数据库状态",
@@ -35,7 +998,18 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
       }
     },
     "/api/identities": {
@@ -51,7 +1025,18 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
       },
       "post": {
         "summary": "创建记录身份与默认工具模型",
@@ -85,7 +1070,29 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "使用网页登录Cookie时必填；业务Bearer请求无需此字段"
+          }
+        ]
       }
     },
     "/api/identities/{identity_id}": {
@@ -101,6 +1108,15 @@
               "type": "string",
               "title": "Identity Id"
             }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "使用网页登录Cookie时必填；业务Bearer请求无需此字段"
           }
         ],
         "requestBody": {
@@ -132,7 +1148,18 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
       }
     },
     "/api/issues": {
@@ -230,7 +1257,18 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
       },
       "post": {
         "summary": "创建待梳理问题",
@@ -264,7 +1302,29 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "使用网页登录Cookie时必填；业务Bearer请求无需此字段"
+          }
+        ]
       }
     },
     "/api/issues/{issue_id}": {
@@ -301,7 +1361,18 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
       },
       "patch": {
         "summary": "编辑问题内容与属性",
@@ -315,6 +1386,15 @@
               "type": "string",
               "title": "Issue Id"
             }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "使用网页登录Cookie时必填；业务Bearer请求无需此字段"
           }
         ],
         "requestBody": {
@@ -346,7 +1426,18 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
       }
     },
     "/api/issues/{issue_id}/transitions": {
@@ -362,6 +1453,15 @@
               "type": "string",
               "title": "Issue Id"
             }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "使用网页登录Cookie时必填；业务Bearer请求无需此字段"
           }
         ],
         "requestBody": {
@@ -393,7 +1493,18 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
       }
     },
     "/api/issues/{issue_id}/followups": {
@@ -409,6 +1520,15 @@
               "type": "string",
               "title": "Issue Id"
             }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "使用网页登录Cookie时必填；业务Bearer请求无需此字段"
           }
         ],
         "requestBody": {
@@ -440,7 +1560,18 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
       }
     },
     "/api/tasks": {
@@ -524,7 +1655,18 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
       },
       "post": {
         "summary": "创建关联或独立行动",
@@ -558,7 +1700,29 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "使用网页登录Cookie时必填；业务Bearer请求无需此字段"
+          }
+        ]
       }
     },
     "/api/tasks/{task_id}": {
@@ -595,7 +1759,18 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
       },
       "patch": {
         "summary": "编辑行动内容与关联",
@@ -609,6 +1784,15 @@
               "type": "string",
               "title": "Task Id"
             }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "使用网页登录Cookie时必填；业务Bearer请求无需此字段"
           }
         ],
         "requestBody": {
@@ -640,7 +1824,18 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
       }
     },
     "/api/tasks/{task_id}/transitions": {
@@ -656,6 +1851,15 @@
               "type": "string",
               "title": "Task Id"
             }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "使用网页登录Cookie时必填；业务Bearer请求无需此字段"
           }
         ],
         "requestBody": {
@@ -687,7 +1891,18 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
       }
     },
     "/api/tasks/{task_id}/dependencies": {
@@ -703,6 +1918,15 @@
               "type": "string",
               "title": "Task Id"
             }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "使用网页登录Cookie时必填；业务Bearer请求无需此字段"
           }
         ],
         "requestBody": {
@@ -734,7 +1958,18 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
       }
     },
     "/api/tasks/{task_id}/reorder": {
@@ -750,6 +1985,15 @@
               "type": "string",
               "title": "Task Id"
             }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "使用网页登录Cookie时必填；业务Bearer请求无需此字段"
           }
         ],
         "requestBody": {
@@ -781,7 +2025,18 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
       }
     },
     "/api/trash": {
@@ -797,7 +2052,18 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
       }
     },
     "/api/issues/{issue_id}/trash": {
@@ -813,6 +2079,15 @@
               "type": "string",
               "title": "Issue Id"
             }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "使用网页登录Cookie时必填；业务Bearer请求无需此字段"
           }
         ],
         "requestBody": {
@@ -844,7 +2119,18 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
       }
     },
     "/api/issues/{issue_id}/restore": {
@@ -860,6 +2146,15 @@
               "type": "string",
               "title": "Issue Id"
             }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "使用网页登录Cookie时必填；业务Bearer请求无需此字段"
           }
         ],
         "requestBody": {
@@ -891,7 +2186,18 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
       }
     },
     "/api/tasks/{task_id}/trash": {
@@ -907,6 +2213,15 @@
               "type": "string",
               "title": "Task Id"
             }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "使用网页登录Cookie时必填；业务Bearer请求无需此字段"
           }
         ],
         "requestBody": {
@@ -938,7 +2253,18 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
       }
     },
     "/api/tasks/{task_id}/restore": {
@@ -954,6 +2280,15 @@
               "type": "string",
               "title": "Task Id"
             }
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "使用网页登录Cookie时必填；业务Bearer请求无需此字段"
           }
         ],
         "requestBody": {
@@ -985,7 +2320,18 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
       }
     },
     "/api/activity": {
@@ -1036,7 +2382,18 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
       }
     },
     "/api/export": {
@@ -1052,12 +2409,43 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "AccountBearer": []
+          },
+          {
+            "AccountSession": []
+          },
+          {
+            "SecureAccountSession": []
+          }
+        ]
       }
     }
   },
   "components": {
     "schemas": {
+      "Access": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "scope": {
+            "type": "string",
+            "title": "Scope",
+            "default": "write"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "Access"
+      },
       "CreationInput": {
         "properties": {
           "identityId": {
@@ -1098,6 +2486,35 @@
           "identityId"
         ],
         "title": "CreationInput"
+      },
+      "Credentials": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 40,
+            "minLength": 2,
+            "title": "Username"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Password"
+          },
+          "displayName": {
+            "type": "string",
+            "maxLength": 60,
+            "title": "Displayname",
+            "default": ""
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "Credentials"
       },
       "Dependencies": {
         "properties": {
@@ -1639,6 +3056,42 @@
         "type": "object",
         "title": "ModelInfo"
       },
+      "Password": {
+        "properties": {
+          "oldPassword": {
+            "type": "string",
+            "maxLength": 128,
+            "title": "Oldpassword"
+          },
+          "newPassword": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Newpassword"
+          }
+        },
+        "type": "object",
+        "required": [
+          "oldPassword",
+          "newPassword"
+        ],
+        "title": "Password"
+      },
+      "Profile": {
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "maxLength": 60,
+            "minLength": 1,
+            "title": "Displayname"
+          }
+        },
+        "type": "object",
+        "required": [
+          "displayName"
+        ],
+        "title": "Profile"
+      },
       "Reorder": {
         "properties": {
           "request_id": {
@@ -1955,6 +3408,25 @@
           "expected_version"
         ],
         "title": "Write"
+      }
+    },
+    "securitySchemes": {
+      "AccountBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "当前账号的OAuth或PAT访问令牌"
+      },
+      "AccountSession": {
+        "type": "apiKey",
+        "name": "shixu_session",
+        "in": "cookie",
+        "description": "HTTP网页登录会话；写请求同时需要X-CSRF-Token"
+      },
+      "SecureAccountSession": {
+        "type": "apiKey",
+        "name": "__Host-shixu_session",
+        "in": "cookie",
+        "description": "HTTPS独立Secure会话；写请求同时需要X-CSRF-Token"
       }
     }
   }

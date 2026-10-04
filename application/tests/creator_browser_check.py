@@ -2,14 +2,16 @@
 import argparse,json
 from pathlib import Path
 from uuid import uuid4
+from http_auth import Session
 import httpx
 from playwright.sync_api import sync_playwright,expect
 ROOT=Path(__file__).resolve().parents[1]
 
 
 def run(url):
+    api=Session(url)
     expect.set_options(timeout=20000)
-    api=httpx.Client(base_url=url,trust_env=False,timeout=30)
+    api=api
     health=api.get('/api/health').raise_for_status().json()
     assert health['backend']=='sqlite-test' or health['database'].endswith('_test')
     checks=[];errors=[]
@@ -19,11 +21,11 @@ def run(url):
             page=browser.new_page(viewport=dict(width=width,height=1000 if width==1440 else 844))
             page.set_default_timeout(20000)
             page.on('pageerror',lambda e:errors.append(str(e)))
-            page.goto(url);expect(page.locator('#sync-state')).to_contain_text('已同步')
-            expect(page.locator('.avatar')).to_have_count(0)
+            api.cookies(page.context);page.goto(url);expect(page.locator('#sync-state')).to_contain_text('已同步')
+            expect(page.locator('.account-pill:visible')).to_be_visible()
             suffix=str(uuid4())[:6]
             def new_profile(name,agent=False):
-                page.locator('.identity-button:visible').click()
+                page.evaluate("openAccountPanel('settings')");page.locator('[data-account-action=account-tab][data-id=identity]').click();page.locator('#account-modal [data-action=identity-settings]').click()
                 page.locator('dialog[open] [data-action="add-profile"]').click()
                 page.locator('[name="profileName"]').fill(name)
                 if agent:
@@ -31,7 +33,7 @@ def run(url):
                     page.locator('[name="profileModel"]').fill('GPT-6.1 Sol')
                     page.locator('[name="profileProvider"]').fill('OpenAI')
                 page.locator('#profile-form [type=submit]').click()
-                expect(page.locator('.identity-button:visible')).to_contain_text(name)
+                expect(page.locator('#profile-form')).to_be_hidden();page.locator('[data-account-action=close-account-panel]').click()
             human='Elias-'+suffix;new_profile(human)
             new_profile('Codex-'+suffix,True)
             identities=api.get('/api/identities').json()['items']
@@ -57,12 +59,12 @@ def run(url):
             expect(page.locator('dialog[open] .creation-detail')).to_contain_text('OpenAI')
             page.locator('dialog[open] [aria-label="关闭弹窗"]').click()
             # Rename/default changes affect new records only; cannot change identity kind.
-            page.locator('.identity-button:visible').click()
+            page.evaluate("openAccountPanel('settings')");page.locator('[data-account-action=account-tab][data-id=identity]').click();page.locator('#account-modal [data-action=identity-settings]').click()
             page.locator(f'[data-action="edit-profile"][data-id="{a["id"]}"]').click()
             expect(page.locator('[name="profileKind"]')).to_be_disabled()
             page.locator('[name="profileModel"]').fill('后续模型')
             page.locator('#profile-form [type=submit]').click()
-            expect(page.locator('#profile-form')).to_be_hidden()
+            expect(page.locator('#profile-form')).to_be_hidden();page.locator('[data-account-action=close-account-panel]').click()
             assert api.get('/api/issues/'+record['id']).json()['item']['modelInfo']['name']=='GPT-6.1 Sol'
             page.locator('nav:visible [data-action="nav"][data-id="tasks"]').click()
             page.locator('#app [data-action="new-task"]').first.click()
@@ -76,10 +78,10 @@ def run(url):
             expect(page.locator('#app')).to_contain_text('自主行动-'+suffix)
             assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
             page.screenshot(path=str(ROOT/f'verification/creator-{width}.png'),full_page=True)
-            page.reload();expect(page.locator('.identity-button:visible')).to_contain_text('Codex-'+suffix)
-            other=browser.new_page();other.goto(url)
+            page.reload();expect(page.locator('#sync-state')).to_contain_text('已同步')
+            other=browser.new_page();api.cookies(other.context);other.goto(url)
             expect(other.locator('#sync-state')).to_contain_text('已同步')
-            other.locator('.identity-button:visible').click()
+            other.evaluate("openAccountPanel('settings')");other.locator('[data-account-action=account-tab][data-id=identity]').click();other.locator('#account-modal [data-action=identity-settings]').click()
             expect(other.locator('.identity-list')).to_contain_text(human)
             other.close();page.close()
             checks.append(dict(viewport=width,passed=True,scope='服务端通用身份；人类发起+AI工具+模型；普通修改保留快照；新建默认模型；问题与行动筛选；刷新和新浏览器持久化'))

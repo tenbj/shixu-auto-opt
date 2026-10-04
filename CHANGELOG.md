@@ -1,5 +1,23 @@
 # 更新日志
 
+## v3.1.0 · 2026-10-04 · 独立账号与 AI 快速接入
+
+- 落地已确认的 v1.8.0 原型：账号下拉、移动端二级工具菜单、账号设置与 AI 接入弹窗 Tab。
+- 账号密码登录和独立工作台；数据、版本、身份、审计、幂等按账号隔离，旧数据迁入指定的初始账号。
+- 公开 /connect 接入页、可复制给 AI 的提示词、runtime 指南、固定版本 Skill 包与 SHA256；新电脑无需服务端项目源码。
+- 26 个 MCP 工具，新增连接身份诊断、设备命名和撤销；OAuth PKCE、刷新轮换与重放撤销，兼容账号 PAT 和 stdio。
+- 保留显式开启的 HTTP 登录/PAT，HTTPS 为推荐入口和标准远程 OAuth 入口；MCP 优先 HTTPS。
+- 更新 API、MCP、19 表数据模型、架构图、交互 ER 图、迁移脚本与完整项目包。
+
+### 验证与升级
+
+- 81 项业务/API 测试、31 项页面检查、26 个 stdio MCP 工具、HTTP MCP 与账号隔离、五种接入视口、MySQL 保留/并发/重启、双图与 ZIP 换目录启动验证通过。
+- 公网 HTTP/HTTPS、OAuth PKCE/刷新/撤销、F02 调用及 Skill 下载哈希验证通过；Codex CLI 配置在隔离目录验证。未宣称所有 runtime 端到端或 AI 自主任务验证。
+- 从 2.4 升级：先停服备份，在 application 依次运行 scripts/migrate_accounts.py 和 scripts/migrate_onboarding.py，再启动。初始账号密码由部署者私有提供；旧全局 MCP 密钥停用，客户端改用账号 OAuth/PAT。
+- 从已部署的 3.0 升级只需执行 migrate_onboarding.py。详见 application/README.md 与账号部署文档。
+- 附件：shixu-system-3.1.0.zip、shixu-issues-1.4.0.zip、SHA256SUMS.txt。排除私有配置、真实数据库、访问密钥和运行日志。
+- 完整变化：https://github.com/tenbj/shixu-personal-desk/compare/v2.4.0...v3.1.0
+
 ## v1.8.0 · 2026-10-04 · 账号与 AI 接入原型
 
 - 独立账号工作台原型：右上角账号下拉、二级工作台工具、账号设置弹窗，兼容桌面与手机。

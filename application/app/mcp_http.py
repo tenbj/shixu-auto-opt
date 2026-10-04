@@ -3,7 +3,7 @@ import httpx
 from starlette.responses import JSONResponse
 from mcp.server.transport_security import TransportSecuritySettings
 from mcp_server import create_server
-from .mcp_access import authenticate
+from .account_context import principal
 
 
 class AccessGate:
@@ -18,7 +18,8 @@ class AccessGate:
         headers = dict(scope['headers'])
         value = headers.get(b'authorization', b'').decode('latin-1')
         scheme, _, token = value.partition(' ')
-        identifier = authenticate(self.keys, token) if scheme.lower() == 'bearer' else None
+        user = principal.get()
+        identifier = user.get('access_id') if user and user.get('auth') == 'bearer' else None
         if not identifier:
             return await JSONResponse({'detail': '需要有效的MCP访问密钥'}, status_code=401,
                                       headers={'WWW-Authenticate': 'Bearer realm="shixu-mcp"'})(scope, receive, send)

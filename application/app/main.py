@@ -24,8 +24,6 @@ from .models import (Write, IssueCreate, IssueUpdate, IssueTransition, Followup,
 def create_app(db_path=None):
     @asynccontextmanager
     async def lifespan(application):
-        from .mcp_access import ensure_keys
-        ensure_keys(application.state.mcp_keys, os.getenv('SHIXU_API_URL', 'http://127.0.0.1:8765').rstrip('/') + '/mcp')
         async with application.state.mcp_http.router.lifespan_context(application.state.mcp_http):
             application.state.mcp_running = True
             try:
@@ -33,13 +31,17 @@ def create_app(db_path=None):
             finally:
                 application.state.mcp_running = False
 
-    app = FastAPI(title='拾序系统 API', version='2.4.0', lifespan=lifespan,
-                  description='共享记录工作台；写入使用全局版本与持久化幂等请求。')
+    app = FastAPI(title='拾序系统 API', version='3.1.0', lifespan=lifespan,
+                  description='账号独立工作台；会话或令牌认证，按账号隔离版本、编号与幂等。')
     load_environment()
     if db_path is not None or os.getenv('SHIXU_BACKEND') == 'sqlite':
         app.state.store = Store(db_path or os.getenv('SHIXU_DB', str(ROOT / 'runtime' / 'test.sqlite3')))
     else:
         app.state.store = MySQLStore()
+    from .account_api import install_accounts
+    install_accounts(app, app.state.store)
+    from .onboarding import install_onboarding
+    install_onboarding(app)
     allowed_hosts = ['localhost', '127.0.0.1', '[::1]', 'testserver', 'eliasliu.cc']
     extra_hosts = [host.strip() for host in os.getenv('SHIXU_ALLOWED_HOSTS', '').split(',') if host.strip()]
     if any('*' in host or '/' in host for host in extra_hosts):
@@ -62,7 +64,7 @@ def create_app(db_path=None):
 
     @app.exception_handler(DomainError)
     async def domain_error(request, error):
-        return JSONResponse({'detail': error.message}, status_code=error.status)
+        return JSONResponse({'error':error.message if error.message in ('invalid_grant','invalid_scope','unsupported_grant_type') else 'invalid_request'} if request.url.path=='/oauth/token' else {'detail': error.message}, status_code=error.status, headers={'Cache-Control':'no-store'})
 
     @app.exception_handler(sqlite3.Error)
     @app.exception_handler(pymysql.MySQLError)
@@ -76,13 +78,16 @@ def create_app(db_path=None):
 
     @app.get('/api/health', summary='检查服务与数据库状态')
     def health():
-        state = app.state.store.read()
-        return {'status': 'ok', 'version': '2.4.0', 'revision': state['revision'], 'mode': 'local-single-user',
+        from .account_context import principal
+        with app.state.accounts.connection() as connection:
+            app.state.accounts.query(connection, 'SELECT 1')
+        state = app.state.store.read() if principal.get() else {}
+        return {'status': 'ok', 'version': '3.1.0', 'revision': state.get('revision'), 'mode': 'account-isolated',
                 'backend': getattr(app.state.store, 'backend', 'sqlite-test'),
                 'database': getattr(app.state.store, 'database', None),
                 'pid': os.getpid(), 'instance': os.getenv('SHIXU_INSTANCE', ''),
                 'mcp': {'running': getattr(app.state, 'mcp_running', False), 'transport': 'streamable-http',
-                        'endpoint': '/mcp', 'authentication': 'bearer-key'}}
+                        'endpoint': '/mcp', 'authentication': 'account-bearer'}}
 
     @app.get('/api/workspace', summary='读取完整工作台与并发版本')
     def workspace():
@@ -204,6 +209,10 @@ def create_app(db_path=None):
     app.state.mcp_running = False
     app.state.mcp_http, protected_mcp = create_http(app, app.state.mcp_keys, allowed_hosts + extra_hosts)
     app.mount('/', protected_mcp)
+    from .https_proxy import HTTPSProxyProof
+    app.add_middleware(HTTPSProxyProof,
+                       secret=os.getenv('SHIXU_HTTPS_PROXY_SECRET', ''),
+                       public_url=os.getenv('SHIXU_PUBLIC_URL', ''))
     return app
 
 

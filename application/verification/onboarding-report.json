@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "delivery_id": "d22bcb32-463c-4c00-9e75-c7764eea4afe",
+  "checks": [
+    "anonymous guide/manifest/Skill download and digest",
+    "real MCP diagnostic, readonly account/scope/version and device evidence; no business writes",
+    "360px public copy, account top-right entry, three tabs, rename, keyboard and context return",
+    "390px public copy, account top-right entry, three tabs, rename, keyboard and context return",
+    "430px public copy, account top-right entry, three tabs, rename, keyboard and context return",
+    "537px public copy, account top-right entry, three tabs, rename, keyboard and context return",
+    "1440px public copy, account top-right entry, three tabs, rename, keyboard and context return",
+    "revocation immediately denies the previously verified connection"
+  ],
+  "browser_errors": [],
+  "scope": "real isolated HTTP/MCP SDK and Chromium; no actual Codex/WorkBuddy installation claimed"
+}

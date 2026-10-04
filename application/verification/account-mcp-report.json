@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "delivery_id": "d22bcb32-463c-4c00-9e75-c7764eea4afe",
+  "checks": [
+    "两个真实HTTP MCP并行会话各自创建与回读，账号上下文不串用"
+  ],
+  "backend": "mysql"
+}

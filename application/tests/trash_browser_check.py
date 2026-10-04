@@ -2,16 +2,18 @@
 import argparse, json
 from pathlib import Path
 from uuid import uuid4
+from http_auth import Session
 import httpx
 from playwright.sync_api import sync_playwright, expect
 ROOT=Path(__file__).resolve().parents[1]
 def run(url):
-    health=httpx.get(url+'/api/health',trust_env=False).raise_for_status().json()
+    api=Session(url)
+    health=api.get(url+'/api/health',trust_env=False).raise_for_status().json()
     assert health['backend']=='sqlite-test' or health['database'].endswith('_test')
     checks=[]; errors=[]
     def write(path,**body):
-        rev=httpx.get(url+'/api/workspace',trust_env=False).json()['revision']
-        return httpx.post(url+path,json=dict(body,expected_version=rev,request_id=str(uuid4())),trust_env=False).raise_for_status().json()['resource']
+        rev=api.get(url+'/api/workspace',trust_env=False).json()['revision']
+        return api.post(url+path,json=dict(body,expected_version=rev,request_id=str(uuid4())),trust_env=False).raise_for_status().json()['resource']
     with sync_playwright() as pw:
         browser=pw.chromium.launch()
         for width in [1440,360,390,430]:
@@ -20,7 +22,7 @@ def run(url):
             task=write('/api/tasks',title='同批恢复行动',issueId=issue['id'])
             context=browser.new_context(viewport=dict(width=width,height=900))
             page=context.new_page();page.on('pageerror',lambda e:errors.append(str(e)))
-            page.goto(url);expect(page.locator('#sync-state' if width>700 else '#mobile-sync-state')).to_contain_text('已同步')
+            api.cookies(page.context);page.goto(url);expect(page.locator('#sync-state' if width>700 else '#mobile-sync-state')).to_contain_text('已同步')
             nav='#nav' if width>700 else '.mobile-bottom'
             page.locator(nav+' [data-id=issues]').click()
             page.locator('#search').fill(issue['title'])
@@ -36,7 +38,7 @@ def run(url):
             page.locator('.compact-menu [data-action=delete-issue]').click()
             expect(page.locator('#trash-form')).to_contain_text('服务端')
             page.locator('#trash-form [type=submit]').click();expect(page.locator('#modal')).not_to_be_visible()
-            trash=httpx.get(url+'/api/trash',trust_env=False).json()
+            trash=api.get(url+'/api/trash',trust_env=False).json()
             deleted=next(x for x in trash['issues'] if x['id']==issue['id'])
             child=next(x for x in trash['tasks'] if x['id']==task['id'])
             assert deleted['deletionBatch']==child['deletionBatch']
@@ -44,13 +46,13 @@ def run(url):
             page.reload();expect(page.locator('#sync-state' if width>700 else '#mobile-sync-state')).to_contain_text('已同步')
             if width>700: page.locator('#nav [data-id=trash]').click()
             else:
-                page.locator('[data-action=mobile-more]').click()
-                page.locator('#modal [data-action=open-trash]').click()
+                page.locator('[data-account-action=toggle-menu]:visible').click();page.locator('[data-account-action=menu-tools]').click()
+                page.locator('#account-dropdown [data-action=open-trash]').click()
             expect(page.locator('[data-action=restore-issue][data-id="'+issue['id']+'"]')).to_be_visible()
             assert page.locator('[data-action=restore-task][data-id="'+task['id']+'"]').count()==0
             page.locator('[data-action=restore-issue][data-id="'+issue['id']+'"]').click()
             page.locator('#trash-form [type=submit]').click();expect(page.locator('#modal')).not_to_be_visible()
-            restored=httpx.get(url+'/api/issues/'+issue['id'],trust_env=False).raise_for_status().json()
+            restored=api.get(url+'/api/issues/'+issue['id'],trust_env=False).raise_for_status().json()
             assert restored['item']['number']==issue['number']
             assert next(x for x in restored['tasks'] if x['id']==task['id'])['sequence']==task['sequence']
             assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')

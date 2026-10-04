@@ -2,12 +2,14 @@
 import argparse,json,sys
 from pathlib import Path
 from uuid import uuid4
+from http_auth import Session
 import httpx,pymysql
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from app.mysql_store import settings,MySQLStore
 def run(url):
-    client=httpx.Client(base_url=url,trust_env=False,timeout=30)
+    api=Session(url)
+    client=api
     health=client.get('/api/health').raise_for_status().json()
     assert health['backend']=='mysql' and health['database'].endswith('_test')
     def write(path,**body):
@@ -31,22 +33,22 @@ def run(url):
     write('/api/tasks/'+second['id']+'/dependencies',dependsOn=[first['id']])
     assert edge()['deleted_at'] is None
     with pymysql.connect(**options) as conn,conn.cursor() as cur:
-        cur.execute("SELECT EVENT_OBJECT_TABLE,EVENT_MANIPULATION,ACTION_TIMING,ACTION_STATEMENT FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA=%s AND TRIGGER_NAME LIKE 'shixu_no_delete_%%'",(health['database'],))
+        cur.execute("SELECT EVENT_OBJECT_TABLE,EVENT_MANIPULATION,ACTION_TIMING,ACTION_STATEMENT FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA=%s",(health['database'],))
         triggers=cur.fetchall()
-        assert len(triggers)==10
+        assert len(triggers)==19
         assert all(t['EVENT_MANIPULATION']=='DELETE' and t['ACTION_TIMING']=='BEFORE' and 'SIGNAL' in t['ACTION_STATEMENT'].upper() for t in triggers)
         try:cur.execute('DELETE FROM tasks WHERE id=%s',(second['id'],))
         except pymysql.MySQLError as e:assert e.args[0]==1644 and 'Physical deletion' in str(e)
         else:raise AssertionError('Database allowed physical DELETE')
         finally:conn.rollback()
     deleted=write('/api/issues/'+issue['id']+'/trash')
-    snapshot=MySQLStore(health['database']).read()
+    snapshot=MySQLStore(health['database']).for_owner(api.user['id']).read()
     assert next(i for i in snapshot['data']['issues'] if i['id']==issue['id'])['deletedAt']
     assert all(next(t for t in snapshot['data']['tasks'] if t['id']==i)['deletedAt'] for i in [first['id'],second['id']])
     write('/api/issues/'+issue['id']+'/restore')
     assert edge()['deleted_at'] is None
     assert client.get('/api/tasks/'+second['id']).json()['item']['dependsOn']==[first['id']]
-    report=dict(passed=True,backend='mysql',guards=10,checks=['移除前置保留同一行并标记删除时间','有效依赖过滤已删除关联','重新添加激活原行','数据库自身触发器拒绝DELETE','软删除问题保留行动和依赖，恢复有效原关系'],business_production_writes=0)
+    report=dict(passed=True,backend='mysql',guards=19,checks=['移除前置保留同一行并标记删除时间','有效依赖过滤已删除关联','重新添加激活原行','数据库自身触发器拒绝DELETE','软删除问题保留行动和依赖，恢复有效原关系'],business_production_writes=0)
     (ROOT/'verification/retention-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
     print(json.dumps(report,ensure_ascii=False))
 if __name__=='__main__':

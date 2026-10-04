@@ -1,19 +1,31 @@
 {
   "passed": true,
-  "delivery_id": "f09f717a-c941-456c-a07e-e76603bbf495",
-  "diagram_sha256": "375efa13b60c420cfc392573bc98a32bb3a52dfbc0dd9add133bd180c5e6c8cc",
+  "delivery_id": "d22bcb32-463c-4c00-9e75-c7764eea4afe",
+  "diagram_sha256": "c2af24189d8680883f5264a58c0ab74d7972aa571b7981932b7be655f65f7b6d",
   "sources": [
     {
       "path": "data/mysql-schema.sql",
-      "sha256": "cb5bb7963e469d9c8ae346c97071af136d2ab9509ceda2ba4b30e8c5014fdcb1"
+      "sha256": "fa5933580bb57ff7d2a84d21c5b98cb0811373ed98f02daa7c310a26965b1fed"
     },
     {
-      "path": "scripts/migrate_creators.py",
-      "sha256": "1bc4b108510aab80c1144029c4d0046f4a4b10c8aab9eb6fc8f337cbab88edf4"
+      "path": "scripts/migrate_accounts.py",
+      "sha256": "10ed677317ef9f513589816ec49747f9096f904bc47184f876d5f066e2bcda9d"
+    },
+    {
+      "path": "scripts/migrate_onboarding.py",
+      "sha256": "9366f98ffb4086d5701ab0a2f067c63443beca4e7f5316715b0d2d59ef285ef9"
+    },
+    {
+      "path": "app/onboarding_auth.py",
+      "sha256": "65f91815c63d078d3af989abab9e1b2f4f94910f5d004866e515d0d3dd47576c"
+    },
+    {
+      "path": "app/accounts.py",
+      "sha256": "76a1e4a23d9363c31cbe5e9078559d414ba828cfae50f1438065524533815f63"
     },
     {
       "path": "app/mysql_store.py",
-      "sha256": "88f28a9ef778e096fbe537d3027363b080da9a2e2210354c0e0923099ad8cbbe"
+      "sha256": "9d5692bc9f4751eb3c9211beb0095071fd531611c51c7ccee0ec8a9e3e071c8d"
     }
   ],
   "source_consistent": true,
@@ -21,8 +33,8 @@
   "scope": "真实浏览器离线几何与交互；源码、DDL、迁移、元数据核对",
   "live_schema": {
     "status": "pass",
-    "tables": 10,
-    "columns": 89,
+    "tables": 19,
+    "columns": 149,
     "foreign_keys": 6,
     "business_rows_read": 0,
     "writes": 0

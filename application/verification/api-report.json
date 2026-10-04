@@ -1,6 +1,7 @@
 {
   "passed": true,
-  "tests": 57,
+  "tests": 81,
   "failures": 0,
-  "scope": "FastAPI TestClient + 真实临时SQLite；包括事务回滚、幂等、并发与状态机"
+  "scope": "FastAPI TestClient + 真实临时SQLite；包括事务回滚、幂等、并发与状态机",
+  "delivery_id": "d22bcb32-463c-4c00-9e75-c7764eea4afe"
 }
