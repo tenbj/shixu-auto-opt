@@ -349,5 +349,16 @@
       "description",
       "followups"
     ]
+  },
+  "custom_tool_flow": {
+    "requirement_id": "REQ-090",
+    "steps": [
+      "select __custom__",
+      "show required name",
+      "validate and reuse or allocate stable source id",
+      "persist profile with toolName",
+      "refresh source options"
+    ],
+    "error": "keep draft on storage failure"
   }
 }

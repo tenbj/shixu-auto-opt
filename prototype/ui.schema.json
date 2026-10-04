@@ -650,7 +650,66 @@
             "value": "测试模型-v1"
           }
         ]
+      },
+      {
+        "id": "custom-tool-add",
+        "requirement_ids": [
+          "REQ-090"
+        ],
+        "steps": [
+          {
+            "action": "click",
+            "selector": ".identity-button:visible"
+          },
+          {
+            "action": "click",
+            "selector": "dialog[open] [data-action=add-profile]"
+          },
+          {
+            "action": "fill",
+            "selector": "dialog[open] [name=profileName]",
+            "value": "自定义助手"
+          },
+          {
+            "action": "select",
+            "selector": "dialog[open] [name=profileKind]",
+            "value": "agent"
+          },
+          {
+            "action": "select",
+            "selector": "dialog[open] [name=profileVia]",
+            "value": "__custom__"
+          },
+          {
+            "action": "expect_visible",
+            "selector": "dialog[open] [name=profileCustomTool]"
+          },
+          {
+            "action": "fill",
+            "selector": "dialog[open] [name=profileCustomTool]",
+            "value": "Cursor"
+          },
+          {
+            "action": "click",
+            "selector": "dialog[open] button[type=submit]"
+          }
+        ]
       }
+    ]
+  },
+  "custom_tools": {
+    "requirement_id": "REQ-090",
+    "selector": "[name=\"profileVia\"]",
+    "custom_option": "__custom__",
+    "name_field": "profileCustomTool",
+    "source_id": "custom:<uuid>",
+    "name_max_length": 80,
+    "duplicate_policy": "trim and case-insensitive reuse",
+    "persistence": "identityProfiles[].toolName; account-scoped in accounts prototype",
+    "events": [
+      "EVT-FIELD",
+      "EVT-SUBMIT",
+      "EVT-IDENTITY"
     ]
   }
 }
