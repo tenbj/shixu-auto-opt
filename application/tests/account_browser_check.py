@@ -5,6 +5,17 @@ from uuid import uuid4
 import httpx
 from playwright.sync_api import sync_playwright,expect
 ROOT=Path(__file__).resolve().parents[1]
+def expect_mobile_account_position(page):
+ # Login can replace the account button while its identity profile is saved.
+ # Resolve the current element and measure it in the same browser task.
+ page.wait_for_function("""() => {
+  const button = document.querySelector('.mobile-header .account-pill');
+  const box = button?.getBoundingClientRect();
+  if (!box || box.width <= 0 || box.height <= 0) return false;
+  const rightGap = window.innerWidth - box.right;
+  return rightGap >= 0 && rightGap < 35;
+ }""", timeout=20000).dispose()
+
 def run(url):
  expect.set_options(timeout=20000)
  checks=[];errors=[]
@@ -20,7 +31,7 @@ def run(url):
    expect(page.locator('#account-auth')).to_be_hidden()
    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
    if width<700:
-    box=page.locator('.account-pill:visible').bounding_box();assert width-box['x']-box['width']<35
+    expect_mobile_account_position(page)
     expect(page.locator('.mobile-header [data-action=mobile-more]')).to_be_hidden()
    page.locator('nav:visible [data-id=issues]').click();page.locator('#search').fill('保留筛选')
    page.locator('.account-pill:visible').click();page.locator('[data-account-action=menu-tools]').click()
