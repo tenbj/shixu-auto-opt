@@ -60,7 +60,7 @@ def finalize(run_id):
     assert not run(['docker','volume','ls','--filter','label=com.docker.compose.project='+project,'-q']).strip()
     report['checks'].append({'name':'cleanup','status':'passed','observations':['Only owned isolated project containers/volumes removed; preexisting non-test containers retained']})
     report['auxiliary_images']=[x for x in report['images'] if x['service']!='app'];report['images']=[x for x in report['images'] if x['service']=='app']
-    contract=json.loads((ROOT/'project-contract.json').read_text(encoding='utf-8'));report['inputs']=snapshot(ROOT,contract['docker']['inputs'])
+    contract=json.loads((ROOT/'project-contract.json').read_text(encoding='utf-8'));assert report['inputs']==snapshot(ROOT,contract['docker']['inputs']),'Source changed after image build; rebuild and rerun acceptance'
     report['passed']=True;report['finished_at']=now();path.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
     (ROOT/'verification'/'docker-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
     print(json.dumps({'passed':True,'report':str(path),'image':image}))
@@ -95,6 +95,9 @@ def main():
     cli=['docker','compose','-p',project,'-f',str(ROOT/'compose.yaml'),'-f',str(compose)]
     run(['docker','build','-t',args.image,'.'],timeout=900)
     report={'passed':False,'environment':'isolated','run_id':run_id,'compose_project':project,'mcp_mode':'embedded','delivery_id':json.loads((ROOT/'project-contract.json').read_text(encoding='utf-8'))['delivery_id'],'started_at':now(),'checks':[],'url':f'http://127.0.0.1:{port}','images':[], 'baseline_image':json.loads(run(['docker','image','inspect',args.baseline]))[0]['Id'], 'cold_start_evidence':('verification/docker/'+project+'.json' if args.resume else None)}
+    from docker_contract import snapshot
+    report['inputs']=snapshot(ROOT,json.loads((ROOT/'project-contract.json').read_text(encoding='utf-8'))['docker']['inputs'])
+    report['runner_sha256']=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     before=json.loads(run(['docker','ps','--format','json']).decode().strip().replace('\n',',').join(['[',']']) or '[]')
     existing,excluded=inventory(before,project,set(args.peer_project));report['existing_containers']=existing
     report['peer_projects']=args.peer_project;report['excluded_test_containers']=excluded
@@ -170,7 +173,8 @@ def main():
         run(cli+['up','-d','db','--wait','--wait-timeout','900'],timeout=960);wait_health();assert api.get('/api/workspace').json()==retained
         passed('failure_recovery','Database stopped: health, anonymous, session and PAT requests explicitly 503; database recovered and workspace/session retained without app restart')
     except Exception as error:
-        report['error']=str(error);save();raise
+        (private/(run_id+'-error.txt')).write_text(str(error),encoding='utf-8')
+        report['error']=type(error).__name__+': isolated acceptance failed; raw diagnostic retained only under private runtime.';save();raise
     finally:
         report['finished_at']=now();save()
     if not args.keep:finalize(run_id)
