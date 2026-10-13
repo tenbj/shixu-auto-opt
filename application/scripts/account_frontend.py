@@ -33,11 +33,19 @@ def integrate(html,root):
     layer=layer.replace("if(a==='close-account-panel')document.querySelector('#account-modal')?.close();", "if(a==='close-account-panel')closeAccountPanel();")
     layer=layer.replace("menu.querySelector('button').focus({preventScroll:true})", "menu.querySelector('button').focus({preventScroll:true})")
     layer=layer.replace("window.addEventListener('scroll',closeAccountMenu)","window.addEventListener('scroll',()=>{const menu=document.querySelector('#account-dropdown'),trigger=[...document.querySelectorAll('.account-pill')].find(x=>x.getBoundingClientRect().width>0);if(menu&&trigger){const r=trigger.getBoundingClientRect();if(r.bottom<0)closeAccountMenu();else menu.style.top=(r.bottom+8)+'px'}})")
+    layer=layer.replace("function showLogin(mode='login',notice=''){\n closeAccountMenu();", "function showLogin(mode='login',notice=''){\n closeAccountMenu();\n"+" document.querySelectorAll('#account-menu,#mobile-identity').forEach(x=>{x.replaceChildren();delete x.dataset.accountControl});\n")
+    # Keep account controls stable while background workspace responses render.
+    layer=layer.replace("top.innerHTML=control;", "if(top.dataset.accountControl!==control){top.innerHTML=control;top.dataset.accountControl=control;closeAccountMenu()};")
+    layer=layer.replace("document.querySelector('#mobile-identity').innerHTML=control;", "const mobileControl=document.querySelector('#mobile-identity');if(mobileControl.dataset.accountControl!==control){mobileControl.innerHTML=control;mobileControl.dataset.accountControl=control;closeAccountMenu()};")
+    layer=layer.replace(";closeAccountMenu();document.querySelector('.nav-label')", ";document.querySelector('.nav-label')")
+    chrome_start=layer.index('function renderAccountChrome(){');chrome_end=layer.index('function accountHead(',chrome_start)
+    layer=layer[:chrome_start]+layer[chrome_start:chrome_end].replace("setAttribute('aria-expanded','false')","setAttribute('aria-expanded',String(!!document.querySelector('#account-dropdown')))")+layer[chrome_end:]
     layer=layer.replace('MCP 接入','AI 接入').replace('MCP接入','AI接入').replace('服务器令牌','访问令牌').replace("connections:'list'","connections:'quick'")
     layer=layer.replace('<div class="auth-switch">','<p><a href="/connect">连接 AI · 查看接入指引</a></p><div class="auth-switch">')
     css+='\n'+(root/'static/ai-access.css').read_text(encoding='utf-8')
     layer="let currentUser=null,csrfToken='',lastPreviewConfig=null;\n"+layer+'\n'+(root/'static/accounts-api.js').read_text(encoding='utf-8')+'\n'+(root/'static/ai-access-api.js').read_text(encoding='utf-8')
     html=html.replace('\nloadWorkspace();\n','\nqueueMicrotask(bootAccount);\n',1)
+    html=html.replace("document.querySelector('#mobile-identity').innerHTML=identitySwitch('mobile-identity');", "// Account chrome owns the mobile identity control and preserves its focus across renders.")
     html=html.replace('function render(){',"function render(){\n if(!currentUser){showLogin();return;}\n",1)
     marker="\n}\ndocument.addEventListener('change',e=>{if(e.target.id==='mobile-problem-select')"
     assert marker in html

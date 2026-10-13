@@ -75,7 +75,7 @@ def run(url):
                 page.locator('[role=tab][data-id=server]').click();expect(page.locator('#account-tabpanel')).to_contain_text('访问令牌')
                 page.locator('[role=tab][data-id=server]').press('Home');expect(page.locator('[role=tab][aria-selected=true]')).to_contain_text('快速接入')
                 page.keyboard.press('Escape');expect(page.locator('#account-modal')).not_to_be_visible()
-                assert page.evaluate('document.activeElement.classList.contains("account-pill")')
+                assert page.evaluate('document.activeElement.classList.contains("account-pill")'), {'width':width,'active':page.evaluate('document.activeElement.outerHTML'),'dialog':page.locator('#account-modal').get_attribute('open')}
                 assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
                 checks.append(f'{width}px public copy, account top-right entry, three tabs, rename, keyboard and context return')
                 page.close()

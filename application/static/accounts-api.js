@@ -43,7 +43,13 @@ let accountDraft='';
 function accountFormSnapshot(){return JSON.stringify([...document.querySelectorAll('#account-modal form')].map(f=>[f.id,[...new FormData(f)]]))}
 function accountHasDraft(){return document.querySelector('#account-modal')?.open&&accountDraft!==accountFormSnapshot()}
 function allowAccountDiscard(){return !accountHasDraft()||confirm('有未保存的修改。确定放弃吗？取消可继续编辑。')}
-function closeAccountPanel(){document.querySelector('#account-modal')?.close();[...document.querySelectorAll('.account-pill')].find(x=>x.getBoundingClientRect().width>0)?.focus({preventScroll:true})};
+function closeAccountPanel(){
+ const modal=document.querySelector('#account-modal');modal?.close();
+ const restore=()=>[...document.querySelectorAll('.account-pill')].find(x=>x.getClientRects().length&&getComputedStyle(x).visibility!=='hidden')?.focus({preventScroll:true});
+ restore();requestAnimationFrame(()=>{if(!modal?.open&&!document.querySelector('dialog[open]'))restore()});
+};
+// Handle Escape deterministically after tab DOM replacement and nested-dialog closure.
+document.addEventListener('keydown',e=>{const modal=document.querySelector('#account-modal');if(e.key!=='Escape'||!modal?.open||document.querySelector('#modal')?.open)return;e.preventDefault();e.stopPropagation();if(allowAccountDiscard())closeAccountPanel()},true);
 const accountRenderPage=renderAccountPage;
 renderAccountPage=function(){
  accountRenderPage();
