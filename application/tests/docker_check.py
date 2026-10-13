@@ -51,7 +51,7 @@ def cleanup_owned(project, private):
         except BaseException as error:failures.append(kind+': '+repr(error))
     if failures:raise RuntimeError('; '.join(failures))
 
-def finalize(run_id):
+def finalize(run_id, *, publish_summary=True):
     from docker_contract import STAGES, snapshot
     if not re.fullmatch(r'h02test-shixu-[a-f0-9]+(?:-[a-f0-9]+)?',run_id):raise ValueError('Invalid isolated run')
     path=ROOT/'verification'/'docker'/(run_id+'.json');report=json.loads(path.read_text(encoding='utf-8'))
@@ -85,7 +85,8 @@ def finalize(run_id):
     contract=json.loads((ROOT/'project-contract.json').read_text(encoding='utf-8'));assert report['inputs']==snapshot(ROOT,contract['docker']['inputs']),'Source changed after image build; rebuild and rerun acceptance'
     assert report['test_inputs']==snapshot(ROOT,['tests']),'Test helpers changed during acceptance'
     report['passed']=True;report['finished_at']=now();path.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
-    (ROOT/'verification'/'docker-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+    if publish_summary:
+        (ROOT/'verification'/'docker-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
     print(json.dumps({'passed':True,'report':str(path),'image':image}))
 
 def main():
@@ -215,9 +216,9 @@ def main():
         run(cli+['stop','db']);assert api.get('/api/health').status_code==503
         assert api.get('/api/workspace').status_code==503
         assert httpx.get(url+'/api/workspace',headers={'Authorization':'Bearer '+key['token']},trust_env=False).status_code==503
-        assert httpx.get(url+'/api/workspace',trust_env=False).status_code==503
+        assert httpx.get(url+'/api/workspace',trust_env=False).status_code==401
         run(cli+['up','-d','db','--wait','--wait-timeout','900'],timeout=960);wait_health();assert api.get('/api/workspace').json()==retained
-        passed('failure_recovery','Database stopped: health, anonymous, session and PAT requests explicitly 503; database recovered and workspace/session retained without app restart')
+        passed('failure_recovery','Database stopped: health, session and PAT requests 503; missing credentials remain 401 without database access; database recovered and workspace/session retained without app restart')
         finalize(run_id)
         report=json.loads((output/(run_id+'.json')).read_text(encoding='utf-8'))
     except BaseException as error:

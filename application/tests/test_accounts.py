@@ -100,15 +100,19 @@ def test_auth_database_failure_is_retryable_without_leaking_details(system, monk
     import pymysql
     app,session,_=system
     key=session.post('/api/account/mcp-access',json={'name':'outage','scope':'read'}).json()['token']
-    original=app.state.accounts.authenticate
+    original=app.state.accounts.connection
     def unavailable(*args):raise pymysql.OperationalError(2003,'private-host-and-secret')
-    monkeypatch.setattr(app.state.accounts,'authenticate',unavailable)
+    # Fail the database boundary, preserving authenticate's empty-token short circuit.
+    monkeypatch.setattr(app.state.accounts,'connection',unavailable)
     with closing(TestClient(app)) as remote:
         for headers in [{},{'Authorization':'Bearer '+key}]:
             response=remote.get('/api/health',headers=headers)
             assert response.status_code==503
             assert 'private-host-and-secret' not in response.text
         assert session.get('/api/workspace').status_code==503
-        monkeypatch.setattr(app.state.accounts,'authenticate',original)
+        assert remote.get('/api/workspace',headers={'Authorization':'Bearer '+key}).status_code==503
+        assert remote.get('/api/workspace').status_code==401
+        assert remote.get('/api/auth/me').status_code==401
+        monkeypatch.setattr(app.state.accounts,'connection',original)
         assert session.get('/api/workspace').status_code==200
         assert remote.get('/api/workspace',headers={'Authorization':'Bearer '+key}).status_code==200
