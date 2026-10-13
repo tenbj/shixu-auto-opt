@@ -13,6 +13,6 @@ def main():
             info=zipfile.ZipInfo('shixu-issues/'+p.relative_to(source).as_posix(),date_time=(2026,10,4,0,0,0))
             info.compress_type=zipfile.ZIP_DEFLATED;z.writestr(info,p.read_bytes())
     manifest=dict(name='shixu-issues',version=version,filename=filename,sha256=hashlib.sha256(target.read_bytes()).hexdigest(),source='application/skills/shixu-issues',derivedFrom='F02 portable Skill 1.4.0; system releases maintain this portable distribution',sources={p.relative_to(source).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in files})
-    (ROOT/'downloads/skill-manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding='utf-8')
+    (ROOT/'downloads/skill-manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding='utf-8', newline='\n')
     print(filename+' '+manifest['sha256'])
 if __name__=='__main__':main()

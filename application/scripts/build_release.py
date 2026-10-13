@@ -115,8 +115,8 @@ def main():
         result = portable(candidate, temporary)
     delivery=json.loads((ROOT/'project-contract.json').read_text(encoding='utf-8'))['delivery_id']
     result['delivery_id']=delivery;report['delivery_id']=delivery
-    (ROOT / 'verification/portable-report.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
-    (ROOT / 'verification/release-scan.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
+    (ROOT / 'verification/portable-report.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8', newline='\n')
+    (ROOT / 'verification/release-scan.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8', newline='\n')
     subprocess.run([sys.executable, 'scripts/generate_docs.py'], cwd=ROOT, check=True)
     if not args.ci:
         subprocess.run([sys.executable, 'scripts/validate_project.py', '--project-dir', '.', '--report', 'verification/contract-report.json'], cwd=ROOT, check=True)
@@ -125,7 +125,7 @@ def main():
     report['delivery_id']=delivery
     if not report['passed']:
         raise SystemExit('Final package scan failed')
-    (ROOT / 'verification/release-scan.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
+    (ROOT / 'verification/release-scan.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8', newline='\n')
     directory = ROOT / 'dist'
     directory.mkdir(exist_ok=True)
     target = directory / 'shixu-system-3.2.1.zip'
@@ -146,7 +146,7 @@ def main():
             assert hashlib.sha256(actual).hexdigest()==expected
             assert bundle.read('shixu-issues/'+relative)==actual
     shutil.copyfile(skill,directory/skill.name)
-    (directory / 'SHA256SUMS.txt').write_text(digest+'  '+target.name+'\n'+skill_digest+'  '+skill.name+'\n',encoding='utf-8')
+    (directory / 'SHA256SUMS.txt').write_text(digest+'  '+target.name+'\n'+skill_digest+'  '+skill.name+'\n',encoding='utf-8', newline='\n')
     with zipfile.ZipFile(target) as bundle:
         assert bundle.testzip() is None
         assert all(not any(part in SKIP_PARTS for part in Path(name).parts) for name in bundle.namelist())

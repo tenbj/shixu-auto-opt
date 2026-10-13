@@ -3,6 +3,7 @@
 所有可复用测试集中于本目录。`test_*.py`是pytest回归；`*_check.py`是显式集成/浏览器验收；`auth_client.py`、`http_auth.py`和`compare_databases.py`是测试助手。
 
 - `python tests/run_suite.py`：临时SQLite、单元/API、真实SDK、浏览器及重启保留。
+- `python tests/checkout_check.py`：在Git工作树中核对Docker输入原始字节与Git存储字节一致，避免Windows/Linux换行导致证据失效。
 - `python tests/dual_transport_check.py`：临时TLS证书及合成账号，HTTP/HTTPS认证与MCP兼容。
 - `python tests/diagrams_check.py`：离线双图几何、缩放和拖动；`--live-schema`只读核对指定数据库元数据。
 - `python tests/docker_check.py --image shixu-system:3.2.1 --baseline shixu-system:3.2.0-docker.1`：独立随机Compose项目与MySQL测试库，容器/API/MCP/浏览器、恢复、回退升级、故障、秘密扫描和本项目清理。每次调用真实构建当前镜像（允许Docker缓存），要求基线镜像已存在。默认保护全部既有容器；并行验收只能用`--peer-project <确切Compose项目名>`显式排除并记录，禁止按名称前缀忽略。失败保留私有诊断和所属测试资源；`--resume <本次失败项目>`复用该测试卷，其证据与首次冷启动分开记录。最终源码指纹必须与构建时一致。

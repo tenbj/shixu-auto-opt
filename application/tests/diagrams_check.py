@@ -140,12 +140,12 @@ def main():
             sha=hashlib.sha256((ROOT/path).read_bytes()).hexdigest()
             contract['diagrams'][kind]=dict(skill=skill,path=path,sha256=sha,maintenance=('updated' if kind=='architecture' else 'reviewed_unchanged'),change_note=('Docker单应用容器、外部MySQL、命名卷与完整同源入口' if kind=='architecture' else 'Docker化不改DDL/实体/关系；核对20表6物理外键并重新进行浏览器双态几何验收'),sources=sources)
             evidence=dict(passed=True,delivery_id=contract['delivery_id'],diagram_sha256=sha,sources=sources,source_consistent=True,details='verification/diagrams/report.json',scope='真实浏览器离线几何与交互；源码、DDL、迁移、元数据核对',live_schema=report.get('live_schema'))
-            (OUT/(kind+'-report.json')).write_text(json.dumps(evidence,ensure_ascii=False,indent=2),encoding='utf-8')
-        (ROOT/'project-contract.json').write_text(json.dumps(contract,ensure_ascii=False,indent=2),encoding='utf-8')
+            (OUT/(kind+'-report.json')).write_text(json.dumps(evidence,ensure_ascii=False,indent=2),encoding='utf-8', newline='\n')
+        (ROOT/'project-contract.json').write_text(json.dumps(contract,ensure_ascii=False,indent=2),encoding='utf-8', newline='\n')
         report['delivery_id']=contract['delivery_id']
         report['status']='pass'
         report['passed']=True
-        (OUT/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+        (OUT/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8', newline='\n')
         print(json.dumps(report,ensure_ascii=False,indent=2))
         browser.close()
     return int(bool(errors))

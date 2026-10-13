@@ -29,5 +29,7 @@ jobs:
         working-directory: ${{ env.SYSTEM_DIR }}
       - run: python tests/diagrams_check.py
         working-directory: ${{ env.SYSTEM_DIR }}
+      - run: python tests/checkout_check.py
+        working-directory: ${{ env.SYSTEM_DIR }}
       - run: python scripts/build_release.py --ci
         working-directory: ${{ env.SYSTEM_DIR }}

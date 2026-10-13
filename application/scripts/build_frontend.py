@@ -109,5 +109,5 @@ from creator_frontend import integrate
 html = integrate(html, ROOT)
 from account_frontend import integrate as integrate_accounts
 html = integrate_accounts(html, ROOT)
-(ROOT / 'static' / 'index.html').write_text(html, encoding='utf-8')
+(ROOT / 'static' / 'index.html').write_text(html, encoding='utf-8', newline='\n')
 print('Generated static/index.html; prototype unchanged')

@@ -1,3 +1,8 @@
+# Source/evidence hashes must survive Windows and Linux checkout unchanged.
+.gitattributes text eol=lf
+.github/** text eol=lf
+application/** text=auto eol=lf
+
 # Frozen prototype hashes must survive Windows checkout unchanged.
 application/reference/*.html -text
 

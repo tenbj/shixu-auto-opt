@@ -21,7 +21,7 @@ MAPPING = dict(ai_tools='list_ai_tools',ai_tool_create='create_ai_tool',connecti
 
 
 def write_json(path, value):
-    (ROOT / path).write_text(json.dumps(value, ensure_ascii=False, indent=2), encoding='utf-8')
+    (ROOT / path).write_text(json.dumps(value, ensure_ascii=False, indent=2), encoding='utf-8', newline='\n')
 
 
 def main():
@@ -87,12 +87,12 @@ def main():
     doc += ['## 示例与边界' , '', '只读：`python examples/api_client.py`。合成写入：加 `--write-demo`。浏览器示例：服务运行后访问 `/examples/`。', '',
             '本版为账号隔离工作台，支持显式配置0.0.0.0监听与内网Host允许列表；actor不是身份认证。正式存储为用户配置的MySQL专属新库，实体分表保存；SQLite仅用于隔离测试。提供回收站软删除与恢复，依赖关系移除也是软删除，数据库20表DELETE触发器与运行时SQL防护阻止物理删除。提供登录注册、会话管理、OAuth与访问令牌；没有永久删除、导入或离线跨设备同步API。完整工作台/导出包含回收站，普通列表和详情仅限有效记录。恢复必要行动可重开验证，删除问题/恢复问题均原子处理同批关联行动。审计分页使用after=最后一条revision继续查询。完整备份使用MySQL专属库备份，页面JSON不含幂等表。']
     text = '\n'.join(doc) + '\n'
-    (ROOT / 'docs/API中文说明.md').write_text(text, encoding='utf-8')
-    (ROOT / 'docs/API中文说明.html').write_text('<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>拾序API中文说明</title><style>body{max-width:1100px;margin:32px auto;padding:20px;background:#f6f8f2;color:#214636}pre{white-space:pre-wrap;font:15px/1.8 system-ui;overflow-wrap:anywhere}</style><h1>拾序 API 中文说明</h1><pre>'+html.escape(text)+'</pre></html>', encoding='utf-8')
+    (ROOT / 'docs/API中文说明.md').write_text(text, encoding='utf-8', newline='\n')
+    (ROOT / 'docs/API中文说明.html').write_text('<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>拾序API中文说明</title><style>body{max-width:1100px;margin:32px auto;padding:20px;background:#f6f8f2;color:#214636}pre{white-space:pre-wrap;font:15px/1.8 system-ui;overflow-wrap:anywhere}</style><h1>拾序 API 中文说明</h1><pre>'+html.escape(text)+'</pre></html>', encoding='utf-8', newline='\n')
     mapping += ['', '所有业务删除均为软删除；依赖移除保留原行并标记deleted_at。20表DELETE触发器和运行时SQL防护禁止物理删除。', '', '数据层：MySQL issues/tasks/task_dependencies/issue_followups/issue_history/issue_logs保存实体；workspace_meta保存版本与编号；activity/idempotency_requests保存审计与幂等。所有业务修改在同一InnoDB事务提交，行锁保护账号内版本。', '',
                 '未实现原型记录自动导入，源HTML与其localStorage均未改动。所有可写入口由后端规则校验，旧原型脚本不具有写库权限。', '',
                 '验证分别见 verification/api-report.json、browser-report.json、mcp-report.json、persistence-report.json；AI自主任务未验收。']
-    (ROOT / 'docs/需求与能力映射.md').write_text('\n'.join(mapping)+'\n', encoding='utf-8')
+    (ROOT / 'docs/需求与能力映射.md').write_text('\n'.join(mapping)+'\n', encoding='utf-8', newline='\n')
     contract = json.loads((ROOT / 'project-contract.json').read_text(encoding='utf-8'))
     # Application docs validate their frozen design input, independently of newer prototypes.
     source = ROOT / 'reference' / 'accounts-source.html'
