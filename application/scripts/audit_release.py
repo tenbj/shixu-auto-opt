@@ -34,7 +34,7 @@ def main():
         parts = Path(name).parts
         if any(p in {'private', 'runtime', '.venv', '__pycache__', '.pytest_cache', '.git'} for p in parts):
             findings.append(name + ': excluded directory')
-        if Path(name).name.startswith('frp-public.') or (Path(name).name.startswith('.env') and Path(name).name != '.env.example'):
+        if Path(name).name.startswith('frp-public.') or (Path(name).name.startswith('.env') and Path(name).name not in {'.env.example', '.env.docker.example'}):
             findings.append(name + ': private artifact')
         if Path(name).suffix.lower() in {'.sqlite3', '.db', '.log', '.pyc', '.pem', '.key'}:
             findings.append(name + ': private/runtime file type')

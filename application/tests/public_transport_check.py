@@ -13,7 +13,8 @@ import httpx2
 from mcp import Client
 from mcp.client.streamable_http import streamable_http_client
 
-URL = 'https://shixu.eliasliu.cc'
+URL = os.environ['SHIXU_VERIFY_HTTPS_URL'].rstrip('/')
+HTTP_URL = os.environ['SHIXU_VERIFY_HTTP_URL'].rstrip('/')
 
 
 async def sdk(token):
@@ -31,7 +32,7 @@ async def sdk(token):
 
 def run():
     report = {}
-    credentials = {'username': 'test', 'password': os.environ['SHIXU_VERIFY_PASSWORD']}
+    credentials = {'username': os.environ['SHIXU_VERIFY_USERNAME'], 'password': os.environ['SHIXU_VERIFY_PASSWORD']}
     web = httpx.Client(base_url=URL, timeout=30, trust_env=False)
     access_ids = []
     try:
@@ -88,7 +89,7 @@ def run():
         denied = httpx.get(URL + '/api/workspace', headers={'Authorization': 'Bearer ' + pat['token']}, timeout=20, trust_env=False)
         assert denied.status_code == 401
         report['temporary_tokens_revoked'] = True
-        with httpx.Client(base_url='http://eliasliu.cc:11865', timeout=20, trust_env=False) as old:
+        with httpx.Client(base_url=HTTP_URL, timeout=20, trust_env=False) as old:
             login = old.post('/api/auth/login', json=credentials)
             login.raise_for_status()
             assert login.headers['set-cookie'].startswith('shixu_session=')
@@ -103,10 +104,10 @@ def run():
             web.post('/api/account/mcp-access/' + identifier + '/revoke', json={})
         web.post('/api/auth/logout', json={})
         web.close()
-    target = Path(__file__).with_name('public-https-report.json')
+    target = Path(__file__).resolve().parents[1]/'verification/public-https-report.json'
     report.update(passed=True,delivery_id=json.loads((target.parent.parent/'project-contract.json').read_text(encoding='utf-8'))['delivery_id'],business_writes=0)
     target.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
-    target.with_name('public-http-report.json').write_text(json.dumps(dict(passed=True,delivery_id=report['delivery_id'],url='http://eliasliu.cc:11865',checks=['HTTP session login and read','canonical HTTPS MCP advertised','business workspace unchanged','HTTP logout'],business_writes=0),ensure_ascii=False,indent=2),encoding='utf-8')
+    target.with_name('public-http-report.json').write_text(json.dumps(dict(passed=True,delivery_id=report['delivery_id'],url=HTTP_URL,checks=['HTTP session login and read','canonical HTTPS MCP advertised','business workspace unchanged','HTTP logout'],business_writes=0),ensure_ascii=False,indent=2),encoding='utf-8')
     print(json.dumps(report, ensure_ascii=False))
 
 

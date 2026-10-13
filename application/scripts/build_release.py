@@ -1,4 +1,5 @@
 """白名单打包、内容扫描、换目录运行验证与合同检查。不会发布或上传。"""
+import argparse
 import hashlib
 import json
 import os
@@ -11,12 +12,12 @@ import tempfile
 import time
 import zipfile
 import httpx
-from check import stop
+from process_tools import stop
 
 ROOT = Path(__file__).resolve().parents[1]
 INCLUDE_DIRS = {'skills', 'app', 'static', 'docs', 'examples', 'tests', 'verification', 'scripts', 'data', 'reference', 'downloads', '.github'}
 INCLUDE_FILES = {'README.md', 'CHANGELOG.md', 'LICENSE', '.gitignore', '.env.example', 'requirements.txt',
-                 'requirements-dev.txt', 'requirements-lock.txt', 'project-contract.json', 'mcp_server.py'}
+                 'requirements-dev.txt', 'requirements-lock.txt', 'project-contract.json', 'mcp_server.py', 'Dockerfile', '.dockerignore', 'compose.yaml', '.env.docker.example'}
 SKIP_PARTS = {'__pycache__', '.pytest_cache', 'runtime', 'private', '.venv', '.git', 'dist'}
 
 
@@ -100,9 +101,10 @@ def portable(zip_path, temporary):
 
 
 def main():
+    parser=argparse.ArgumentParser();parser.add_argument('--ci',action='store_true',help='Verify portable source package without claiming full Docker delivery');args=parser.parse_args()
     summary = json.loads((ROOT / 'verification/summary.json').read_text(encoding='utf-8'))
     if not summary.get('passed'):
-        raise SystemExit('Run scripts/check.py successfully before packaging')
+        raise SystemExit('Run tests/run_suite.py successfully before packaging')
     report = scan(files())
     if not report['passed']:
         raise SystemExit(json.dumps(report))
@@ -115,7 +117,8 @@ def main():
     (ROOT / 'verification/portable-report.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
     (ROOT / 'verification/release-scan.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
     subprocess.run([sys.executable, 'scripts/generate_docs.py'], cwd=ROOT, check=True)
-    subprocess.run([sys.executable, 'scripts/validate_project.py', '--project-dir', '.', '--report', 'verification/contract-report.json'], cwd=ROOT, check=True)
+    if not args.ci:
+        subprocess.run([sys.executable, 'scripts/validate_project.py', '--project-dir', '.', '--report', 'verification/contract-report.json'], cwd=ROOT, check=True)
     final_files = files()
     report = scan(final_files)
     report['delivery_id']=delivery
@@ -124,7 +127,7 @@ def main():
     (ROOT / 'verification/release-scan.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
     directory = ROOT / 'dist'
     directory.mkdir(exist_ok=True)
-    target = directory / 'shixu-system-3.2.0.zip'
+    target = directory / 'shixu-system-3.2.1.zip'
     archive(target, files())
     digest = hashlib.sha256(target.read_bytes()).hexdigest()
     (directory / 'SHA256SUMS.txt').write_text(digest + '  ' + target.name + '\n', encoding='utf-8')
@@ -132,7 +135,7 @@ def main():
         assert bundle.testzip() is None
         assert all(not any(part in SKIP_PARTS for part in Path(name).parts) for name in bundle.namelist())
         contract = json.loads(bundle.read('shixu-system/project-contract.json'))
-        assert contract['status'] == 'ready'
+        assert args.ci or contract['status'] == 'ready'
     print(json.dumps({'zip': str(target), 'sha256': digest, 'files': len(files()), 'passed': True}, ensure_ascii=False))
 
 

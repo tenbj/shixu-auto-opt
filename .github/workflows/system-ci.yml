@@ -21,13 +21,13 @@ jobs:
         working-directory: ${{ env.SYSTEM_DIR }}
       - run: python -m playwright install chromium
         working-directory: ${{ env.SYSTEM_DIR }}
-      - run: python scripts/check.py
+      - run: python tests/run_suite.py
         working-directory: ${{ env.SYSTEM_DIR }}
       - run: python scripts/generate_docs.py
         working-directory: ${{ env.SYSTEM_DIR }}
       - run: python scripts/generate_diagrams.py
         working-directory: ${{ env.SYSTEM_DIR }}
-      - run: python scripts/check_diagrams.py
+      - run: python tests/diagrams_check.py
         working-directory: ${{ env.SYSTEM_DIR }}
-      - run: python scripts/build_release.py
+      - run: python scripts/build_release.py --ci
         working-directory: ${{ env.SYSTEM_DIR }}

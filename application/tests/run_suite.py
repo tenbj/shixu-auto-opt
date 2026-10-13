@@ -36,14 +36,8 @@ def wait(url, process):
     raise RuntimeError('验证服务未就绪')
 
 
-def stop(process):
-    if process.poll() is None:
-        if os.name == 'nt':
-            subprocess.run(['taskkill', '/PID', str(process.pid), '/T', '/F'], check=True, capture_output=True, creationflags=subprocess.CREATE_NO_WINDOW)
-        else:
-            process.terminate()
-        process.wait(timeout=10)
-
+sys.path.insert(0,str(ROOT/'scripts'))
+from process_tools import stop
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -54,6 +48,9 @@ def main():
         env = dict(os.environ, SHIXU_BACKEND='sqlite', SHIXU_DB=str(Path(temporary) / 'tests.sqlite3'), PYTHONIOENCODING='utf-8', SHIXU_SKIP_DOTENV='true', SHIXU_PUBLIC_URL='', SHIXU_HTTPS_PROXY_SECRET='')
         run('-m', 'pytest', 'tests', '-q', '--junitxml=verification/pytest.xml', env=env)
         suite = ET.parse(REPORT / 'pytest.xml').getroot().find('testsuite')
+        skill_cases=[case for case in suite.findall('testcase') if 'test_skill_update' in case.get('classname','')]
+        assert skill_cases and all(case.find('failure') is None and case.find('error') is None for case in skill_cases)
+        (REPORT/'f02-report.json').write_text(json.dumps(dict(passed=True,portable_update_tests=len(skill_cases),delivery_id=json.loads((ROOT/'project-contract.json').read_text(encoding='utf-8'))['delivery_id'],scope='Current pytest isolated portable Skill update cases; no real client installation claimed')),encoding='utf-8')
         api_report = {'passed': True, 'tests': int(suite.attrib['tests']), 'failures': int(suite.attrib['failures']), 'scope': 'FastAPI TestClient + 真实临时SQLite；包括事务回滚、幂等、并发与状态机'}
         (REPORT / 'api-report.json').write_text(json.dumps(api_report, ensure_ascii=False, indent=2), encoding='utf-8')
         port = available_port()
