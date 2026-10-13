@@ -9,3 +9,6 @@ application/reference/*.html -text
 # Portable Skill hashes and migration evidence preserve exact source bytes.
 application/skills/** -text
 application/scripts/migrate_custom_tools.py -text
+
+# Segmented acceptance references the exact original failed-run bytes.
+application/verification/docker/h02test-shixu-32b356ff.json -text
