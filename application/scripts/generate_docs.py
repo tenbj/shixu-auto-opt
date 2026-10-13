@@ -39,7 +39,7 @@ def main():
                                     order='先health，再list/get版本，再写入', error_handling='404检查ID；409重读；422修正输入；503不确认成功、同号重试', protocol=entry))
     write_json('docs/MCP工具目录.json', catalog)
     operations = []
-    doc = ['# 拾序 API 中文说明', '', '版本 3.2.0 · 基地址 http://127.0.0.1:8765 · UTF-8 JSON。在线交互文档 `/docs`，机器Schema `/openapi.json`。', '',
+    doc = ['# 拾序 API 中文说明', '', '版本 3.2.1 · 基地址 http://127.0.0.1:8765 · UTF-8 JSON。在线交互文档 `/docs`，机器Schema `/openapi.json`。', '',
            '## 账号认证', '', '登录注册和OAuth协议见账号与远程接入.md。网页用HttpOnly会话Cookie，写入附X-CSRF-Token；程序用Authorization: Bearer账号令牌。401表示需要登录，403表示CSRF或权限不足，跨账号资源返回404。owner不能由调用方指定。账号管理端点不使用业务revision/request_id；OAuth token使用表单格式。', '', '## 并发、幂等与错误', '',
            '所有业务写入携带 `request_id`（8–120字符，推荐UUID）、`expected_version`（当前账号revision）与可选 `actor`（审计标签，默认未指定）。请求体不接受未声明字段。每个写入是一个MySQL InnoDB事务；返回 `revision`、`resource` 和事务提交时的 `data`。失败不改变数据、审计或版本。', '',
            '同一request_id及完全相同内容重放返回原始成功响应；request_id相同但内容不同返回409。网络超时保持请求内容和编号重试。账号内版本是工作台版本，不是单个对象版本；任何对象写入都会递增。', '',
@@ -102,15 +102,17 @@ def main():
             raise RuntimeError('源原型hash变化，停止生成合同')
     contract['prototype']['path'] = '../prototype-accounts/prototype.html（原始源；分发快照已脱敏）'
     contract['prototype']['source_modified'] = False
-    contract['version']='3.2.0'
+    contract['version']='3.2.1'
     contract['operations'] = operations
-    checks = {'business':'api-report.json', 'api':'api-report.json', 'mcp':'mcp-report.json', 'http_mcp':'http-mcp-report.json', 'browser':'browser-report.json', 'persistence':'persistence-report.json', 'portable':'portable-report.json', 'release_scan':'release-scan.json', 'trash_browser':'trash-browser-report.json', 'diagrams':'diagrams/report.json', 'architecture':'diagrams/architecture-report.json', 'erd':'diagrams/erd-report.json', 'creators':'creator-browser-report.json', 'accounts':'account-browser-report.json', 'account_mcp':'account-mcp-report.json', 'dual_transport':'dual-transport-report.json', 'public_http':'public-http-report.json', 'f02':'f02-report.json', 'onboarding':'onboarding-report.json'}
+    checks = {'business':'api-report.json', 'api':'api-report.json', 'mcp':'mcp-report.json', 'http_mcp':'http-mcp-report.json', 'browser':'browser-report.json', 'persistence':'persistence-report.json', 'portable':'portable-report.json', 'release_scan':'release-scan.json', 'trash_browser':'trash-browser-report.json', 'diagrams':'diagrams/report.json', 'architecture':'diagrams/architecture-report.json', 'erd':'diagrams/erd-report.json', 'creators':'creator-browser-report.json', 'accounts':'account-browser-report.json', 'account_mcp':'account-mcp-report.json', 'dual_transport':'dual-transport-report.json', 'public_http':'public-http-report.json', 'f02':'f02-report.json', 'onboarding':'onboarding-report.json', 'docker':'docker-report.json'}
     contract['checks'] = []
     for name, file in checks.items():
         path = ROOT / 'verification' / file
         passed = path.exists() and json.loads(path.read_text(encoding='utf-8')).get('delivery_id')==contract['delivery_id'] and json.loads(path.read_text(encoding='utf-8')).get('passed', json.loads(path.read_text(encoding='utf-8')).get('status') == 'pass') is True
         contract['checks'].append(dict(name=name, required=name!='public_http', status='passed' if passed else 'not_run', evidence='verification/'+file if path.exists() else ''))
-    contract['checks'].append(dict(name='ai_task', status='not_run', evidence='', reason='已完成固定SDK序列，不等同于AI自主选择工具验收'))
+    ai_path=ROOT/'verification/ai-task-report.json'
+    ai=json.loads(ai_path.read_text(encoding='utf-8')) if ai_path.exists() else {}
+    contract['checks'].append(dict(name='ai_task',status='passed' if ai.get('passed') and ai.get('delivery_id')==contract['delivery_id'] else 'not_run',evidence='verification/ai-task-report.json' if ai_path.exists() else '',reason='独立AI任务证据与固定SDK序列分别核对'))
     contract['storage'] = {'production':'mysql-entity-tables', 'schema':'data/mysql-schema.sql', 'tables':20, 'test_adapter':'SQLite仅用于隔离测试与无凭据分发包检查'}
     mysql_report = ROOT / 'verification/mysql-report.json'
     if mysql_report.exists():
@@ -118,7 +120,7 @@ def main():
     contract['limits'] = ['HTTP兼容开关支持网页登录和PAT/API/MCP；标准远程OAuth仍要求HTTPS。HTTPS优先入口shixu.eliasliu.cc，HTTP明文兼容入口保留',
         'OAuth动态注册与S256 PKCE、read/write集合兼容；访问令牌1小时、刷新轮换最长30天，重放/撤销使授权整组失效；PAT1年',
         '当前MySQL连接未启用TLS；凭据仅从私有环境读取',
-        'Windows/Python3.11服务端与SDK验收；干净实体电脑及全部runtime实机、AI自主安装任务未验收，支持矩阵不得冒充验证通过',
+        'Docker Linux amd64 / Python3.11及Windows SDK和浏览器验收；其他CPU架构、全部客户端实机和AI自主安装任务未验收',
         '账号归属在应用事务校验，ER仅展示数据库真实物理外键，owner_id为逻辑关联',
         '未选择开放许可证；脱敏源快照使用独立hash，原始原型保持未修改',
         'ready表示源码及安装包交付验收，不等同于线上部署；public_http仅为部署后可选验收，旧delivery报告不复用为本轮通过']

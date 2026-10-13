@@ -3,7 +3,7 @@
   "info": {
     "title": "拾序系统 API",
     "description": "账号独立工作台；会话或令牌认证，按账号隔离版本、编号与幂等。",
-    "version": "3.2.0"
+    "version": "3.2.1"
   },
   "paths": {
     "/api/auth/login": {

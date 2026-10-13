@@ -1,6 +1,6 @@
 # 拾序 · 系统 + API + MCP
 
-版本3.2.0，按已确认的自定义AI工具原型v1.9.0更新。保留五视图、七状态流转、回收站、编号、依赖、日历、跟进及创建来源；页面、API与MCP共用按账号隔离的MySQL事务。
+版本3.2.1，按已确认的自定义AI工具原型v1.9.0更新。保留五视图、七状态流转、回收站、编号、依赖、日历、跟进及创建来源；页面、API与MCP共用按账号隔离的MySQL事务。
 
 右上角账号卡片打开下拉菜单，账号设置和AI接入采用弹窗Tab。手机工作台工具放在二级菜单，退出登录放在账号菜单。关闭弹窗保留页面与筛选。
 
@@ -23,7 +23,7 @@
 
 ## 验证与交付
 
-依次执行 scripts/check.py --mysql、scripts/generate_diagrams.py、scripts/check_diagrams.py --live-schema、scripts/generate_docs.py、scripts/build_release.py。默认check使用SQLite测试适配器，MySQL验证只写专属_test库。证据在verification，20表定义在data/mysql-schema.sql。源原型未修改，分发的冻结快照已脱敏。
+依次执行 tests/run_suite.py --mysql、scripts/generate_diagrams.py、tests/diagrams_check.py --live-schema、scripts/generate_docs.py、scripts/build_release.py。默认check使用SQLite测试适配器，MySQL验证只写专属_test库。证据在verification，20表定义在data/mysql-schema.sql。源原型未修改，分发的冻结快照已脱敏。
 
 业务删除与依赖移除保留原行，数据库DELETE触发器阻止物理删除。每个账号独立revision、编号、身份、审计和幂等，数据归属只能来自认证上下文。
 
@@ -42,3 +42,8 @@ AI身份支持预设工具和“其他 / 自定义工具”；名称1至80字、
 从3.1升级：暂停写入、停止服务，运行 `python scripts/migrate_custom_tools.py`，脚本先备份全部表并核对原数据，再新增ai_tools、扩展identity_profiles.via、issues/tasks.created_via及activity.resource_id为80字符。确认报告passed后重启。重复执行幂等；DDL不是事务性回滚，失败保持停服，检查私有备份后完成迁移；回退应用时保留新增表和扩宽字段，禁止删除新工具或历史记录。
 
 [接入更新指南](docs/connect/updates.md)说明用户驱动的Skill/MCP更新。服务发布包内skills/shixu-issues为独立可安装Skill的维护源，1.5.0包含可选标准库更新脚本；由1.4.0便携包派生，工作区F02入口仍独立管理。脚本默认只读计划，显式--apply才安装；校验摘要、保留用户修改、备份旧版。MCP由当前客户端原生能力合并配置并验证，不通过服务端远程写客户端文件。
+
+
+## Docker部署
+
+正式3.2.1业务保持不变，Docker交付修订为3.2.1。网页、API、内置MCP、双图和接入资源随单个非root应用镜像运行，生产继续使用现有MySQL。详见 [Docker部署、升级与恢复](docs/Docker部署.md)。

@@ -31,7 +31,7 @@ def create_app(db_path=None):
             finally:
                 application.state.mcp_running = False
 
-    app = FastAPI(title='拾序系统 API', version='3.2.0', lifespan=lifespan,
+    app = FastAPI(title='拾序系统 API', version='3.2.1', lifespan=lifespan,
                   description='账号独立工作台；会话或令牌认证，按账号隔离版本、编号与幂等。')
     load_environment()
     if db_path is not None or os.getenv('SHIXU_BACKEND') == 'sqlite':
@@ -82,7 +82,7 @@ def create_app(db_path=None):
         with app.state.accounts.connection() as connection:
             app.state.accounts.query(connection, 'SELECT 1')
         state = app.state.store.read() if principal.get() else {}
-        return {'status': 'ok', 'version': '3.2.0', 'revision': state.get('revision'), 'mode': 'account-isolated',
+        return {'status': 'ok', 'version': '3.2.1', 'revision': state.get('revision'), 'mode': 'account-isolated',
                 'backend': getattr(app.state.store, 'backend', 'sqlite-test'),
                 'database': getattr(app.state.store, 'database', None),
                 'pid': os.getpid(), 'instance': os.getenv('SHIXU_INSTANCE', ''),

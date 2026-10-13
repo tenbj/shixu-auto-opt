@@ -12,7 +12,7 @@ def create_server(api_transport=None):
     BASE = os.getenv('SHIXU_API_URL', 'http://127.0.0.1:8765').rstrip('/')
     if urlparse(BASE).hostname not in ['127.0.0.1', 'localhost', '::1']:
         raise ValueError('本地版本 MCP 只连接回环地址')
-    server = MCPServer('shixu', version='3.2.0', instructions='先 health，再 list/get 获取 revision，写入携带 request_id 和 expected_version。重试同号；409重读，422修正输入，503不得声称成功。提交验证必须填写处理说明、方法；确认解决必须填写验证依据。actor仅为审计标签。创建前list_identities；creation.identityId指定实际提交身份，initiatedByPersonId可指定人类发起者；modelInfo记录实际模型，空对象表示未提供，不能从工具名猜测。')
+    server = MCPServer('shixu', version='3.2.1', instructions='先 health，再 list/get 获取 revision，写入携带 request_id 和 expected_version。重试同号；409重读，422修正输入，503不得声称成功。提交验证必须填写处理说明、方法；确认解决必须填写验证依据。actor仅为审计标签。创建前list_identities；creation.identityId指定实际提交身份，initiatedByPersonId可指定人类发起者；modelInfo记录实际模型，空对象表示未提供，不能从工具名猜测。')
     READ = ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False)
     WRITE = ToolAnnotations(readOnlyHint=False, destructiveHint=False, idempotentHint=True, openWorldHint=False)
 
