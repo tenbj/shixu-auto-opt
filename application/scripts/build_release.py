@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import re
 import socket
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -130,13 +131,28 @@ def main():
     target = directory / 'shixu-system-3.2.1.zip'
     archive(target, files())
     digest = hashlib.sha256(target.read_bytes()).hexdigest()
-    (directory / 'SHA256SUMS.txt').write_text(digest + '  ' + target.name + '\n', encoding='utf-8')
+    manifest=json.loads((ROOT/'downloads/skill-manifest.json').read_text(encoding='utf-8'))
+    skill=ROOT/'downloads'/manifest['filename']
+    assert skill.parent==ROOT/'downloads' and skill.suffix=='.zip'
+    skill_digest=hashlib.sha256(skill.read_bytes()).hexdigest()
+    assert skill_digest==manifest['sha256'],'Skill archive does not match manifest'
+    source=ROOT/'skills/shixu-issues'
+    with zipfile.ZipFile(skill) as bundle:
+        assert bundle.testzip() is None
+        assert set(bundle.namelist())=={'shixu-issues/'+p for p in manifest['sources']}
+        for relative,expected in manifest['sources'].items():
+            assert (source/relative).resolve().is_relative_to(source.resolve())
+            actual=(source/relative).read_bytes()
+            assert hashlib.sha256(actual).hexdigest()==expected
+            assert bundle.read('shixu-issues/'+relative)==actual
+    shutil.copyfile(skill,directory/skill.name)
+    (directory / 'SHA256SUMS.txt').write_text(digest+'  '+target.name+'\n'+skill_digest+'  '+skill.name+'\n',encoding='utf-8')
     with zipfile.ZipFile(target) as bundle:
         assert bundle.testzip() is None
         assert all(not any(part in SKIP_PARTS for part in Path(name).parts) for name in bundle.namelist())
         contract = json.loads(bundle.read('shixu-system/project-contract.json'))
         assert args.ci or contract['status'] == 'ready'
-    print(json.dumps({'zip': str(target), 'sha256': digest, 'files': len(files()), 'passed': True}, ensure_ascii=False))
+    print(json.dumps({'zip': str(target), 'sha256': digest, 'files': len(files()), 'skill_zip':str(directory/skill.name),'skill_sha256':skill_digest,'passed': True}, ensure_ascii=False))
 
 
 if __name__ == '__main__':
