@@ -1,0 +1,6 @@
+{
+  "passed": true,
+  "errors": [],
+  "warnings": [],
+  "scope": "结构、映射、双HTML页面、Docker及来源快照和本轮证据一致性；不替代实际运行、语义核对与浏览器验收"
+}

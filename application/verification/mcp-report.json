@@ -249,7 +249,7 @@
     "delete_task",
     "restore_task"
   ],
-  "backend": "sqlite-test",
+  "backend": "mysql",
   "passed": true,
   "delivery_id": "0a31638d-1525-44f5-b7d6-1aa554f5c6cf"
 }

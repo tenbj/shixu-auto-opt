@@ -1,0 +1,27 @@
+{
+  "passed": true,
+  "environment": "isolated_docker_mysql",
+  "source_commit": "180e63a715b6eebed28cae61bae1a72e650ee787",
+  "actor": "root independent reviewer",
+  "task_selection": "Discovered 29 live tools, selected connection identity check and Docker synthetic issue search/detail read-back based on live tool descriptions",
+  "tools": [
+    "get_connection_context",
+    "list_issues",
+    "get_issue"
+  ],
+  "interface_version": "3.2.0",
+  "skill_loaded_claim": false,
+  "issue_id": "091c40f3-d249-40e5-a550-3a06ed592cbd",
+  "issue_number": 1,
+  "issue_status": "待梳理",
+  "list_revision": 31,
+  "detail_revision": 31,
+  "detail_matches_search": true,
+  "business_writes": 0,
+  "connection_verification_record_updated": true,
+  "production_touched": false,
+  "delivery_id": "0a31638d-1525-44f5-b7d6-1aa554f5c6cf",
+  "run_id": "h02test-shixu-32b356ff",
+  "image": "sha256:10e16b65e10e06187248b97d4ecfba590adfa264f2daaf70fd0436af9b8d107d",
+  "scope": "Independent AI reviewer discovered live MCP tool descriptions, selected a read-only task and verified identity, synthetic issue search/detail; no Skill installation claimed"
+}

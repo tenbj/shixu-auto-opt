@@ -1,7 +1,7 @@
 {
   "schema_version": "1.2",
   "project_name": "拾序系统",
-  "status": "draft",
+  "status": "ready",
   "prototype": {
     "path": "../prototype-accounts/prototype.html（原始源；分发快照已脱敏）",
     "sha256": "1e69489fb4fce7eebf3f956ae6c3a7bcd43dca49739786af0bce778b5624fd40",
@@ -409,7 +409,7 @@
     {
       "name": "browser",
       "required": true,
-      "status": "not_run",
+      "status": "passed",
       "evidence": "verification/browser-report.json"
     },
     {
@@ -433,7 +433,7 @@
     {
       "name": "trash_browser",
       "required": true,
-      "status": "not_run",
+      "status": "passed",
       "evidence": "verification/trash-browser-report.json"
     },
     {
@@ -463,7 +463,7 @@
     {
       "name": "accounts",
       "required": true,
-      "status": "not_run",
+      "status": "passed",
       "evidence": "verification/account-browser-report.json"
     },
     {
@@ -499,19 +499,24 @@
     {
       "name": "docker",
       "required": true,
-      "status": "not_run",
-      "evidence": ""
+      "status": "passed",
+      "evidence": "verification/docker-report.json"
     },
     {
       "name": "ai_task",
-      "status": "not_run",
-      "evidence": "",
+      "status": "passed",
+      "evidence": "verification/ai-task-report.json",
       "reason": "独立AI任务证据与固定SDK序列分别核对"
     },
     {
+      "name": "mysql",
+      "status": "passed",
+      "evidence": "verification/mysql-report.json"
+    },
+    {
       "name": "retention_mysql",
-      "status": "not_run",
-      "evidence": ""
+      "status": "passed",
+      "evidence": "verification/retention-report.json"
     }
   ],
   "limits": [

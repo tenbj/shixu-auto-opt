@@ -6,13 +6,19 @@
   "integration_backend": "sqlite-test",
   "mysql_checks": 0,
   "persistence": "passed",
-  "ai_autonomous": "not_run",
+  "ai_autonomous": "passed: independent Docker MCP read-only task; no Skill installation",
   "environment": {
     "os": "win32",
     "python": "3.11.7"
   },
-  "scope": "单机SQLite隔离服务；本轮单元93项（业务90、Docker资源保护3）；Docker/MySQL验收单独记录，当前尚未完成；未做AI自主任务验收",
+  "scope": "Full isolated SQLite suite: 96 pytest (90 application/Skill, 6 runner guards), API, real stdio/HTTP MCP, all browser groups and process restart persistence. Test-boundary correction subsequently passed 12 targeted account/runner tests. Final Docker evidence is separately recorded as segmented acceptance.",
   "delivery_id": "0a31638d-1525-44f5-b7d6-1aa554f5c6cf",
-  "pytest_tests": 93,
-  "docker_inventory_tests": 3
+  "pytest_tests": 96,
+  "docker_inventory_tests": 6,
+  "docker_evidence": "verification/docker-report.json",
+  "targeted_after_boundary_fix": {
+    "passed": true,
+    "tests": 12,
+    "source_commit": "745142f4e14eb6115dde7db6bf4a456ced9b317f"
+  }
 }

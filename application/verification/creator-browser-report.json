@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "backend": "sqlite-test",
+  "backend": "mysql",
   "checks": [
     {
       "viewport": 1440,

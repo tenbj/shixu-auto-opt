@@ -1,77 +1,27 @@
 {
-  "status": "awaiting_user_docker_recovery",
-  "recorded_at": "2026-10-13T14:07:57.743530+00:00",
+  "status": "verified_for_release_packaging",
+  "recorded_at": "2026-10-13T15:57:09.277728+00:00",
   "delivery_id": "0a31638d-1525-44f5-b7d6-1aa554f5c6cf",
   "version": "3.2.1",
-  "release_ready": false,
+  "contract_status": "ready",
+  "docker_passed": true,
+  "docker_execution": "segmented",
+  "docker_evidence": "verification/docker-report.json",
+  "complete_run": "h02test-shixu-32b356ff (original passed=false retained; 11 accepted stages)",
+  "supplementary_run": "h02test-shixu-e51f2ff6",
+  "application_image": "sha256:10e16b65e10e06187248b97d4ecfba590adfa264f2daaf70fd0436af9b8d107d",
+  "application_input_count": 89,
+  "supplementary_test_input_count": 36,
+  "offline_pytest_before_test_correction": 96,
+  "targeted_after_test_correction": 12,
+  "ai_task": "Independent tool discovery/selection/read-back passed; Skill installation not claimed",
   "production_deployed": false,
-  "completed": {
-    "pytest": {
-      "passed": true,
-      "total": 93,
-      "business": 90,
-      "resource_inventory": 3,
-      "evidence": "verification/pytest.xml"
-    },
-    "sqlite_api_mcp_ui_persistence": {
-      "passed": true,
-      "evidence": "verification/summary.json"
-    },
-    "dual_transport": {
-      "passed": true,
-      "evidence": "verification/dual-transport-report.json",
-      "scope": "isolated HTTP/temporary TLS HTTPS; no public deployment claim"
-    },
-    "diagrams": {
-      "passed": true,
-      "tables": 20,
-      "physical_foreign_keys": 6,
-      "evidence": "verification/diagrams/report.json",
-      "current_live_schema_check": false
-    },
-    "line_endings": {
-      "passed": true,
-      "inputs": 89,
-      "evidence": "verification/line-ending-report.json"
-    },
-    "portable_candidate": {
-      "passed": true,
-      "evidence": "verification/portable-report.json",
-      "final_release_asset": false
-    }
+  "remote_published": false,
+  "owned_test_resources_remaining": {
+    "containers": 0,
+    "volumes": 0,
+    "networks": 0
   },
-  "docker_attempt": {
-    "passed": false,
-    "run_id": "h02test-shixu-f178ae63",
-    "evidence": "verification/docker/h02test-shixu-f178ae63.json",
-    "private_diagnostics": "runtime/h02test-shixu-f178ae63",
-    "completed_stages": [
-      "compose_config",
-      "build",
-      "startup",
-      "auth",
-      "mcp"
-    ],
-    "failure": "onboarding MCP initialize timed out; later Docker CLI reported Docker Desktop unable to start; engine-wide cause under host investigation",
-    "limits": [
-      "First attempt predates final version labels and LF normalization; cannot validate final source/image.",
-      "Exact-label resource inventory is separate evidence; original runner used broader name exclusion.",
-      "Owned failed-run resources intentionally retained; present engine state not queried after user requested no Docker calls."
-    ]
-  },
-  "resume_plan": [
-    "Wait for user confirmation that Docker recovery is complete; then parent verifies original production services.",
-    "Run both project Docker acceptances serially. Before new Shixu run inspect and record exact existing container ownership/state.",
-    "After preserving failed diagnostics, remove only h02test-shixu-f178ae63 containers/volumes via its private compose configuration; no global prune or restart.",
-    "Run python tests/docker_check.py to create a fresh unique isolated project and build final source. Supply --peer-project only if an explicitly identified concurrent peer must be excluded.",
-    "While that owned MySQL is available, run python tests/diagrams_check.py --live-schema with only its isolated DB environment.",
-    "Complete all Docker stages, compare protected original resources, run normal build_release.py and both project/H02 validators; require ready and fresh matching image/source evidence.",
-    "Scan every new reachable commit/blob and final ZIP entries; commit final evidence, then parent reviews push/PR merge/tag/Release."
-  ],
-  "asset_gaps": [
-    "Current dist system ZIP is a draft CI candidate and predates final LF-checker source. Do not publish.",
-    "Final system ZIP and SHA256SUMS must be regenerated after complete Docker acceptance.",
-    "Independent Skill 1.5.0 was verified unchanged; SHA256 a08e5868b1de22a92bc7e125df7c17275b198a290b08405c0a1cb7771f8b1295."
-  ],
-  "safety": "No production data changed, no production deployment, no remote push/tag/release, original worktrees preserved."
+  "next_action": "Complete normal package generation and final blob/asset privacy review; parent handles GitHub publication and separately authorized production deployment",
+  "detail": "verification/验收索引.md"
 }

@@ -1,0 +1,87 @@
+{
+  "passed": true,
+  "table_count": 20,
+  "tables": {
+    "access_metadata": {
+      "count": 11,
+      "sha256": "e7da9556c60e711fff76d6d0f0a68117df021836a09d9576738f5e320413be46"
+    },
+    "account_access": {
+      "count": 11,
+      "sha256": "35f732f3f329e0b4c9157bfa62184dfd8c1b9068f9ef5ac8e08746b952694825"
+    },
+    "account_login_limits": {
+      "count": 8,
+      "sha256": "169774b888fd0c8b4b08d0d47393c8a34e0457426e6beafae5900b2cc45cc39e"
+    },
+    "account_sessions": {
+      "count": 30,
+      "sha256": "1ab342518d8bd2cbadb2f5e77b5ac68d846b119cb05350a1876d573c7b14ee22"
+    },
+    "activity": {
+      "count": 131,
+      "sha256": "88deb7d303601498e3b670f3d8d64a119ee9cde3706ae869be863eb9b3e62e91"
+    },
+    "ai_tools": {
+      "count": 5,
+      "sha256": "03c7b8d9153e2c5cd43322ad9dc95cbdd668cb3e35946be264e51ff4cf784b0b"
+    },
+    "app_users": {
+      "count": 13,
+      "sha256": "90310fe40be00fdea308f5145cdf7656c887e5db0f6c796694b76a681fbd3421"
+    },
+    "idempotency_requests": {
+      "count": 131,
+      "sha256": "18858b509d145196aec51a34b3b74fad4ae16e4dd75c9def5261d02f8170e752"
+    },
+    "identity_profiles": {
+      "count": 25,
+      "sha256": "ce2e600b20cca00199ab0258a14e96107c7b9aac33e4d529d568ea877f523a35"
+    },
+    "issue_followups": {
+      "count": 3,
+      "sha256": "56c478ab1c1432a4d0d8bd902dc00fa3e97cbad94b960b490a9d78d908dcaf67"
+    },
+    "issue_history": {
+      "count": 19,
+      "sha256": "9dd59a5ce33d3683e8607b895678317a319fd45cc2212a1809e5c50cada79672"
+    },
+    "issue_logs": {
+      "count": 119,
+      "sha256": "48fc19abdd7a7f8fdf93b6b9e859fe477b74783f3ab222e6b2cbe3c49c95a3fd"
+    },
+    "issues": {
+      "count": 29,
+      "sha256": "a906aa475dd774731517cd3ae901c65f20c24f619db072b68650664f9012c68d"
+    },
+    "oauth_clients": {
+      "count": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "oauth_codes": {
+      "count": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "oauth_pending": {
+      "count": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "oauth_refresh_tokens": {
+      "count": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "task_dependencies": {
+      "count": 3,
+      "sha256": "52fce2d5124532a72fdee012c647e1f25af5e054c0717c782792ab03fbd06f8e"
+    },
+    "tasks": {
+      "count": 19,
+      "sha256": "cf1be93ee843eae891873844daed9fff30ed9927a273e78d9930e002269a05b5"
+    },
+    "workspace_meta": {
+      "count": 13,
+      "sha256": "ddfb4c30937088010b428a81f5a684db936161f42816e0517cb30f445184a862"
+    }
+  },
+  "scope": "All column values, all rows; deterministic sorted JSON digest; same isolated instance, distinct database"
+}

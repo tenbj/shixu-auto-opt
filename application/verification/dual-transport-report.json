@@ -5,12 +5,18 @@
     {
       "scheme": "http",
       "passed": true,
-      "scope": "Non-loopback browser origin; register/login session, mobile tabs, generated URL, 29 MCP tools, create/read, revoke, logout and Cookie attributes"
+      "scope": "Non-loopback browser origin; register/login session, mobile tabs, generated URL, 29 MCP tools, create/read, revoke, logout, Cookie attributes, and delayed real ME response preserves registration draft"
     },
     {
       "scheme": "https",
       "passed": true,
-      "scope": "Non-loopback browser origin; register/login session, mobile tabs, generated URL, 29 MCP tools, create/read, revoke, logout and Cookie attributes"
+      "scope": "Non-loopback browser origin; register/login session, mobile tabs, generated URL, 29 MCP tools, create/read, revoke, logout, Cookie attributes, and delayed real ME response preserves registration draft"
+    },
+    {
+      "scheme": "http+https",
+      "passed": true,
+      "same_browser_context": true,
+      "scope": "Both origins stay on original scheme; UI registration and explicit login; session-authenticated business create/read; cross-account 404; each logout preserves the other scheme session; login restores own data"
     }
   ],
   "browser_errors": [],

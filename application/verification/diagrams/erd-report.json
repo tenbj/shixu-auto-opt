@@ -35,5 +35,12 @@
   "source_consistent": true,
   "details": "verification/diagrams/report.json",
   "scope": "真实浏览器离线几何与交互；源码、DDL、迁移、元数据核对",
-  "live_schema": null
+  "live_schema": {
+    "status": "pass",
+    "tables": 20,
+    "columns": 153,
+    "foreign_keys": 6,
+    "business_rows_read": 0,
+    "writes": 0
+  }
 }

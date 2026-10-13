@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "tests": 6,
+  "suite": "tests/test_docker_inventory.py",
+  "command": "python -m pytest tests/test_docker_inventory.py -q",
+  "scope": "Exact Compose ownership inventory, interrupt command reap, owned cleanup label readback, original exception preservation",
+  "source_sha256": "b452b407d510857d17cfe86bcbda72a95fa37afa4d645827e0d0b075eb948153",
+  "delivery_id": "0a31638d-1525-44f5-b7d6-1aa554f5c6cf"
+}

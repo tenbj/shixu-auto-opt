@@ -1,0 +1,1263 @@
+{
+  "passed": true,
+  "environment": "isolated",
+  "run_id": "h02test-shixu-e51f2ff6",
+  "compose_project": "h02test-shixu-e51f2ff6",
+  "mcp_mode": "embedded",
+  "delivery_id": "0a31638d-1525-44f5-b7d6-1aa554f5c6cf",
+  "started_at": "2026-10-13T15:51:30.637239+00:00",
+  "checks": [
+    {
+      "name": "compose_config",
+      "status": "passed",
+      "observations": [
+        "Test composition parsed without exposing interpolated secrets"
+      ],
+      "source_run": "h02test-shixu-32b356ff",
+      "source_evidence": "verification/docker/h02test-shixu-32b356ff.json"
+    },
+    {
+      "name": "build",
+      "status": "passed",
+      "observations": [
+        "Current Dockerfile build completed in this invocation; cache allowed; pip check and application import in Dockerfile; actual image ID recorded",
+        "No production environment or private files in COPY allowlist"
+      ],
+      "source_run": "h02test-shixu-32b356ff",
+      "source_evidence": "verification/docker/h02test-shixu-32b356ff.json"
+    },
+    {
+      "name": "startup",
+      "status": "passed",
+      "observations": [
+        "Cold isolated MySQL initialized with application identity; non-root application healthy",
+        "http://127.0.0.1:56812"
+      ],
+      "source_run": "h02test-shixu-32b356ff",
+      "source_evidence": "verification/docker/h02test-shixu-32b356ff.json"
+    },
+    {
+      "name": "auth",
+      "status": "passed",
+      "observations": [
+        "Missing/invalid credentials 401; read token cannot write (403); valid authenticated account access"
+      ],
+      "source_run": "h02test-shixu-32b356ff",
+      "source_evidence": "verification/docker/h02test-shixu-32b356ff.json"
+    },
+    {
+      "name": "mcp",
+      "status": "passed",
+      "observations": [
+        "Real MCP SDK initialize, 29 tools, authenticated read/write/readback; report verification/docker/mcp-report.json"
+      ],
+      "source_run": "h02test-shixu-32b356ff",
+      "source_evidence": "verification/docker/h02test-shixu-32b356ff.json"
+    },
+    {
+      "name": "api",
+      "status": "passed",
+      "observations": [
+        "Real API create/readback and Docker-entry browser business, accounts, trash, onboarding, creator workflows passed",
+        "Existing account isolation and OAuth tests executed through Docker entry"
+      ],
+      "source_run": "h02test-shixu-32b356ff",
+      "source_evidence": "verification/docker/h02test-shixu-32b356ff.json"
+    },
+    {
+      "name": "diagrams",
+      "status": "passed",
+      "observations": [
+        "Actual isolated MySQL metadata verified (20 tables, 6 physical foreign keys)",
+        "Both original HTML routes match current local bytes; independent offline geometry/browser reports accompany them"
+      ],
+      "source_run": "h02test-shixu-32b356ff",
+      "source_evidence": "verification/docker/h02test-shixu-32b356ff.json"
+    },
+    {
+      "name": "recreate",
+      "status": "passed",
+      "observations": [
+        "App and MySQL containers recreated against original named volumes; authenticated full workspace preserved"
+      ],
+      "source_run": "h02test-shixu-32b356ff",
+      "source_evidence": "verification/docker/h02test-shixu-32b356ff.json"
+    },
+    {
+      "name": "rollback",
+      "status": "passed",
+      "observations": [
+        "Explicit previous Docker image restored; unchanged schema and full workspace compatible"
+      ],
+      "source_run": "h02test-shixu-32b356ff",
+      "source_evidence": "verification/docker/h02test-shixu-32b356ff.json"
+    },
+    {
+      "name": "upgrade",
+      "status": "passed",
+      "observations": [
+        "Switched known formal baseline image to new Docker artifact; complete workspace retained; no schema migration"
+      ],
+      "source_run": "h02test-shixu-32b356ff",
+      "source_evidence": "verification/docker/h02test-shixu-32b356ff.json"
+    },
+    {
+      "name": "backup_restore",
+      "status": "passed",
+      "observations": [
+        "Consistent logical dump restored into distinct empty database; all 20 tables row content/count hashes equal",
+        "Same isolated instance, distinct database; verification/docker/restore-content-report.json"
+      ],
+      "source_run": "h02test-shixu-32b356ff",
+      "source_evidence": "verification/docker/h02test-shixu-32b356ff.json"
+    },
+    {
+      "name": "failure_recovery",
+      "status": "passed",
+      "source_run": "h02test-shixu-e51f2ff6",
+      "source_evidence": "verification/docker/h02test-shixu-e51f2ff6-recovery.json",
+      "observations": [
+        "Database stopped: health/session/PAT 503; missing credentials correctly 401 without DB lookup; database restored and complete session/PAT workspace retained without app restart"
+      ]
+    },
+    {
+      "name": "secrets",
+      "status": "passed",
+      "observations": [
+        "All 337709179 decompressed image bytes and metadata scanned; isolated credential values absent; explicit COPY whitelist excludes runtime/private env"
+      ],
+      "source_run": "h02test-shixu-e51f2ff6",
+      "source_evidence": "verification/docker/h02test-shixu-e51f2ff6-recovery.json"
+    },
+    {
+      "name": "cleanup",
+      "status": "passed",
+      "observations": [
+        "Only owned isolated project containers/volumes removed; preexisting non-test containers retained"
+      ],
+      "source_run": "h02test-shixu-e51f2ff6",
+      "source_evidence": "verification/docker/h02test-shixu-e51f2ff6-recovery.json"
+    }
+  ],
+  "url": "http://127.0.0.1:57521",
+  "images": [
+    {
+      "service": "app",
+      "id": "sha256:10e16b65e10e06187248b97d4ecfba590adfa264f2daaf70fd0436af9b8d107d"
+    }
+  ],
+  "baseline_image": "sha256:90c1bebc5d84fb7114b9303e21a47069c1162bef9f14787b76e362975e3439c0",
+  "inputs": [
+    {
+      "path": ".dockerignore",
+      "sha256": "7b9cd8277b345a702be1d6e825a7c571d9c253fb6a8df3d79982c11306c85fa1"
+    },
+    {
+      "path": ".env.docker.example",
+      "sha256": "fad7ff133a8b03e6118fe45ff9415cf3a18a611de10ba57029405488b9975fa7"
+    },
+    {
+      "path": "Dockerfile",
+      "sha256": "d962e0684040c19ac6f17b46b0d8e0c1735b6cae5c2c88950ab210aaa13dc2b2"
+    },
+    {
+      "path": "app/__init__.py",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "app/account_api.py",
+      "sha256": "2c1495c0019847b6479bb49a913011da65350d093d155de1f5ef2ef43b8a86d2"
+    },
+    {
+      "path": "app/account_context.py",
+      "sha256": "210982f27d89f4fe2513a66bd5b4f2a06974c670daad96d9e2f0db7911b3c35e"
+    },
+    {
+      "path": "app/account_store.py",
+      "sha256": "d01f422d6ed867afa640757c2a65476744e5c9c4f06190488f9f1c3127f41e26"
+    },
+    {
+      "path": "app/accounts.py",
+      "sha256": "7478eaa39fbec35d52f543b25816af9c5504f305970e208df6c3ac6d4efae786"
+    },
+    {
+      "path": "app/config.py",
+      "sha256": "54438f22d2170091c95488e7bf95246bff187e6ca3ab68b97e5cd4090af347d6"
+    },
+    {
+      "path": "app/domain.py",
+      "sha256": "b4914e8d85cac6fbc7e2326105f1a3a6bc9f0fcfa94c8802e1d6cc20f7a7f937"
+    },
+    {
+      "path": "app/https_proxy.py",
+      "sha256": "a668bbcd0da418806b1cd35fe2286ff07eb481d8184cc155993eb6f80a76b0f6"
+    },
+    {
+      "path": "app/main.py",
+      "sha256": "74f8bb3567ec3e10bff1d589ee357df9943a13dd1b32a6bfeb4142108d028e1e"
+    },
+    {
+      "path": "app/mcp_access.py",
+      "sha256": "3271569fd5506dea2c8121e2b2293b439e641c3b81480ce8d8172fa33c415da9"
+    },
+    {
+      "path": "app/mcp_http.py",
+      "sha256": "69b14fce4d7cd5f0194b5ac696448ab1142397c888249809361b72e98f22c828"
+    },
+    {
+      "path": "app/models.py",
+      "sha256": "38904b9f55a940eb8e14ef131c18b7fa41da4595a498d8b78702ba3d046dc6fd"
+    },
+    {
+      "path": "app/mysql_store.py",
+      "sha256": "4dbf110d7daa6c19b8a96d9fa7614bc117923ef051b562e55a6ed8dafef74ed9"
+    },
+    {
+      "path": "app/onboarding.py",
+      "sha256": "abf2849b0f5803b59c91a2101ef0f5ad49c76acc265571e2d4d5c9e223b78c7d"
+    },
+    {
+      "path": "app/onboarding_auth.py",
+      "sha256": "9a1e13480ab2266f984a2f0fcc91d8f226d99c14ee578d1b41b03419515013f5"
+    },
+    {
+      "path": "app/store.py",
+      "sha256": "047fec7be373fc6e31f54ff5bf53358d6ac091ebc2838475c5ba02a58ee6570a"
+    },
+    {
+      "path": "compose.yaml",
+      "sha256": "b3c1d0bf0b47dd6182590bbfbc852e6d49ec2976259802464796573db1e21b9b"
+    },
+    {
+      "path": "data/demo.json",
+      "sha256": "2e62262608fd663e8e704f9c02b48d957556c9c9aad103acc475f2a6d19009c7"
+    },
+    {
+      "path": "data/mysql-schema.sql",
+      "sha256": "26151e441fb8c79e153cc99efb676a55bc3a602bfa8f0e6eca9a1829ae522d14"
+    },
+    {
+      "path": "docs/AI快速接入.md",
+      "sha256": "1895ae88a2e45d15653a60c7866a40cb75681104f97b1f04cbeb8d984b6abba0"
+    },
+    {
+      "path": "docs/AI接入与调用指南.md",
+      "sha256": "6a89762bb0c28b95bd6765cc2f3178bdbcad39a66dc6d17d8ceab41f4abe294a"
+    },
+    {
+      "path": "docs/API中文说明.html",
+      "sha256": "3289e49787a4426218b2f53295d6717ee35299f79b33262931f18b0f3c1991ef"
+    },
+    {
+      "path": "docs/API中文说明.md",
+      "sha256": "f82be0a833fb4cab7c2de30db0d31d288a2c3656872d201eb28acebfc2a89a6d"
+    },
+    {
+      "path": "docs/Docker部署.md",
+      "sha256": "5cd119be0eb50fd9887ef825d07b1ef0644a3bee3784dd90f84431b76ba75695"
+    },
+    {
+      "path": "docs/MCP工具目录.json",
+      "sha256": "33b13f335713c2d3c474a1889efc6e63600fe41c2990c6eba3b3f2cb0d4088d6"
+    },
+    {
+      "path": "docs/MCP远程接入.md",
+      "sha256": "0c69f6726353acadeab505b88edae8bf8f323338ae9a5010e6ba714c22ee6bf7"
+    },
+    {
+      "path": "docs/MySQL部署说明.md",
+      "sha256": "90257120ade548f4b5c0da21cdf78c84be13f2d2eac5d7c8551730647bb54d74"
+    },
+    {
+      "path": "docs/connect/claude.md",
+      "sha256": "e3d7be5d0825e8eb0d6e1e7649a5d32e99894f35f663f241e814408d6e4e46df"
+    },
+    {
+      "path": "docs/connect/codex.md",
+      "sha256": "d119b002053d166a365d27cb053d8211c6288d0880c16f6ce49a7f560ef46964"
+    },
+    {
+      "path": "docs/connect/guide.md",
+      "sha256": "dc005f9992039d8af98a0ea92711ff28230eeb9b3de6fb018e909eb8da4e2383"
+    },
+    {
+      "path": "docs/connect/other.md",
+      "sha256": "0ea94bf1ad70387d768b8ff078abe27f16aa97a8d4a8c68c4af3f73be8b0fcd1"
+    },
+    {
+      "path": "docs/connect/runtimes.json",
+      "sha256": "6ecfbf5c7709a8f95b5443c7dcb252ed88acf6e8ac4fad1eea8cc8323ed8706d"
+    },
+    {
+      "path": "docs/connect/updates.md",
+      "sha256": "48605fc2f5550557d9b036a95de5d5d32219c3fb676630c6ed1702d6ad0cad5e"
+    },
+    {
+      "path": "docs/connect/workbuddy.md",
+      "sha256": "5e39253e8a4276ccb5c5248202baa1b0eb3e73ff39eae95b458377ace9fdc74b"
+    },
+    {
+      "path": "docs/openapi.json",
+      "sha256": "0154ac950645d369c36de91467805d85fa94bf1d43bf1eb9b0d25d3d4b9220ba"
+    },
+    {
+      "path": "docs/发布来源与结构.md",
+      "sha256": "e437e67eea097bb1b06d96185c5eedcf6af0f1f7312b31414573b31f9c6969cc"
+    },
+    {
+      "path": "docs/账号与远程接入.md",
+      "sha256": "738172b47615479fcad922a02d1cc4763b1452a70f27d13027f92d8a73aadd95"
+    },
+    {
+      "path": "docs/需求与能力映射.md",
+      "sha256": "535f65067492c11c2a5c08a70e2d2134d3cca3925890ba0bf50ad0ebccc84b65"
+    },
+    {
+      "path": "downloads/shixu-issues-1.4.0.zip",
+      "sha256": "5260a3cc1bd116109ef1debae1bb0e01db5e58e5bbf548c269977c9d8ce4a4b4"
+    },
+    {
+      "path": "downloads/shixu-issues-1.5.0.zip",
+      "sha256": "a08e5868b1de22a92bc7e125df7c17275b198a290b08405c0a1cb7771f8b1295"
+    },
+    {
+      "path": "downloads/skill-manifest.json",
+      "sha256": "ee1efa25538b976e47ca9756f15958367e2b080c0582b05a991ac9f2a8f1feb6"
+    },
+    {
+      "path": "examples/api_client.py",
+      "sha256": "43970a6d6d21b645cdcd8d528ee4e4e9c7739599aedeee65a9a5c2150187e9c7"
+    },
+    {
+      "path": "examples/creator_client.py",
+      "sha256": "1f949caa14942d99ccbe71a616b1e02e032243881b2c9667acf066e4030ddfdf"
+    },
+    {
+      "path": "examples/http_mcp_client.py",
+      "sha256": "83e0ad0fed158b7d257cfdd4717b1e8a54341617912ed882e2657c72cfada359"
+    },
+    {
+      "path": "examples/index.html",
+      "sha256": "264c851f011fcbb4440cfec98ee145068426ab01111b3ef36d404003d5ce64b2"
+    },
+    {
+      "path": "examples/mcp_client.py",
+      "sha256": "e5164650c5ec27b5335955a30e94d4761057c0ecc55d6509f21057ff3ee89592"
+    },
+    {
+      "path": "examples/tools_client.py",
+      "sha256": "381647b34d605bbfe3b36f3ff5ee582f68490ce34b0f752011dd6f8183b385d2"
+    },
+    {
+      "path": "mcp_server.py",
+      "sha256": "9b5c24e4ce71d032abf6687eb786fd6344569ba61196d9607a523d8901c4f145"
+    },
+    {
+      "path": "requirements-lock.txt",
+      "sha256": "43b28be074ab9973ee3b5785b96cffab37fb43a3c7821c1e6cd83b082b021377"
+    },
+    {
+      "path": "scripts/account_frontend.py",
+      "sha256": "16b08bd3a1dca795ba029da6a123056f35694531e0dadd834f9d71a4253fdf41"
+    },
+    {
+      "path": "scripts/architecture-template.html",
+      "sha256": "303b61732ce2e078a5b10c17266ce1e80d47f38e56fce1ce92d25f4fc2b49bc3"
+    },
+    {
+      "path": "scripts/audit_release.py",
+      "sha256": "fd88911ba55edac10d75036b6090d1b4463add6438c562e0b8cfba75a51e17c6"
+    },
+    {
+      "path": "scripts/build_frontend.py",
+      "sha256": "c852001f1f39a55fe78bbcf863426505685dcf9e450b4d532848790cc20a3908"
+    },
+    {
+      "path": "scripts/build_release.py",
+      "sha256": "bfcd7e4e228496f43e8980198495475f89da768a4de4ededfeb821e5551c006c"
+    },
+    {
+      "path": "scripts/build_skill.py",
+      "sha256": "4a42da837bd5e65d2eee0b5338442acc374c61caedb2358f59c3663ffe386887"
+    },
+    {
+      "path": "scripts/configure_mcp.py",
+      "sha256": "9449cd0c3a5f7883a5936594339ed66909c9016ec32c7ea9e09c11861a14d1fe"
+    },
+    {
+      "path": "scripts/creator_frontend.py",
+      "sha256": "df616b602918f1211870d230eb4e2d1032b10eacc174eb3f7c925a37aa88a875"
+    },
+    {
+      "path": "scripts/docker_contract.py",
+      "sha256": "b979fa9a54e6f2ef71cf5adaf099be20e3bb575600d5d2dd18ebe7968c484ddf"
+    },
+    {
+      "path": "scripts/erd-template.html",
+      "sha256": "54e7131d99fbb494922f1df16b7322f81fd2ec04712088e393ef32df0ce48b5d"
+    },
+    {
+      "path": "scripts/generate_diagrams.py",
+      "sha256": "471e0b84c3ecfc0a1bad0f07f60c92e9fb9163d9988a4f0cdcb70f8489764155"
+    },
+    {
+      "path": "scripts/generate_docs.py",
+      "sha256": "49e4cc62cb6edb93301cf9257dd71cde030f5c7415cba5495607ebd1aa72283b"
+    },
+    {
+      "path": "scripts/init_mysql.py",
+      "sha256": "f9ecadf6b66c42ce89d317771ea7cde3b8ae87204bbd8d6239cd9d6c8bcf0d7e"
+    },
+    {
+      "path": "scripts/mcp_access.py",
+      "sha256": "b9cbcc613282e3b094cc7bae2f5a40481ccba518c8a976588069616552d87400"
+    },
+    {
+      "path": "scripts/migrate_accounts.py",
+      "sha256": "10ed677317ef9f513589816ec49747f9096f904bc47184f876d5f066e2bcda9d"
+    },
+    {
+      "path": "scripts/migrate_creators.py",
+      "sha256": "d86a3d8ef0eed814541e8e607aaf8e72cfe952593c9a3fa562a7ed075fd8e3e6"
+    },
+    {
+      "path": "scripts/migrate_custom_tools.py",
+      "sha256": "7a7c1d6bb974e2e5cd69afd09773358682bb6a8f9a12a949bfb49796b532d371"
+    },
+    {
+      "path": "scripts/migrate_onboarding.py",
+      "sha256": "9366f98ffb4086d5701ab0a2f067c63443beca4e7f5316715b0d2d59ef285ef9"
+    },
+    {
+      "path": "scripts/migrate_sqlite_to_mysql.py",
+      "sha256": "dff2afcf689c4183a952c4e9b47664a86ceb0bea79649cdb710a907705f3f67b"
+    },
+    {
+      "path": "scripts/migrate_trash.py",
+      "sha256": "b16085a3e570365acf88e1a780cffa15fd1adce2993e49d4ff4e169f6232ccde"
+    },
+    {
+      "path": "scripts/process_tools.py",
+      "sha256": "04f15bc2941dd235fca1d03516a72470081fb3b64420c06c911c9adb4aa29fc4"
+    },
+    {
+      "path": "scripts/seed_demo.py",
+      "sha256": "6bdea5a71549c988fdcb81996a6ed59ee8bb30a5219fafe2c4e64f1f81029ec8"
+    },
+    {
+      "path": "scripts/service.py",
+      "sha256": "e88a571a7f3011d3d97983af9c88d40721d9dc8b75cb29ad3c4152d28ad480b0"
+    },
+    {
+      "path": "scripts/validate_project.py",
+      "sha256": "7a854e42b5204c83954ee01a2626d917e8e47872f8db31cf250e7fcfe4930128"
+    },
+    {
+      "path": "skills/shixu-issues/SKILL.md",
+      "sha256": "4d025a7865c27d3521f9bcd40a96f84d31bbc44b3b1c71a7ceef9ed22bedd037"
+    },
+    {
+      "path": "skills/shixu-issues/VERSION",
+      "sha256": "acb57a7135b2d7d6e665f67f056e21353023b93835f54def1ae523bf76f1bfb3"
+    },
+    {
+      "path": "skills/shixu-issues/references/创建身份与模型规则.md",
+      "sha256": "15a8a5cfca67ba35754d89f587ec21f400df201111be64b113b08c2795624256"
+    },
+    {
+      "path": "skills/shixu-issues/references/录入与分类规则.md",
+      "sha256": "03887c91da34095b2f84aec79b8d7583e9e6162a46030b00287235e292b416f0"
+    },
+    {
+      "path": "skills/shixu-issues/references/更新接入.md",
+      "sha256": "48605fc2f5550557d9b036a95de5d5d32219c3fb676630c6ed1702d6ad0cad5e"
+    },
+    {
+      "path": "skills/shixu-issues/scripts/update.py",
+      "sha256": "d26159caaa9464b3df8af1aa69608d48c4f3ea4cb21a87c86fa8907dc48aeba2"
+    },
+    {
+      "path": "static/accounts-api.js",
+      "sha256": "1846208568aa495ede228e9e07a3c98fe791c2c6bc6150d4a9b5428ce883cef4"
+    },
+    {
+      "path": "static/ai-access-api.js",
+      "sha256": "a82ed52a10b96c48a914e238d27b7a42afbba07b0367ddf287bd60843bd8dc76"
+    },
+    {
+      "path": "static/ai-access.css",
+      "sha256": "25913def889c1923cdfe75f575f82a000a76d619c92617491c14aa306a8e2c60"
+    },
+    {
+      "path": "static/connect.html",
+      "sha256": "be3fce7a5ddffd5c6c632663d6808ca7998dce90a3ad7b283812e2455118cbb4"
+    },
+    {
+      "path": "static/diagrams/architecture.html",
+      "sha256": "303b61732ce2e078a5b10c17266ce1e80d47f38e56fce1ce92d25f4fc2b49bc3"
+    },
+    {
+      "path": "static/diagrams/erd.html",
+      "sha256": "435588d34baf0556da54edde4de75cce46c52c81e03c383a9d9c3fd31442eb84"
+    },
+    {
+      "path": "static/index.html",
+      "sha256": "4f48f4ee153a3805d92ff596449c21c4009a08eb13a6f61c2c825ccb508f2b8a"
+    }
+  ],
+  "test_inputs": [
+    {
+      "path": "tests/README.md",
+      "sha256": "1ef71cae41b6f70c051531c13e1beb9a6237df3f1938a45560d909efdee20fa4"
+    },
+    {
+      "path": "tests/account_browser_check.py",
+      "sha256": "ab16433bacd77c5e2bf7bdb8697434d2f9594164886b056b86f2cd3ba2fa2fa2"
+    },
+    {
+      "path": "tests/account_mcp_check.py",
+      "sha256": "3ed17b66f29d7b00445e8e78d0e9cc6cc43492cdc464c9d3615d33049462eebf"
+    },
+    {
+      "path": "tests/auth_client.py",
+      "sha256": "be41a8d71d2d9108173fdaa64fbf2796023781cdc251aa87d3bb605b6ef9b32d"
+    },
+    {
+      "path": "tests/browser_check.py",
+      "sha256": "26fbc2a5759dd8f2a4844b90857a07a8009a1744c0fe68476ccde56e08f0f977"
+    },
+    {
+      "path": "tests/checkout_check.py",
+      "sha256": "e395fb231a01a22532eb43d447423d4a0e1152cca011b5feecfc77fbe032153c"
+    },
+    {
+      "path": "tests/codex_config_check.py",
+      "sha256": "0b1bb9c6b8696f37f0c1dadd8d677d6a3515c7a1788fabaf562ba078732a36cd"
+    },
+    {
+      "path": "tests/compare_databases.py",
+      "sha256": "03703d29ac38332bdb6dc384148a1820afd0fc4a73387b9f109826f083b22526"
+    },
+    {
+      "path": "tests/conftest.py",
+      "sha256": "a536e7a00c486b47e766f424dccb731b648874a34148d06349375f0c8d86e68f"
+    },
+    {
+      "path": "tests/creator_browser_check.py",
+      "sha256": "ea5a347643aa8e5ffec395a6366b156c11f8eed2394ca6b0564bd123e513e577"
+    },
+    {
+      "path": "tests/diagrams_check.py",
+      "sha256": "745f2459ae645dba88351ab8dba6fc955ef094c3551ebf40f445c29e4d41ef09"
+    },
+    {
+      "path": "tests/docker_check.py",
+      "sha256": "31acc51dbd089dcfc501f3f60fb537a68fbeb32bee308bca481e4ee9a27c5668"
+    },
+    {
+      "path": "tests/docker_recovery_check.py",
+      "sha256": "cbc91e909e8a68b14ab0490aaed670d79a529b1b0ae5628e8ac57bef81351f96"
+    },
+    {
+      "path": "tests/dual_transport_check.py",
+      "sha256": "0ba8152c6dc9684faef18aa7b2cfd79a828fec5eff418cac63f252a3e27ec81b"
+    },
+    {
+      "path": "tests/http_auth.py",
+      "sha256": "cfb29152b21f702e0c762ed30dd259d429a70666df7e649957f50d931369bb36"
+    },
+    {
+      "path": "tests/lan_check.py",
+      "sha256": "51f4e59b96133a7fe85033ecc64453c0bbf88f9922fc01ee1b031fbe98e484af"
+    },
+    {
+      "path": "tests/mysql_check.py",
+      "sha256": "6f89b22db2280da22de8e4dd73baefeb1055d7e6a00b8089a3910f1abfe905a5"
+    },
+    {
+      "path": "tests/onboarding_check.py",
+      "sha256": "4ae9ff938fee6592a22f3bcae1f6b86871266f48f46b1d93e3ad438afb0b4884"
+    },
+    {
+      "path": "tests/public_transport_check.py",
+      "sha256": "2c0ab99bbf1077b6873acac78997ba7f4234214898f9f7abeeafc9a2e788cb44"
+    },
+    {
+      "path": "tests/retention_mysql_check.py",
+      "sha256": "d42dd1d9b33c5f7bee3e9bdf0b87a4a1018a9a7456dad2e63d8628f719c3a4c8"
+    },
+    {
+      "path": "tests/run_suite.py",
+      "sha256": "c47f7df49892070eeb11aab33e02ccddf3168b0e38dd5a605c70515ce06af89c"
+    },
+    {
+      "path": "tests/test_accounts.py",
+      "sha256": "dee0fb938dfa25659f3a13ce802cc354fabd69d645dc8ce553e2f96f9d02e338"
+    },
+    {
+      "path": "tests/test_api.py",
+      "sha256": "34dc94c2578a4c5954de1e45ed73f2d0bc165baf84548ee87523cd99e0bec49c"
+    },
+    {
+      "path": "tests/test_creators.py",
+      "sha256": "980c88c933e46c80030618768e21aa6bda04fca8d88b6578899fff90ad64f082"
+    },
+    {
+      "path": "tests/test_custom_tools.py",
+      "sha256": "9029d4f9b785bcc9e5b16a4bd6d81f64f448ee8740639c3331554d18e5683921"
+    },
+    {
+      "path": "tests/test_docker_inventory.py",
+      "sha256": "b452b407d510857d17cfe86bcbda72a95fa37afa4d645827e0d0b075eb948153"
+    },
+    {
+      "path": "tests/test_http_access.py",
+      "sha256": "b96571094f6a3ed809a3aadf102e7dd02557b7fc2c2abe121cc78b716674ab30"
+    },
+    {
+      "path": "tests/test_https_proxy.py",
+      "sha256": "74216a8858720c003512d596a97c948c148431e651107a88c3d44334179487ff"
+    },
+    {
+      "path": "tests/test_mcp_http.py",
+      "sha256": "d177e76e8fa0001659b7719b8450371739cbbee6aa445b4a404538ad6b71a215"
+    },
+    {
+      "path": "tests/test_no_physical_delete.py",
+      "sha256": "4e9efabb0a6aacf347e66fa5436115811a4307cc565459145fd9704b0e5e7777"
+    },
+    {
+      "path": "tests/test_onboarding.py",
+      "sha256": "fc11229c43b24784d164b43eb26b5cec4f64f67f280c39a1d316dc78e96928ef"
+    },
+    {
+      "path": "tests/test_service_mcp.py",
+      "sha256": "0024ea5abb2bbf084a5f4196d7950988522391fa1f6bcb2b1c2d68efb4c6ea85"
+    },
+    {
+      "path": "tests/test_skill_update.py",
+      "sha256": "d0f70c5386dc3072e56f84b8e8fbbf6cee9bf6038c80700d9faa4477d87ac94b"
+    },
+    {
+      "path": "tests/test_trash.py",
+      "sha256": "96dd660b13270057688ad7bc7072f638de211025c73be3ff66ed2e95a3616f3b"
+    },
+    {
+      "path": "tests/tls_proxy.py",
+      "sha256": "e6ada15d5e08732f04031d67310120c2e2fb224fcd0c00ffd538d8945000dbc3"
+    },
+    {
+      "path": "tests/trash_browser_check.py",
+      "sha256": "8969efb913027f180b3c741e1c202db071dfa8cf8180a4e2f5e0bed95f1d2a5e"
+    }
+  ],
+  "resource_limits": {
+    "db": {
+      "memory_mib": 512,
+      "cpus": 0.75,
+      "restart": "no"
+    },
+    "app": {
+      "memory_mib": 512,
+      "cpus": 0.75,
+      "restart": "no"
+    }
+  },
+  "runner_sha256": "cbc91e909e8a68b14ab0490aaed670d79a529b1b0ae5628e8ac57bef81351f96",
+  "existing_containers": [
+    "00d453e6ea87",
+    "1f4dca65b416",
+    "23ffcf98c369",
+    "29d57c1513df",
+    "2d6a9c2631d3",
+    "3f25aa33c828",
+    "418518876f65",
+    "435d6b83e812",
+    "4644c5e09d87",
+    "5b8b52f80bb1",
+    "5e0a9c3e2fe0",
+    "5e3a764d8433",
+    "612a90d3614a",
+    "67f53a2e1ad8",
+    "9af351ce9bf4",
+    "a0080a52a657",
+    "ab22b52ad7f8",
+    "b1a1d407088d",
+    "b39136c1acf2",
+    "b68531abc3be",
+    "bf274ff5299a",
+    "d353dae7441e",
+    "d70dc2015e50",
+    "e90d8c920cc2",
+    "eae1efc58371",
+    "fa8fb534bfd9",
+    "fac77493c26d"
+  ],
+  "peer_projects": [],
+  "excluded_test_containers": [],
+  "dual_transport_evidence": "verification/docker/dual-transport-report.json",
+  "execution": "segmented",
+  "prior_segments": [
+    {
+      "run_id": "h02test-shixu-32b356ff",
+      "evidence": "verification/docker/h02test-shixu-32b356ff.json",
+      "sha256": "e2f79617f7a3d1d8924b2d5b26dde0ba498ea5720c56205928433f90e9ad82c1",
+      "passed": false,
+      "accepted_stages": [
+        "api",
+        "auth",
+        "backup_restore",
+        "build",
+        "compose_config",
+        "diagrams",
+        "mcp",
+        "recreate",
+        "rollback",
+        "startup",
+        "upgrade"
+      ],
+      "image": "sha256:10e16b65e10e06187248b97d4ecfba590adfa264f2daaf70fd0436af9b8d107d",
+      "inputs": [
+        {
+          "path": ".dockerignore",
+          "sha256": "7b9cd8277b345a702be1d6e825a7c571d9c253fb6a8df3d79982c11306c85fa1"
+        },
+        {
+          "path": ".env.docker.example",
+          "sha256": "fad7ff133a8b03e6118fe45ff9415cf3a18a611de10ba57029405488b9975fa7"
+        },
+        {
+          "path": "Dockerfile",
+          "sha256": "d962e0684040c19ac6f17b46b0d8e0c1735b6cae5c2c88950ab210aaa13dc2b2"
+        },
+        {
+          "path": "app/__init__.py",
+          "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+        },
+        {
+          "path": "app/account_api.py",
+          "sha256": "2c1495c0019847b6479bb49a913011da65350d093d155de1f5ef2ef43b8a86d2"
+        },
+        {
+          "path": "app/account_context.py",
+          "sha256": "210982f27d89f4fe2513a66bd5b4f2a06974c670daad96d9e2f0db7911b3c35e"
+        },
+        {
+          "path": "app/account_store.py",
+          "sha256": "d01f422d6ed867afa640757c2a65476744e5c9c4f06190488f9f1c3127f41e26"
+        },
+        {
+          "path": "app/accounts.py",
+          "sha256": "7478eaa39fbec35d52f543b25816af9c5504f305970e208df6c3ac6d4efae786"
+        },
+        {
+          "path": "app/config.py",
+          "sha256": "54438f22d2170091c95488e7bf95246bff187e6ca3ab68b97e5cd4090af347d6"
+        },
+        {
+          "path": "app/domain.py",
+          "sha256": "b4914e8d85cac6fbc7e2326105f1a3a6bc9f0fcfa94c8802e1d6cc20f7a7f937"
+        },
+        {
+          "path": "app/https_proxy.py",
+          "sha256": "a668bbcd0da418806b1cd35fe2286ff07eb481d8184cc155993eb6f80a76b0f6"
+        },
+        {
+          "path": "app/main.py",
+          "sha256": "74f8bb3567ec3e10bff1d589ee357df9943a13dd1b32a6bfeb4142108d028e1e"
+        },
+        {
+          "path": "app/mcp_access.py",
+          "sha256": "3271569fd5506dea2c8121e2b2293b439e641c3b81480ce8d8172fa33c415da9"
+        },
+        {
+          "path": "app/mcp_http.py",
+          "sha256": "69b14fce4d7cd5f0194b5ac696448ab1142397c888249809361b72e98f22c828"
+        },
+        {
+          "path": "app/models.py",
+          "sha256": "38904b9f55a940eb8e14ef131c18b7fa41da4595a498d8b78702ba3d046dc6fd"
+        },
+        {
+          "path": "app/mysql_store.py",
+          "sha256": "4dbf110d7daa6c19b8a96d9fa7614bc117923ef051b562e55a6ed8dafef74ed9"
+        },
+        {
+          "path": "app/onboarding.py",
+          "sha256": "abf2849b0f5803b59c91a2101ef0f5ad49c76acc265571e2d4d5c9e223b78c7d"
+        },
+        {
+          "path": "app/onboarding_auth.py",
+          "sha256": "9a1e13480ab2266f984a2f0fcc91d8f226d99c14ee578d1b41b03419515013f5"
+        },
+        {
+          "path": "app/store.py",
+          "sha256": "047fec7be373fc6e31f54ff5bf53358d6ac091ebc2838475c5ba02a58ee6570a"
+        },
+        {
+          "path": "compose.yaml",
+          "sha256": "b3c1d0bf0b47dd6182590bbfbc852e6d49ec2976259802464796573db1e21b9b"
+        },
+        {
+          "path": "data/demo.json",
+          "sha256": "2e62262608fd663e8e704f9c02b48d957556c9c9aad103acc475f2a6d19009c7"
+        },
+        {
+          "path": "data/mysql-schema.sql",
+          "sha256": "26151e441fb8c79e153cc99efb676a55bc3a602bfa8f0e6eca9a1829ae522d14"
+        },
+        {
+          "path": "docs/AI快速接入.md",
+          "sha256": "1895ae88a2e45d15653a60c7866a40cb75681104f97b1f04cbeb8d984b6abba0"
+        },
+        {
+          "path": "docs/AI接入与调用指南.md",
+          "sha256": "6a89762bb0c28b95bd6765cc2f3178bdbcad39a66dc6d17d8ceab41f4abe294a"
+        },
+        {
+          "path": "docs/API中文说明.html",
+          "sha256": "3289e49787a4426218b2f53295d6717ee35299f79b33262931f18b0f3c1991ef"
+        },
+        {
+          "path": "docs/API中文说明.md",
+          "sha256": "f82be0a833fb4cab7c2de30db0d31d288a2c3656872d201eb28acebfc2a89a6d"
+        },
+        {
+          "path": "docs/Docker部署.md",
+          "sha256": "5cd119be0eb50fd9887ef825d07b1ef0644a3bee3784dd90f84431b76ba75695"
+        },
+        {
+          "path": "docs/MCP工具目录.json",
+          "sha256": "33b13f335713c2d3c474a1889efc6e63600fe41c2990c6eba3b3f2cb0d4088d6"
+        },
+        {
+          "path": "docs/MCP远程接入.md",
+          "sha256": "0c69f6726353acadeab505b88edae8bf8f323338ae9a5010e6ba714c22ee6bf7"
+        },
+        {
+          "path": "docs/MySQL部署说明.md",
+          "sha256": "90257120ade548f4b5c0da21cdf78c84be13f2d2eac5d7c8551730647bb54d74"
+        },
+        {
+          "path": "docs/connect/claude.md",
+          "sha256": "e3d7be5d0825e8eb0d6e1e7649a5d32e99894f35f663f241e814408d6e4e46df"
+        },
+        {
+          "path": "docs/connect/codex.md",
+          "sha256": "d119b002053d166a365d27cb053d8211c6288d0880c16f6ce49a7f560ef46964"
+        },
+        {
+          "path": "docs/connect/guide.md",
+          "sha256": "dc005f9992039d8af98a0ea92711ff28230eeb9b3de6fb018e909eb8da4e2383"
+        },
+        {
+          "path": "docs/connect/other.md",
+          "sha256": "0ea94bf1ad70387d768b8ff078abe27f16aa97a8d4a8c68c4af3f73be8b0fcd1"
+        },
+        {
+          "path": "docs/connect/runtimes.json",
+          "sha256": "6ecfbf5c7709a8f95b5443c7dcb252ed88acf6e8ac4fad1eea8cc8323ed8706d"
+        },
+        {
+          "path": "docs/connect/updates.md",
+          "sha256": "48605fc2f5550557d9b036a95de5d5d32219c3fb676630c6ed1702d6ad0cad5e"
+        },
+        {
+          "path": "docs/connect/workbuddy.md",
+          "sha256": "5e39253e8a4276ccb5c5248202baa1b0eb3e73ff39eae95b458377ace9fdc74b"
+        },
+        {
+          "path": "docs/openapi.json",
+          "sha256": "0154ac950645d369c36de91467805d85fa94bf1d43bf1eb9b0d25d3d4b9220ba"
+        },
+        {
+          "path": "docs/发布来源与结构.md",
+          "sha256": "e437e67eea097bb1b06d96185c5eedcf6af0f1f7312b31414573b31f9c6969cc"
+        },
+        {
+          "path": "docs/账号与远程接入.md",
+          "sha256": "738172b47615479fcad922a02d1cc4763b1452a70f27d13027f92d8a73aadd95"
+        },
+        {
+          "path": "docs/需求与能力映射.md",
+          "sha256": "535f65067492c11c2a5c08a70e2d2134d3cca3925890ba0bf50ad0ebccc84b65"
+        },
+        {
+          "path": "downloads/shixu-issues-1.4.0.zip",
+          "sha256": "5260a3cc1bd116109ef1debae1bb0e01db5e58e5bbf548c269977c9d8ce4a4b4"
+        },
+        {
+          "path": "downloads/shixu-issues-1.5.0.zip",
+          "sha256": "a08e5868b1de22a92bc7e125df7c17275b198a290b08405c0a1cb7771f8b1295"
+        },
+        {
+          "path": "downloads/skill-manifest.json",
+          "sha256": "ee1efa25538b976e47ca9756f15958367e2b080c0582b05a991ac9f2a8f1feb6"
+        },
+        {
+          "path": "examples/api_client.py",
+          "sha256": "43970a6d6d21b645cdcd8d528ee4e4e9c7739599aedeee65a9a5c2150187e9c7"
+        },
+        {
+          "path": "examples/creator_client.py",
+          "sha256": "1f949caa14942d99ccbe71a616b1e02e032243881b2c9667acf066e4030ddfdf"
+        },
+        {
+          "path": "examples/http_mcp_client.py",
+          "sha256": "83e0ad0fed158b7d257cfdd4717b1e8a54341617912ed882e2657c72cfada359"
+        },
+        {
+          "path": "examples/index.html",
+          "sha256": "264c851f011fcbb4440cfec98ee145068426ab01111b3ef36d404003d5ce64b2"
+        },
+        {
+          "path": "examples/mcp_client.py",
+          "sha256": "e5164650c5ec27b5335955a30e94d4761057c0ecc55d6509f21057ff3ee89592"
+        },
+        {
+          "path": "examples/tools_client.py",
+          "sha256": "381647b34d605bbfe3b36f3ff5ee582f68490ce34b0f752011dd6f8183b385d2"
+        },
+        {
+          "path": "mcp_server.py",
+          "sha256": "9b5c24e4ce71d032abf6687eb786fd6344569ba61196d9607a523d8901c4f145"
+        },
+        {
+          "path": "requirements-lock.txt",
+          "sha256": "43b28be074ab9973ee3b5785b96cffab37fb43a3c7821c1e6cd83b082b021377"
+        },
+        {
+          "path": "scripts/account_frontend.py",
+          "sha256": "16b08bd3a1dca795ba029da6a123056f35694531e0dadd834f9d71a4253fdf41"
+        },
+        {
+          "path": "scripts/architecture-template.html",
+          "sha256": "303b61732ce2e078a5b10c17266ce1e80d47f38e56fce1ce92d25f4fc2b49bc3"
+        },
+        {
+          "path": "scripts/audit_release.py",
+          "sha256": "fd88911ba55edac10d75036b6090d1b4463add6438c562e0b8cfba75a51e17c6"
+        },
+        {
+          "path": "scripts/build_frontend.py",
+          "sha256": "c852001f1f39a55fe78bbcf863426505685dcf9e450b4d532848790cc20a3908"
+        },
+        {
+          "path": "scripts/build_release.py",
+          "sha256": "bfcd7e4e228496f43e8980198495475f89da768a4de4ededfeb821e5551c006c"
+        },
+        {
+          "path": "scripts/build_skill.py",
+          "sha256": "4a42da837bd5e65d2eee0b5338442acc374c61caedb2358f59c3663ffe386887"
+        },
+        {
+          "path": "scripts/configure_mcp.py",
+          "sha256": "9449cd0c3a5f7883a5936594339ed66909c9016ec32c7ea9e09c11861a14d1fe"
+        },
+        {
+          "path": "scripts/creator_frontend.py",
+          "sha256": "df616b602918f1211870d230eb4e2d1032b10eacc174eb3f7c925a37aa88a875"
+        },
+        {
+          "path": "scripts/docker_contract.py",
+          "sha256": "b979fa9a54e6f2ef71cf5adaf099be20e3bb575600d5d2dd18ebe7968c484ddf"
+        },
+        {
+          "path": "scripts/erd-template.html",
+          "sha256": "54e7131d99fbb494922f1df16b7322f81fd2ec04712088e393ef32df0ce48b5d"
+        },
+        {
+          "path": "scripts/generate_diagrams.py",
+          "sha256": "471e0b84c3ecfc0a1bad0f07f60c92e9fb9163d9988a4f0cdcb70f8489764155"
+        },
+        {
+          "path": "scripts/generate_docs.py",
+          "sha256": "49e4cc62cb6edb93301cf9257dd71cde030f5c7415cba5495607ebd1aa72283b"
+        },
+        {
+          "path": "scripts/init_mysql.py",
+          "sha256": "f9ecadf6b66c42ce89d317771ea7cde3b8ae87204bbd8d6239cd9d6c8bcf0d7e"
+        },
+        {
+          "path": "scripts/mcp_access.py",
+          "sha256": "b9cbcc613282e3b094cc7bae2f5a40481ccba518c8a976588069616552d87400"
+        },
+        {
+          "path": "scripts/migrate_accounts.py",
+          "sha256": "10ed677317ef9f513589816ec49747f9096f904bc47184f876d5f066e2bcda9d"
+        },
+        {
+          "path": "scripts/migrate_creators.py",
+          "sha256": "d86a3d8ef0eed814541e8e607aaf8e72cfe952593c9a3fa562a7ed075fd8e3e6"
+        },
+        {
+          "path": "scripts/migrate_custom_tools.py",
+          "sha256": "7a7c1d6bb974e2e5cd69afd09773358682bb6a8f9a12a949bfb49796b532d371"
+        },
+        {
+          "path": "scripts/migrate_onboarding.py",
+          "sha256": "9366f98ffb4086d5701ab0a2f067c63443beca4e7f5316715b0d2d59ef285ef9"
+        },
+        {
+          "path": "scripts/migrate_sqlite_to_mysql.py",
+          "sha256": "dff2afcf689c4183a952c4e9b47664a86ceb0bea79649cdb710a907705f3f67b"
+        },
+        {
+          "path": "scripts/migrate_trash.py",
+          "sha256": "b16085a3e570365acf88e1a780cffa15fd1adce2993e49d4ff4e169f6232ccde"
+        },
+        {
+          "path": "scripts/process_tools.py",
+          "sha256": "04f15bc2941dd235fca1d03516a72470081fb3b64420c06c911c9adb4aa29fc4"
+        },
+        {
+          "path": "scripts/seed_demo.py",
+          "sha256": "6bdea5a71549c988fdcb81996a6ed59ee8bb30a5219fafe2c4e64f1f81029ec8"
+        },
+        {
+          "path": "scripts/service.py",
+          "sha256": "e88a571a7f3011d3d97983af9c88d40721d9dc8b75cb29ad3c4152d28ad480b0"
+        },
+        {
+          "path": "scripts/validate_project.py",
+          "sha256": "7a854e42b5204c83954ee01a2626d917e8e47872f8db31cf250e7fcfe4930128"
+        },
+        {
+          "path": "skills/shixu-issues/SKILL.md",
+          "sha256": "4d025a7865c27d3521f9bcd40a96f84d31bbc44b3b1c71a7ceef9ed22bedd037"
+        },
+        {
+          "path": "skills/shixu-issues/VERSION",
+          "sha256": "acb57a7135b2d7d6e665f67f056e21353023b93835f54def1ae523bf76f1bfb3"
+        },
+        {
+          "path": "skills/shixu-issues/references/创建身份与模型规则.md",
+          "sha256": "15a8a5cfca67ba35754d89f587ec21f400df201111be64b113b08c2795624256"
+        },
+        {
+          "path": "skills/shixu-issues/references/录入与分类规则.md",
+          "sha256": "03887c91da34095b2f84aec79b8d7583e9e6162a46030b00287235e292b416f0"
+        },
+        {
+          "path": "skills/shixu-issues/references/更新接入.md",
+          "sha256": "48605fc2f5550557d9b036a95de5d5d32219c3fb676630c6ed1702d6ad0cad5e"
+        },
+        {
+          "path": "skills/shixu-issues/scripts/update.py",
+          "sha256": "d26159caaa9464b3df8af1aa69608d48c4f3ea4cb21a87c86fa8907dc48aeba2"
+        },
+        {
+          "path": "static/accounts-api.js",
+          "sha256": "1846208568aa495ede228e9e07a3c98fe791c2c6bc6150d4a9b5428ce883cef4"
+        },
+        {
+          "path": "static/ai-access-api.js",
+          "sha256": "a82ed52a10b96c48a914e238d27b7a42afbba07b0367ddf287bd60843bd8dc76"
+        },
+        {
+          "path": "static/ai-access.css",
+          "sha256": "25913def889c1923cdfe75f575f82a000a76d619c92617491c14aa306a8e2c60"
+        },
+        {
+          "path": "static/connect.html",
+          "sha256": "be3fce7a5ddffd5c6c632663d6808ca7998dce90a3ad7b283812e2455118cbb4"
+        },
+        {
+          "path": "static/diagrams/architecture.html",
+          "sha256": "303b61732ce2e078a5b10c17266ce1e80d47f38e56fce1ce92d25f4fc2b49bc3"
+        },
+        {
+          "path": "static/diagrams/erd.html",
+          "sha256": "435588d34baf0556da54edde4de75cce46c52c81e03c383a9d9c3fd31442eb84"
+        },
+        {
+          "path": "static/index.html",
+          "sha256": "4f48f4ee153a3805d92ff596449c21c4009a08eb13a6f61c2c825ccb508f2b8a"
+        }
+      ],
+      "test_inputs": [
+        {
+          "path": "tests/README.md",
+          "sha256": "1ef71cae41b6f70c051531c13e1beb9a6237df3f1938a45560d909efdee20fa4"
+        },
+        {
+          "path": "tests/account_browser_check.py",
+          "sha256": "ab16433bacd77c5e2bf7bdb8697434d2f9594164886b056b86f2cd3ba2fa2fa2"
+        },
+        {
+          "path": "tests/account_mcp_check.py",
+          "sha256": "3ed17b66f29d7b00445e8e78d0e9cc6cc43492cdc464c9d3615d33049462eebf"
+        },
+        {
+          "path": "tests/auth_client.py",
+          "sha256": "be41a8d71d2d9108173fdaa64fbf2796023781cdc251aa87d3bb605b6ef9b32d"
+        },
+        {
+          "path": "tests/browser_check.py",
+          "sha256": "26fbc2a5759dd8f2a4844b90857a07a8009a1744c0fe68476ccde56e08f0f977"
+        },
+        {
+          "path": "tests/checkout_check.py",
+          "sha256": "e395fb231a01a22532eb43d447423d4a0e1152cca011b5feecfc77fbe032153c"
+        },
+        {
+          "path": "tests/codex_config_check.py",
+          "sha256": "0b1bb9c6b8696f37f0c1dadd8d677d6a3515c7a1788fabaf562ba078732a36cd"
+        },
+        {
+          "path": "tests/compare_databases.py",
+          "sha256": "03703d29ac38332bdb6dc384148a1820afd0fc4a73387b9f109826f083b22526"
+        },
+        {
+          "path": "tests/conftest.py",
+          "sha256": "a536e7a00c486b47e766f424dccb731b648874a34148d06349375f0c8d86e68f"
+        },
+        {
+          "path": "tests/creator_browser_check.py",
+          "sha256": "ea5a347643aa8e5ffec395a6366b156c11f8eed2394ca6b0564bd123e513e577"
+        },
+        {
+          "path": "tests/diagrams_check.py",
+          "sha256": "745f2459ae645dba88351ab8dba6fc955ef094c3551ebf40f445c29e4d41ef09"
+        },
+        {
+          "path": "tests/docker_check.py",
+          "sha256": "f028a11a2a4ef8ac4446d37fc705d702a36c834c068b8fa3c37bf0fa94a5aff9"
+        },
+        {
+          "path": "tests/dual_transport_check.py",
+          "sha256": "0ba8152c6dc9684faef18aa7b2cfd79a828fec5eff418cac63f252a3e27ec81b"
+        },
+        {
+          "path": "tests/http_auth.py",
+          "sha256": "cfb29152b21f702e0c762ed30dd259d429a70666df7e649957f50d931369bb36"
+        },
+        {
+          "path": "tests/lan_check.py",
+          "sha256": "51f4e59b96133a7fe85033ecc64453c0bbf88f9922fc01ee1b031fbe98e484af"
+        },
+        {
+          "path": "tests/mysql_check.py",
+          "sha256": "6f89b22db2280da22de8e4dd73baefeb1055d7e6a00b8089a3910f1abfe905a5"
+        },
+        {
+          "path": "tests/onboarding_check.py",
+          "sha256": "4ae9ff938fee6592a22f3bcae1f6b86871266f48f46b1d93e3ad438afb0b4884"
+        },
+        {
+          "path": "tests/public_transport_check.py",
+          "sha256": "2c0ab99bbf1077b6873acac78997ba7f4234214898f9f7abeeafc9a2e788cb44"
+        },
+        {
+          "path": "tests/retention_mysql_check.py",
+          "sha256": "d42dd1d9b33c5f7bee3e9bdf0b87a4a1018a9a7456dad2e63d8628f719c3a4c8"
+        },
+        {
+          "path": "tests/run_suite.py",
+          "sha256": "c47f7df49892070eeb11aab33e02ccddf3168b0e38dd5a605c70515ce06af89c"
+        },
+        {
+          "path": "tests/test_accounts.py",
+          "sha256": "40e421476e831ce24c6367dba6c1b6e36b57e1e7f1cba846ec92076207480cc7"
+        },
+        {
+          "path": "tests/test_api.py",
+          "sha256": "34dc94c2578a4c5954de1e45ed73f2d0bc165baf84548ee87523cd99e0bec49c"
+        },
+        {
+          "path": "tests/test_creators.py",
+          "sha256": "980c88c933e46c80030618768e21aa6bda04fca8d88b6578899fff90ad64f082"
+        },
+        {
+          "path": "tests/test_custom_tools.py",
+          "sha256": "9029d4f9b785bcc9e5b16a4bd6d81f64f448ee8740639c3331554d18e5683921"
+        },
+        {
+          "path": "tests/test_docker_inventory.py",
+          "sha256": "b452b407d510857d17cfe86bcbda72a95fa37afa4d645827e0d0b075eb948153"
+        },
+        {
+          "path": "tests/test_http_access.py",
+          "sha256": "b96571094f6a3ed809a3aadf102e7dd02557b7fc2c2abe121cc78b716674ab30"
+        },
+        {
+          "path": "tests/test_https_proxy.py",
+          "sha256": "74216a8858720c003512d596a97c948c148431e651107a88c3d44334179487ff"
+        },
+        {
+          "path": "tests/test_mcp_http.py",
+          "sha256": "d177e76e8fa0001659b7719b8450371739cbbee6aa445b4a404538ad6b71a215"
+        },
+        {
+          "path": "tests/test_no_physical_delete.py",
+          "sha256": "4e9efabb0a6aacf347e66fa5436115811a4307cc565459145fd9704b0e5e7777"
+        },
+        {
+          "path": "tests/test_onboarding.py",
+          "sha256": "fc11229c43b24784d164b43eb26b5cec4f64f67f280c39a1d316dc78e96928ef"
+        },
+        {
+          "path": "tests/test_service_mcp.py",
+          "sha256": "0024ea5abb2bbf084a5f4196d7950988522391fa1f6bcb2b1c2d68efb4c6ea85"
+        },
+        {
+          "path": "tests/test_skill_update.py",
+          "sha256": "d0f70c5386dc3072e56f84b8e8fbbf6cee9bf6038c80700d9faa4477d87ac94b"
+        },
+        {
+          "path": "tests/test_trash.py",
+          "sha256": "96dd660b13270057688ad7bc7072f638de211025c73be3ff66ed2e95a3616f3b"
+        },
+        {
+          "path": "tests/tls_proxy.py",
+          "sha256": "e6ada15d5e08732f04031d67310120c2e2fb224fcd0c00ffd538d8945000dbc3"
+        },
+        {
+          "path": "tests/trash_browser_check.py",
+          "sha256": "8969efb913027f180b3c741e1c202db071dfa8cf8180a4e2f5e0bed95f1d2a5e"
+        }
+      ],
+      "failure_reason": "Incorrect test expectation: missing credentials short-circuit to 401; authenticating supplied credentials needs DB and returns 503 during outage."
+    }
+  ],
+  "recovery_preconditions": [
+    "Fresh isolated MySQL initialized; same application image healthy; registration/session/PAT and synthetic workspace verified"
+  ],
+  "runtime_resources": [
+    {
+      "service": "app",
+      "image": "sha256:10e16b65e10e06187248b97d4ecfba590adfa264f2daaf70fd0436af9b8d107d",
+      "created": "2026-10-13T15:53:54.756840115Z",
+      "started_at": "2026-10-13T15:53:56.886179187Z",
+      "memory_mib": 512,
+      "cpus": 0.75,
+      "restart": "no"
+    },
+    {
+      "service": "db",
+      "image": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+      "created": "2026-10-13T15:51:37.760519327Z",
+      "started_at": "2026-10-13T15:51:39.607915627Z",
+      "memory_mib": 512,
+      "cpus": 0.75,
+      "restart": "no"
+    }
+  ],
+  "outage_statuses": {
+    "health": 503,
+    "session": 503,
+    "pat": 503,
+    "anonymous": 401
+  },
+  "auxiliary_images": [
+    {
+      "service": "db",
+      "id": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242"
+    }
+  ],
+  "finished_at": "2026-10-13T15:55:09.143093+00:00",
+  "finally_cleanup": {
+    "passed": true,
+    "scope": "Exact owned containers, volumes and networks independently confirmed absent"
+  }
+}

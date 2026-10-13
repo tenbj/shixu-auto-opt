@@ -32,6 +32,14 @@
   },
   "browser_errors": [],
   "external_requests": [],
+  "live_schema": {
+    "status": "pass",
+    "tables": 20,
+    "columns": 153,
+    "foreign_keys": 6,
+    "business_rows_read": 0,
+    "writes": 0
+  },
   "delivery_id": "0a31638d-1525-44f5-b7d6-1aa554f5c6cf",
   "status": "pass",
   "passed": true
