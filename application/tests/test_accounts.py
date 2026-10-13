@@ -94,3 +94,21 @@ def test_password_rotation_and_expired_access(system):
     a.cookies.clear();a.headers.pop('x-csrf-token')
     assert a.post('/api/auth/login',json=dict(username='alice',password='fixture-password')).status_code==401
     assert a.post('/api/auth/login',json=dict(username='alice',password='changed-password')).status_code==200
+
+
+def test_auth_database_failure_is_retryable_without_leaking_details(system, monkeypatch):
+    import pymysql
+    app,session,_=system
+    key=session.post('/api/account/mcp-access',json={'name':'outage','scope':'read'}).json()['token']
+    original=app.state.accounts.authenticate
+    def unavailable(*args):raise pymysql.OperationalError(2003,'private-host-and-secret')
+    monkeypatch.setattr(app.state.accounts,'authenticate',unavailable)
+    with closing(TestClient(app)) as remote:
+        for headers in [{},{'Authorization':'Bearer '+key}]:
+            response=remote.get('/api/health',headers=headers)
+            assert response.status_code==503
+            assert 'private-host-and-secret' not in response.text
+        assert session.get('/api/workspace').status_code==503
+        monkeypatch.setattr(app.state.accounts,'authenticate',original)
+        assert session.get('/api/workspace').status_code==200
+        assert remote.get('/api/workspace',headers={'Authorization':'Bearer '+key}).status_code==200

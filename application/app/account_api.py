@@ -1,5 +1,6 @@
 """账号HTTP入口、会话/CSRF、独立MCP令牌和PKCE授权。"""
-import base64, hashlib, hmac, json, os, re, secrets, time
+import base64, hashlib, hmac, json, os, re, secrets, sqlite3, time
+import pymysql
 from urllib.parse import urlparse, urlencode, parse_qs
 from uuid import uuid4
 from fastapi import Request
@@ -68,7 +69,10 @@ def install_accounts(app,base):
   path=request.url.path
   auth=request.headers.get('authorization','');scheme,_,token=auth.partition(' ')
   is_bearer=scheme.lower()=='bearer'
-  user=await run_in_threadpool(accounts.authenticate, token if is_bearer else request.cookies.get(session_cookie(request),''), 'bearer' if is_bearer else 'session')
+  try:
+   user=await run_in_threadpool(accounts.authenticate, token if is_bearer else request.cookies.get(session_cookie(request),''), 'bearer' if is_bearer else 'session')
+  except (sqlite3.Error,pymysql.MySQLError):
+   return JSONResponse({'detail':'数据库暂时不可用；未确认保存，请使用同一 request_id 重试'},status_code=503,headers={'Cache-Control':'no-store'})
   protected=(path.startswith('/api/') and path not in ('/api/health','/api/auth/login','/api/auth/register')) or path.rstrip('/')=='/mcp'
   try:
    if protected:require(user,'请先登录或提供有效访问令牌',401)
