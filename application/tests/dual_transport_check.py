@@ -1,4 +1,5 @@
 """Real HTTP and TLS browser/MCP checks with synthetic data and an ephemeral certificate."""
+import argparse
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 import datetime
@@ -22,6 +23,7 @@ from cryptography.x509.oid import NameOID
 from mcp import Client
 from mcp.client.streamable_http import streamable_http_client
 from playwright.sync_api import sync_playwright, expect
+from docker_check import stop_command
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -46,6 +48,8 @@ async def mcp_check(url,token,verify):
 
 
 def main():
+    ap=argparse.ArgumentParser();ap.add_argument('--upstream');ap.add_argument('--proxy-env',type=Path);options=ap.parse_args()
+    if bool(options.upstream)!=bool(options.proxy_env):ap.error('--upstream and --proxy-env must be supplied together')
     checks=[];errors=[];processes=[]
     with tempfile.TemporaryDirectory(prefix='shixu-tls-test-') as folder:
         temp=Path(folder);key=rsa.generate_private_key(public_exponent=65537,key_size=2048)
@@ -60,13 +64,29 @@ def main():
         (temp/'cert.pem').write_bytes(cert.public_bytes(serialization.Encoding.PEM))
         trust=ssl.create_default_context(cafile=str(temp/'cert.pem'))
         ports={'http':port(),'https':port()}
+        if options.upstream:
+            from urllib.parse import urlparse
+            from dotenv import dotenv_values
+            parsed=urlparse(options.upstream)
+            assert parsed.scheme=='http' and parsed.hostname=='127.0.0.1' and parsed.port
+            private=options.proxy_env.resolve()
+            assert private.is_relative_to((ROOT/'runtime').resolve()) and private.parent.name.startswith('h02test-shixu-')
+            values=dotenv_values(private)
+            upstream_backend=httpx.get(options.upstream+'/api/health',trust_env=False,timeout=10).raise_for_status().json()['backend']
+            assert values['SHIXU_PUBLIC_URL']=='https://shixu.test'
+            ports={'http':parsed.port,'https':443}
+            with socket.socket() as listener:listener.bind(('127.0.0.1',443))
         env=dict(os.environ,SHIXU_BACKEND='sqlite',SHIXU_DB=str(temp/'test.sqlite3'),SHIXU_ALLOW_HTTP_AUTH='true',SHIXU_ALLOWED_HOSTS='shixu.test',PYTHONIOENCODING='utf-8',SHIXU_SKIP_DOTENV='true',SHIXU_PUBLIC_URL='',SHIXU_HTTPS_PROXY_SECRET='')
+        if options.upstream:env.update(SHIXU_TEST_UPSTREAM=options.upstream,SHIXU_TEST_PROXY_PROOF=values['SHIXU_HTTPS_PROXY_SECRET'])
+        def origin(scheme,p):return f'{scheme}://shixu.test'+('' if scheme=='https' and p==443 else ':'+str(p))
         try:
             for scheme,p in ports.items():
+                if options.upstream and scheme=='http':continue
                 args=[sys.executable,'-m','uvicorn','app.main:app','--host','127.0.0.1','--port',str(p),'--forwarded-allow-ips','']
+                if env.get('SHIXU_TEST_UPSTREAM'):args[3]='tls_proxy:app';args+=['--app-dir',str(ROOT/'tests'),'--lifespan','off']
                 if scheme=='https':args+=['--ssl-keyfile',str(temp/'key.pem'),'--ssl-certfile',str(temp/'cert.pem')]
                 process=subprocess.Popen(args,cwd=ROOT,env=env,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,
-                    **({'creationflags':subprocess.CREATE_NO_WINDOW} if os.name=='nt' else {}));processes.append(process)
+                    **({'creationflags':subprocess.CREATE_NO_WINDOW} if os.name=='nt' else {'start_new_session':True}));processes.append(process)
                 for _ in range(100):
                     try:
                         httpx.get(f'{scheme}://127.0.0.1:{p}/api/health',verify=trust,trust_env=False,timeout=1).raise_for_status();break
@@ -81,9 +101,9 @@ def main():
                     # MCP separately verifies the exact generated certificate through a private CA context.
                     context=browser.new_context(ignore_https_errors=True,viewport={'width':390,'height':844})
                     page=context.new_page();page.on('pageerror',lambda e:errors.append(str(e)))
-                    origin=f'{scheme}://shixu.test:{p}';url=f'{scheme}://127.0.0.1:{p}'
+                    browser_origin=origin(scheme,p);url=f'{scheme}://127.0.0.1:{p}'
                     pending=[];page.route('**/api/auth/me',lambda route:pending.append(route))
-                    page.goto(origin,wait_until='domcontentloaded');page.wait_for_function("!!document.querySelector('[data-account-action=register-mode]')")
+                    page.goto(browser_origin,wait_until='domcontentloaded');page.wait_for_function("!!document.querySelector('[data-account-action=register-mode]')")
                     page.locator('[data-account-action=register-mode]').click()
                     page.locator('[name=username]').fill('preserve_registration_draft')
                     assert len(pending)==1
@@ -100,7 +120,7 @@ def main():
                     page.locator('[data-account-action=new-access]').click();page.locator('#account-access-form [name=name]').fill('协议验收端')
                     page.locator('#account-access-form [name=scope]').select_option('write');page.locator('#account-access-form [type=submit]').click()
                     expect(page.locator('#issued-config')).to_be_visible();config=json.loads(page.locator('#issued-config').input_value())['mcpServers']['shixu']
-                    assert config['url']==origin+'/mcp'
+                    assert config['url']==('https://shixu.test' if options.upstream else browser_origin)+'/mcp'
                     assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
                     # Do not capture the one-time credential modal.
                     token=config['headers']['Authorization'][7:]
@@ -132,7 +152,7 @@ def main():
                     expect(page.locator('.account-pill:visible')).to_contain_text('双入口'+scheme)
                 for scheme,p in ports.items():
                     page=shared.new_page();pages[scheme]=page
-                    response=page.goto(f'{scheme}://shixu.test:{p}',wait_until='domcontentloaded')
+                    response=page.goto(origin(scheme,p),wait_until='domcontentloaded')
                     assert response.status==200 and page.url.startswith(scheme+'://')
                     page.locator('[data-account-action=register-mode]').click()
                     user='shared_'+uuid4().hex[:10];password=uuid4().hex;credentials[scheme]=(user,password)
@@ -160,12 +180,23 @@ def main():
             assert not errors,errors
             assert httpx.post(f'http://127.0.0.1:{ports["http"]}/oauth/register',headers={'Host':'shixu.test','X-Forwarded-Proto':'https'},json={},trust_env=False).status_code==400
         finally:
+            original=sys.exception();failures=[]
             for process in processes:
-                if process.poll() is None:process.terminate()
-                process.wait(timeout=15)
+                try:
+                    if process.poll() is None:stop_command(process)
+                    else:process.wait(timeout=10)
+                except BaseException as error:failures.append(type(error).__name__)
+            if failures:
+                failure=RuntimeError('Test proxy process cleanup failed: '+','.join(failures))
+                if original:original.add_note(str(failure))
+                else:raise failure
     report=dict(passed=True,delivery_id=json.loads((ROOT/'project-contract.json').read_text(encoding='utf-8'))['delivery_id'],checks=checks,browser_errors=errors,
                 public_tls_deployed=False,production_writes=0,tls='Real TLS with ephemeral self-signed test certificate; MCP verifies test CA; no change to public TLS',forwarded_header_spoof_rejected=True)
-    (ROOT/'verification/dual-transport-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+    report['backend']=('docker-mysql' if upstream_backend=='mysql' else 'proxy-'+upstream_backend) if options.upstream else 'isolated-sqlite'
+    report['upstream']=options.upstream
+    target=ROOT/('verification/docker/dual-transport-report.json' if options.upstream and upstream_backend=='mysql' else 'verification/proxy-transport-report.json' if options.upstream else 'verification/dual-transport-report.json')
+    target.parent.mkdir(parents=True,exist_ok=True)
+    target.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
     print(json.dumps(report,ensure_ascii=False))
 
 

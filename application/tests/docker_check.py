@@ -1,18 +1,27 @@
 """Isolated real MySQL/API/MCP/browser Docker acceptance; never loads production env."""
 from pathlib import Path
-import argparse, gzip, hashlib, json, os, re, secrets, socket, subprocess, sys, tarfile, time, uuid
+import argparse, gzip, hashlib, json, os, re, secrets, signal, socket, subprocess, sys, tarfile, time, uuid
 from datetime import datetime, timezone
 import httpx
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'scripts'))
 
+def stop_command(p):
+    if os.name=='nt':
+        subprocess.run(['taskkill','/PID',str(p.pid),'/T','/F'],capture_output=True,timeout=20)
+    else:
+        try:os.killpg(p.pid,signal.SIGKILL)
+        except ProcessLookupError:pass
+    p.communicate(timeout=10)
+
 def run(args, *, env=None, timeout=180, input=None):
-    p=subprocess.Popen(args,cwd=ROOT,env=env,stdin=subprocess.PIPE if input is not None else subprocess.DEVNULL,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+    p=subprocess.Popen(args,cwd=ROOT,env=env,stdin=subprocess.PIPE if input is not None else subprocess.DEVNULL,stdout=subprocess.PIPE,stderr=subprocess.PIPE,
+                       **({'start_new_session':True} if os.name!='nt' else {}))
     try: out,err=p.communicate(input=input,timeout=timeout)
-    except subprocess.TimeoutExpired:
-        if os.name=='nt':subprocess.run(['taskkill','/PID',str(p.pid),'/T','/F'],capture_output=True)
-        else:p.kill()
-        raise RuntimeError('Timed out: '+args[0])
+    except BaseException as error:
+        try:stop_command(p)
+        except BaseException as cleanup_error:error.add_note('Command cleanup failed: '+repr(cleanup_error))
+        raise
     if p.returncode:raise RuntimeError('Command failed: '+args[0]+' '+err.decode(errors='replace')[-3000:])
     return out
 
@@ -33,7 +42,14 @@ def cleanup_owned(project, private):
     assert private.resolve()==(ROOT/'runtime'/project).resolve()
     cfg=json.loads((private/'compose.json').read_text(encoding='utf-8'))
     env=dict(os.environ,SHIXU_DOCKER_ENV_FILE=str(private/'app.env'),SHIXU_PORT=cfg['services']['app']['ports'][0].split(':')[1],SHIXU_IMAGE=cfg['services']['app']['image'])
-    run(['docker','compose','-p',project,'-f',str(ROOT/'compose.yaml'),'-f',str(private/'compose.json'),'down','--volumes','--remove-orphans'],env=env,timeout=120)
+    failures=[]
+    try:run(['docker','compose','-p',project,'-f',str(ROOT/'compose.yaml'),'-f',str(private/'compose.json'),'down','--volumes','--remove-orphans'],env=env,timeout=120)
+    except BaseException as error:failures.append('down: '+repr(error))
+    for kind,command in [('containers',['docker','ps','-a']),('volumes',['docker','volume','ls']),('networks',['docker','network','ls'])]:
+        try:
+            if run(command+['--filter','label=com.docker.compose.project='+project,'-q']).strip():failures.append('Owned '+kind+' remain')
+        except BaseException as error:failures.append(kind+': '+repr(error))
+    if failures:raise RuntimeError('; '.join(failures))
 
 def finalize(run_id):
     from docker_contract import STAGES, snapshot
@@ -81,9 +97,22 @@ def main():
         result={'recorded_at':now(),'runner_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),'scope':'read-only exact Compose-label inventory; no resource mutations','own_project':args.resume,'peer_projects':args.peer_project,'protected_containers':state,'excluded_test_containers':excluded}
         args.inventory_report.parent.mkdir(parents=True,exist_ok=True);args.inventory_report.write_text(json.dumps(result,indent=2),encoding='utf-8')
         print(json.dumps({'protected':len(state),'excluded':len(excluded),'report':str(args.inventory_report)}));return
-    if args.finalize:return finalize(args.finalize)
+    if args.finalize:
+        prior=json.loads((ROOT/'verification/docker'/(args.finalize+'.json')).read_text(encoding='utf-8'))
+        try:return finalize(args.finalize)
+        finally:
+            original=sys.exception()
+            try:cleanup_owned(prior['compose_project'],ROOT/'runtime'/prior['compose_project'])
+            except BaseException as cleanup_error:
+                if original:original.add_note('Finalize cleanup failed: '+repr(cleanup_error))
+                else:raise
     project=args.resume or 'h02test-shixu-'+uuid.uuid4().hex[:8]
     if not re.fullmatch(r'h02test-shixu-[a-f0-9]+',project):raise ValueError('Invalid isolated project')
+    rows=[json.loads(line) for line in run(['docker','ps','-a','--format','json']).decode().splitlines()]
+    for row in rows:
+        labels=dict(item.split('=',1) for item in row.get('Labels','').split(',') if '=' in item)
+        owner=labels.get('com.docker.compose.project','')
+        assert not owner.startswith('h02test-') or owner==project or owner in args.peer_project,'Another acceptance project exists; serialize or explicitly authorize exact peer'
     run_id=project+'-'+uuid.uuid4().hex[:8] if args.resume else project
     private=ROOT/'runtime'/project;private.mkdir(parents=True,exist_ok=bool(args.resume))
     print('Isolated project: '+project,flush=True)
@@ -95,20 +124,16 @@ def main():
         from dotenv import dotenv_values
         previous=json.loads((private/'compose.json').read_text(encoding='utf-8'));port=int(previous['services']['app']['ports'][0].split(':')[1]);pw=dotenv_values(private/'app.env')['DB_PASSWORD']
     appenv=private/'app.env'
-    appenv.write_text('\n'.join(['SHIXU_SKIP_DOTENV=true','SHIXU_BACKEND=mysql','DB_HOST=db','DB_USER=root','DB_PASSWORD='+pw,'DB_NAME='+db,'DB_SSL=false','SHIXU_PUBLIC_URL=','SHIXU_HTTPS_PROXY_SECRET=','SHIXU_INSTANCE='+project,'SHIXU_BOOTSTRAP_PASSWORD='+secrets.token_hex(24)])+'\n',encoding='utf-8')
+    appenv.write_text('\n'.join(['SHIXU_SKIP_DOTENV=true','SHIXU_BACKEND=mysql','DB_HOST=db','DB_USER=root','DB_PASSWORD='+pw,'DB_NAME='+db,'DB_SSL=false','SHIXU_PUBLIC_URL=https://shixu.test','SHIXU_ALLOWED_HOSTS=shixu.test','SHIXU_ALLOW_HTTP_AUTH=true','SHIXU_HTTPS_PROXY_SECRET='+secrets.token_hex(32),'SHIXU_INSTANCE='+project,'SHIXU_BOOTSTRAP_PASSWORD='+secrets.token_hex(24)])+'\n',encoding='utf-8')
     cfg={'services':{'db':{'image':'mysql:8.4','ports':[f'127.0.0.1:{db_port}:3306'],'environment':{'MYSQL_ROOT_PASSWORD':pw,'MYSQL_DATABASE':db},'command':['--performance-schema=OFF','--innodb-buffer-pool-size=32M','--max-connections=30'],'mem_limit':'512m','cpus':0.75,'restart':'no','volumes':['db:/var/lib/mysql'],'healthcheck':{'test':['CMD-SHELL','MYSQL_PWD="$$MYSQL_ROOT_PASSWORD" mysql -h 127.0.0.1 -uroot -e "SELECT 1"'],'interval':'5s','timeout':'5s','retries':160}},'app':{'image':args.image,'env_file':[str(appenv)],'ports':[f'127.0.0.1:{port}:8765'],'volumes':['runtime:/app/runtime'],'depends_on':{'db':{'condition':'service_healthy'}},'init':True,'restart':'no','mem_limit':'512m','cpus':0.75}},'volumes':{'db':{},'runtime':{}}}
     compose=private/'compose.json';compose.write_text(json.dumps(cfg),encoding='utf-8')
     os.environ.update(SHIXU_DOCKER_ENV_FILE=str(appenv),SHIXU_PORT=str(port),SHIXU_IMAGE=args.image)
     cli=['docker','compose','-p',project,'-f',str(ROOT/'compose.yaml'),'-f',str(compose)]
-    run(['docker','build','-t',args.image,'.'],timeout=900)
-    report={'passed':False,'environment':'isolated','run_id':run_id,'compose_project':project,'mcp_mode':'embedded','delivery_id':json.loads((ROOT/'project-contract.json').read_text(encoding='utf-8'))['delivery_id'],'started_at':now(),'checks':[],'url':f'http://127.0.0.1:{port}','images':[], 'baseline_image':json.loads(run(['docker','image','inspect',args.baseline]))[0]['Id'], 'cold_start_evidence':('verification/docker/'+project+'.json' if args.resume else None)}
+    report={'passed':False,'environment':'isolated','run_id':run_id,'compose_project':project,'mcp_mode':'embedded','delivery_id':json.loads((ROOT/'project-contract.json').read_text(encoding='utf-8'))['delivery_id'],'started_at':now(),'checks':[],'url':f'http://127.0.0.1:{port}','images':[], 'baseline_image':None, 'cold_start_evidence':('verification/docker/'+project+'.json' if args.resume else None)}
     from docker_contract import snapshot
     report['inputs']=snapshot(ROOT,json.loads((ROOT/'project-contract.json').read_text(encoding='utf-8'))['docker']['inputs'])
     report['resource_limits']={'db':{'memory_mib':512,'cpus':0.75,'restart':'no'},'app':{'memory_mib':512,'cpus':0.75,'restart':'no'}}
     report['runner_sha256']=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
-    before=json.loads(run(['docker','ps','--format','json']).decode().strip().replace('\n',',').join(['[',']']) or '[]')
-    existing,excluded=inventory(before,project,set(args.peer_project));report['existing_containers']=existing
-    report['peer_projects']=args.peer_project;report['excluded_test_containers']=excluded
     def save(): (output/(run_id+'.json')).write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
     def passed(name,*observations):report['checks'].append({'name':name,'status':'passed','observations':list(observations)});save();print(name,flush=True)
     url=report['url']
@@ -118,6 +143,12 @@ def main():
             except httpx.HTTPError:time.sleep(2)
         raise RuntimeError('Application did not become ready')
     try:
+        before=json.loads(run(['docker','ps','--format','json']).decode().strip().replace('\n',',').join(['[',']']) or '[]')
+        existing,excluded=inventory(before,project,set(args.peer_project));report['existing_containers']=existing
+        report['peer_projects']=args.peer_project;report['excluded_test_containers']=excluded
+        save()
+        run(['docker','build','-t',args.image,'.'],timeout=900)
+        report['baseline_image']=json.loads(run(['docker','image','inspect',args.baseline]))[0]['Id']
         run(cli+['config','--quiet']);passed('compose_config','Test composition parsed without exposing interpolated secrets')
         for name,tag in [('app',args.image),('db','mysql:8.4')]:report['images'].append({'service':name,'id':json.loads(run(['docker','image','inspect',tag]))[0]['Id']})
         passed('build','Current Dockerfile build completed in this invocation; cache allowed; pip check and application import in Dockerfile; actual image ID recorded','No production environment or private files in COPY allowlist')
@@ -145,6 +176,10 @@ def main():
         for script in ['browser_check.py','trash_browser_check.py','account_mcp_check.py','account_browser_check.py','onboarding_check.py','creator_browser_check.py']:
             result=run([sys.executable,'tests/'+script,'--url',url],env=env,timeout=300)
             (output/(script+'.txt')).write_bytes(result);print('browser: '+script,flush=True)
+        run([sys.executable,'tests/dual_transport_check.py','--upstream',url,'--proxy-env',str(appenv)],env=env,timeout=600)
+        dual=json.loads((ROOT/'verification/docker/dual-transport-report.json').read_text(encoding='utf-8'))
+        assert dual['passed'] and dual['backend']=='docker-mysql' and dual['upstream']==url
+        report['dual_transport_evidence']='verification/docker/dual-transport-report.json'
         for script in ['mysql_check.py','retention_mysql_check.py']:
             run([sys.executable,'tests/'+script,'--url',url],env=env,timeout=180)
         run([sys.executable,'examples/mcp_client.py','--url',url,'--write-demo','--report','verification/mcp-report.json'],env=env,timeout=180)
@@ -183,7 +218,7 @@ def main():
         passed('failure_recovery','Database stopped: health, anonymous, session and PAT requests explicitly 503; database recovered and workspace/session retained without app restart')
         finalize(run_id)
         report=json.loads((output/(run_id+'.json')).read_text(encoding='utf-8'))
-    except Exception as error:
+    except BaseException as error:
         (private/(run_id+'-error.txt')).write_text(str(error),encoding='utf-8')
         report['error']=type(error).__name__+': isolated acceptance failed; raw diagnostic retained only under private runtime.'
         try:(private/(run_id+'-container.log')).write_bytes(run(cli+['logs','--no-color','--tail','200'],timeout=30))
@@ -193,7 +228,7 @@ def main():
         try:
             cleanup_owned(project,private)
             report['finally_cleanup']={'passed':True,'scope':'Only owned isolated Compose containers and volumes removed; private diagnostic files preserved'}
-        except Exception as cleanup_error:
+        except BaseException as cleanup_error:
             (private/(run_id+'-cleanup-error.txt')).write_text(str(cleanup_error),encoding='utf-8')
             report['passed']=False
             report['finally_cleanup']={'passed':False,'scope':'Owned resource cleanup failed; private diagnostic retained; no global cleanup attempted'}
