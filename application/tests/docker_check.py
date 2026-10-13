@@ -28,6 +28,13 @@ def inventory(rows, project, peers):
             excluded.append({'id':row['ID'],'compose_project':owner})
         else: kept.append(row['ID'])
     return sorted(kept),excluded
+def cleanup_owned(project, private):
+    if not re.fullmatch(r'h02test-shixu-[a-f0-9]+',project):raise ValueError('Invalid isolated project')
+    assert private.resolve()==(ROOT/'runtime'/project).resolve()
+    cfg=json.loads((private/'compose.json').read_text(encoding='utf-8'))
+    env=dict(os.environ,SHIXU_DOCKER_ENV_FILE=str(private/'app.env'),SHIXU_PORT=cfg['services']['app']['ports'][0].split(':')[1],SHIXU_IMAGE=cfg['services']['app']['image'])
+    run(['docker','compose','-p',project,'-f',str(ROOT/'compose.yaml'),'-f',str(private/'compose.json'),'down','--volumes','--remove-orphans'],env=env,timeout=120)
+
 def finalize(run_id):
     from docker_contract import STAGES, snapshot
     if not re.fullmatch(r'h02test-shixu-[a-f0-9]+(?:-[a-f0-9]+)?',run_id):raise ValueError('Invalid isolated run')
@@ -53,8 +60,7 @@ def finalize(run_id):
                 block=tail+chunk;assert not any(n in block for n in needles),'Secret in image'
                 tail=block[-max(map(len,needles)):];checked+=len(chunk)
     report['checks'].append({'name':'secrets','status':'passed','observations':[f'All {checked} decompressed image bytes and metadata scanned; isolated credential values absent; explicit COPY whitelist excludes runtime/private env']})
-    cfg=json.loads((private/'compose.json').read_text(encoding='utf-8'));env=dict(os.environ,SHIXU_DOCKER_ENV_FILE=str(private/'app.env'),SHIXU_PORT=cfg['services']['app']['ports'][0].split(':')[1],SHIXU_IMAGE=cfg['services']['app']['image'])
-    run(['docker','compose','-p',project,'-f',str(ROOT/'compose.yaml'),'-f',str(private/'compose.json'),'down','--volumes','--remove-orphans'],env=env,timeout=240)
+    cleanup_owned(project,private)
     after=set(run(['docker','ps','--format','{{.ID}}']).decode().splitlines());assert set(report['existing_containers'])<=after
     assert not run(['docker','ps','-a','--filter','label=com.docker.compose.project='+project,'-q']).strip()
     assert not run(['docker','volume','ls','--filter','label=com.docker.compose.project='+project,'-q']).strip()
@@ -66,7 +72,7 @@ def finalize(run_id):
     print(json.dumps({'passed':True,'report':str(path),'image':image}))
 
 def main():
-    ap=argparse.ArgumentParser();ap.add_argument('--image',default='shixu-system:3.2.1');ap.add_argument('--baseline',default='shixu-system:3.2.0-docker.1');ap.add_argument('--keep',action='store_true');ap.add_argument('--resume');ap.add_argument('--finalize');ap.add_argument('--peer-project',action='append',default=[],help='Exact independently owned parallel test Compose project; recorded exclusion');ap.add_argument('--inventory-report',type=Path,help='Read-only real container inventory; record exact peer exclusions without starting or stopping resources');args=ap.parse_args()
+    ap=argparse.ArgumentParser();ap.add_argument('--image',default='shixu-system:3.2.1');ap.add_argument('--baseline',default='shixu-system:3.2.0-docker.1');ap.add_argument('--resume');ap.add_argument('--finalize');ap.add_argument('--peer-project',action='append',default=[],help='Exact independently owned parallel test Compose project; recorded exclusion');ap.add_argument('--inventory-report',type=Path,help='Read-only real container inventory; record exact peer exclusions without starting or stopping resources');args=ap.parse_args()
     if args.inventory_report:
         rows=[json.loads(line) for line in run(['docker','ps','--format','json']).decode().splitlines()]
         kept,excluded=inventory(rows,args.resume,set(args.peer_project))
@@ -77,6 +83,7 @@ def main():
         print(json.dumps({'protected':len(state),'excluded':len(excluded),'report':str(args.inventory_report)}));return
     if args.finalize:return finalize(args.finalize)
     project=args.resume or 'h02test-shixu-'+uuid.uuid4().hex[:8]
+    if not re.fullmatch(r'h02test-shixu-[a-f0-9]+',project):raise ValueError('Invalid isolated project')
     run_id=project+'-'+uuid.uuid4().hex[:8] if args.resume else project
     private=ROOT/'runtime'/project;private.mkdir(parents=True,exist_ok=bool(args.resume))
     print('Isolated project: '+project,flush=True)
@@ -89,7 +96,7 @@ def main():
         previous=json.loads((private/'compose.json').read_text(encoding='utf-8'));port=int(previous['services']['app']['ports'][0].split(':')[1]);pw=dotenv_values(private/'app.env')['DB_PASSWORD']
     appenv=private/'app.env'
     appenv.write_text('\n'.join(['SHIXU_SKIP_DOTENV=true','SHIXU_BACKEND=mysql','DB_HOST=db','DB_USER=root','DB_PASSWORD='+pw,'DB_NAME='+db,'DB_SSL=false','SHIXU_PUBLIC_URL=','SHIXU_HTTPS_PROXY_SECRET=','SHIXU_INSTANCE='+project,'SHIXU_BOOTSTRAP_PASSWORD='+secrets.token_hex(24)])+'\n',encoding='utf-8')
-    cfg={'services':{'db':{'image':'mysql:8.4','ports':[f'127.0.0.1:{db_port}:3306'],'environment':{'MYSQL_ROOT_PASSWORD':pw,'MYSQL_DATABASE':db},'command':['--performance-schema=OFF','--innodb-buffer-pool-size=32M','--max-connections=30'],'mem_limit':'512m','volumes':['db:/var/lib/mysql'],'healthcheck':{'test':['CMD-SHELL','MYSQL_PWD="$$MYSQL_ROOT_PASSWORD" mysql -h 127.0.0.1 -uroot -e "SELECT 1"'],'interval':'5s','timeout':'5s','retries':160}},'app':{'image':args.image,'env_file':[str(appenv)],'ports':[f'127.0.0.1:{port}:8765'],'volumes':['runtime:/app/runtime'],'depends_on':{'db':{'condition':'service_healthy'}},'init':True,'restart':'unless-stopped'}},'volumes':{'db':{},'runtime':{}}}
+    cfg={'services':{'db':{'image':'mysql:8.4','ports':[f'127.0.0.1:{db_port}:3306'],'environment':{'MYSQL_ROOT_PASSWORD':pw,'MYSQL_DATABASE':db},'command':['--performance-schema=OFF','--innodb-buffer-pool-size=32M','--max-connections=30'],'mem_limit':'512m','cpus':0.75,'restart':'no','volumes':['db:/var/lib/mysql'],'healthcheck':{'test':['CMD-SHELL','MYSQL_PWD="$$MYSQL_ROOT_PASSWORD" mysql -h 127.0.0.1 -uroot -e "SELECT 1"'],'interval':'5s','timeout':'5s','retries':160}},'app':{'image':args.image,'env_file':[str(appenv)],'ports':[f'127.0.0.1:{port}:8765'],'volumes':['runtime:/app/runtime'],'depends_on':{'db':{'condition':'service_healthy'}},'init':True,'restart':'no','mem_limit':'512m','cpus':0.75}},'volumes':{'db':{},'runtime':{}}}
     compose=private/'compose.json';compose.write_text(json.dumps(cfg),encoding='utf-8')
     os.environ.update(SHIXU_DOCKER_ENV_FILE=str(appenv),SHIXU_PORT=str(port),SHIXU_IMAGE=args.image)
     cli=['docker','compose','-p',project,'-f',str(ROOT/'compose.yaml'),'-f',str(compose)]
@@ -97,6 +104,7 @@ def main():
     report={'passed':False,'environment':'isolated','run_id':run_id,'compose_project':project,'mcp_mode':'embedded','delivery_id':json.loads((ROOT/'project-contract.json').read_text(encoding='utf-8'))['delivery_id'],'started_at':now(),'checks':[],'url':f'http://127.0.0.1:{port}','images':[], 'baseline_image':json.loads(run(['docker','image','inspect',args.baseline]))[0]['Id'], 'cold_start_evidence':('verification/docker/'+project+'.json' if args.resume else None)}
     from docker_contract import snapshot
     report['inputs']=snapshot(ROOT,json.loads((ROOT/'project-contract.json').read_text(encoding='utf-8'))['docker']['inputs'])
+    report['resource_limits']={'db':{'memory_mib':512,'cpus':0.75,'restart':'no'},'app':{'memory_mib':512,'cpus':0.75,'restart':'no'}}
     report['runner_sha256']=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     before=json.loads(run(['docker','ps','--format','json']).decode().strip().replace('\n',',').join(['[',']']) or '[]')
     existing,excluded=inventory(before,project,set(args.peer_project));report['existing_containers']=existing
@@ -148,7 +156,8 @@ def main():
         passed('api','Real API create/readback and Docker-entry browser business, accounts, trash, onboarding, creator workflows passed','Existing account isolation and OAuth tests executed through Docker entry')
         for kind in ['architecture','erd']:
             path='static/diagrams/'+kind+'.html';r=api.get('/'+path).raise_for_status();assert hashlib.sha256(r.content).digest()==hashlib.sha256((ROOT/path).read_bytes()).digest()
-        passed('diagrams','Both original HTML routes match current local bytes; independent offline geometry/browser reports accompany them')
+        run([sys.executable,'tests/diagrams_check.py','--live-schema'],env=env,timeout=120)
+        passed('diagrams','Actual isolated MySQL metadata verified (20 tables, 6 physical foreign keys)','Both original HTML routes match current local bytes; independent offline geometry/browser reports accompany them')
         retained=api.get('/api/workspace').raise_for_status().json()
         run(cli+['up','-d','--force-recreate','app','--wait','--wait-timeout','180'],timeout=240);wait_health();assert api.get('/api/workspace').json()==retained
         run(cli+['up','-d','--force-recreate','db','--wait','--wait-timeout','900'],timeout=960);wait_health();assert api.get('/api/workspace').json()==retained
@@ -172,11 +181,25 @@ def main():
         assert httpx.get(url+'/api/workspace',trust_env=False).status_code==503
         run(cli+['up','-d','db','--wait','--wait-timeout','900'],timeout=960);wait_health();assert api.get('/api/workspace').json()==retained
         passed('failure_recovery','Database stopped: health, anonymous, session and PAT requests explicitly 503; database recovered and workspace/session retained without app restart')
+        finalize(run_id)
+        report=json.loads((output/(run_id+'.json')).read_text(encoding='utf-8'))
     except Exception as error:
         (private/(run_id+'-error.txt')).write_text(str(error),encoding='utf-8')
-        report['error']=type(error).__name__+': isolated acceptance failed; raw diagnostic retained only under private runtime.';save();raise
+        report['error']=type(error).__name__+': isolated acceptance failed; raw diagnostic retained only under private runtime.'
+        try:(private/(run_id+'-container.log')).write_bytes(run(cli+['logs','--no-color','--tail','200'],timeout=30))
+        except Exception as log_error:(private/(run_id+'-log-error.txt')).write_text(str(log_error),encoding='utf-8')
+        save();raise
     finally:
+        try:
+            cleanup_owned(project,private)
+            report['finally_cleanup']={'passed':True,'scope':'Only owned isolated Compose containers and volumes removed; private diagnostic files preserved'}
+        except Exception as cleanup_error:
+            (private/(run_id+'-cleanup-error.txt')).write_text(str(cleanup_error),encoding='utf-8')
+            report['passed']=False
+            report['finally_cleanup']={'passed':False,'scope':'Owned resource cleanup failed; private diagnostic retained; no global cleanup attempted'}
         report['finished_at']=now();save()
-    if not args.keep:finalize(run_id)
+        if report.get('passed') or (ROOT/'verification/docker-report.json').exists():
+            (ROOT/'verification/docker-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8',newline='\n')
+    assert report['passed'],'Docker acceptance or owned cleanup failed'
     print(json.dumps({'run':project,'report':str(output/(run_id+'.json'))}))
 if __name__=='__main__':main()
