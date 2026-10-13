@@ -121,6 +121,8 @@ def validate(root):
         if tools-mapped_tools:errors.append('未映射MCP工具：'+str(sorted(tools-mapped_tools)))
         checks={c['name']:c for c in contract.get('checks',[])}
         validate_pages(root, contract, checks, errors)
+        from docker_contract import validate_docker
+        validate_docker(root,contract,errors)
         for name in CHECKS:
             check=checks.get(name,{})
             if check.get('status')!='passed':errors.append('验收未通过：'+name)

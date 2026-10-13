@@ -10,12 +10,12 @@
     "新建独立连接回读完整状态一致"
   ],
   "entity_counts": {
-    "issues": 21,
-    "tasks": 17,
-    "followups": 3,
-    "histories": 19,
-    "dependencies": 2
+    "issues": 19,
+    "tasks": 14,
+    "followups": 2,
+    "histories": 15,
+    "dependencies": 1
   },
   "old_databases_accessed": false,
-  "delivery_id": "5c1c2eda-e1c7-4f15-8ba0-e95295f32551"
+  "delivery_id": "0a31638d-1525-44f5-b7d6-1aa554f5c6cf"
 }

@@ -134,18 +134,18 @@ def main():
         import hashlib
         contract=json.loads((ROOT/'project-contract.json').read_text(encoding='utf-8'))
         contract['diagrams']={}
-        for kind,skill,files in [('architecture','D04',['app/main.py','app/domain.py','app/mysql_store.py','mcp_server.py','app/mcp_http.py','app/account_api.py','app/accounts.py','app/account_context.py','scripts/service.py','app/onboarding.py','app/onboarding_auth.py']),('erd','G02',['data/mysql-schema.sql','scripts/migrate_accounts.py','scripts/migrate_onboarding.py','scripts/migrate_custom_tools.py','app/onboarding_auth.py','app/accounts.py','app/mysql_store.py'])]:
+        for kind,skill,files in [('architecture','D04',['app/main.py','app/domain.py','app/mysql_store.py','mcp_server.py','app/mcp_http.py','app/account_api.py','app/accounts.py','app/account_context.py','Dockerfile','compose.yaml','app/onboarding.py','app/onboarding_auth.py']),('erd','G02',['data/mysql-schema.sql','scripts/migrate_accounts.py','scripts/migrate_onboarding.py','scripts/migrate_custom_tools.py','app/onboarding_auth.py','app/accounts.py','app/mysql_store.py'])]:
             path='static/diagrams/'+kind+'.html'
             sources=[dict(path=f,sha256=hashlib.sha256((ROOT/f).read_bytes()).hexdigest()) for f in files]
             sha=hashlib.sha256((ROOT/path).read_bytes()).hexdigest()
-            contract['diagrams'][kind]=dict(skill=skill,path=path,sha256=sha,maintenance='updated',change_note='AI接入、公开引导与Skill分发、OAuth刷新/轮换/设备证据更新；20实体6物理外键；自定义工具账号隔离与更新发现',sources=sources)
+            contract['diagrams'][kind]=dict(skill=skill,path=path,sha256=sha,maintenance=('updated' if kind=='architecture' else 'reviewed_unchanged'),change_note=('Docker单应用容器、外部MySQL、命名卷与完整同源入口' if kind=='architecture' else 'Docker化不改DDL/实体/关系；核对20表6物理外键并重新进行浏览器双态几何验收'),sources=sources)
             evidence=dict(passed=True,delivery_id=contract['delivery_id'],diagram_sha256=sha,sources=sources,source_consistent=True,details='verification/diagrams/report.json',scope='真实浏览器离线几何与交互；源码、DDL、迁移、元数据核对',live_schema=report.get('live_schema'))
-            (OUT/(kind+'-report.json')).write_text(json.dumps(evidence,ensure_ascii=False,indent=2),encoding='utf-8')
-        (ROOT/'project-contract.json').write_text(json.dumps(contract,ensure_ascii=False,indent=2),encoding='utf-8')
+            (OUT/(kind+'-report.json')).write_text(json.dumps(evidence,ensure_ascii=False,indent=2),encoding='utf-8', newline='\n')
+        (ROOT/'project-contract.json').write_text(json.dumps(contract,ensure_ascii=False,indent=2),encoding='utf-8', newline='\n')
         report['delivery_id']=contract['delivery_id']
         report['status']='pass'
         report['passed']=True
-        (OUT/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+        (OUT/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8', newline='\n')
         print(json.dumps(report,ensure_ascii=False,indent=2))
         browser.close()
     return int(bool(errors))

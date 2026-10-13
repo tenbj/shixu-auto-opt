@@ -1,22 +1,24 @@
 """白名单打包、内容扫描、换目录运行验证与合同检查。不会发布或上传。"""
+import argparse
 import hashlib
 import json
 import os
 from pathlib import Path
 import re
 import socket
+import shutil
 import subprocess
 import sys
 import tempfile
 import time
 import zipfile
 import httpx
-from check import stop
+from process_tools import stop
 
 ROOT = Path(__file__).resolve().parents[1]
 INCLUDE_DIRS = {'skills', 'app', 'static', 'docs', 'examples', 'tests', 'verification', 'scripts', 'data', 'reference', 'downloads', '.github'}
 INCLUDE_FILES = {'README.md', 'CHANGELOG.md', 'LICENSE', '.gitignore', '.env.example', 'requirements.txt',
-                 'requirements-dev.txt', 'requirements-lock.txt', 'project-contract.json', 'mcp_server.py'}
+                 'requirements-dev.txt', 'requirements-lock.txt', 'project-contract.json', 'mcp_server.py', 'Dockerfile', '.dockerignore', 'compose.yaml', '.env.docker.example'}
 SKIP_PARTS = {'__pycache__', '.pytest_cache', 'runtime', 'private', '.venv', '.git', 'dist'}
 
 
@@ -100,9 +102,10 @@ def portable(zip_path, temporary):
 
 
 def main():
+    parser=argparse.ArgumentParser();parser.add_argument('--ci',action='store_true',help='Verify portable source package without claiming full Docker delivery');args=parser.parse_args()
     summary = json.loads((ROOT / 'verification/summary.json').read_text(encoding='utf-8'))
     if not summary.get('passed'):
-        raise SystemExit('Run scripts/check.py successfully before packaging')
+        raise SystemExit('Run tests/run_suite.py successfully before packaging')
     report = scan(files())
     if not report['passed']:
         raise SystemExit(json.dumps(report))
@@ -112,28 +115,44 @@ def main():
         result = portable(candidate, temporary)
     delivery=json.loads((ROOT/'project-contract.json').read_text(encoding='utf-8'))['delivery_id']
     result['delivery_id']=delivery;report['delivery_id']=delivery
-    (ROOT / 'verification/portable-report.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
-    (ROOT / 'verification/release-scan.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
+    (ROOT / 'verification/portable-report.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8', newline='\n')
+    (ROOT / 'verification/release-scan.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8', newline='\n')
     subprocess.run([sys.executable, 'scripts/generate_docs.py'], cwd=ROOT, check=True)
-    subprocess.run([sys.executable, 'scripts/validate_project.py', '--project-dir', '.', '--report', 'verification/contract-report.json'], cwd=ROOT, check=True)
+    if not args.ci:
+        subprocess.run([sys.executable, 'scripts/validate_project.py', '--project-dir', '.', '--report', 'verification/contract-report.json'], cwd=ROOT, check=True)
     final_files = files()
     report = scan(final_files)
     report['delivery_id']=delivery
     if not report['passed']:
         raise SystemExit('Final package scan failed')
-    (ROOT / 'verification/release-scan.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
+    (ROOT / 'verification/release-scan.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8', newline='\n')
     directory = ROOT / 'dist'
     directory.mkdir(exist_ok=True)
-    target = directory / 'shixu-system-3.2.0.zip'
+    target = directory / 'shixu-system-3.2.1.zip'
     archive(target, files())
     digest = hashlib.sha256(target.read_bytes()).hexdigest()
-    (directory / 'SHA256SUMS.txt').write_text(digest + '  ' + target.name + '\n', encoding='utf-8')
+    manifest=json.loads((ROOT/'downloads/skill-manifest.json').read_text(encoding='utf-8'))
+    skill=ROOT/'downloads'/manifest['filename']
+    assert skill.parent==ROOT/'downloads' and skill.suffix=='.zip'
+    skill_digest=hashlib.sha256(skill.read_bytes()).hexdigest()
+    assert skill_digest==manifest['sha256'],'Skill archive does not match manifest'
+    source=ROOT/'skills/shixu-issues'
+    with zipfile.ZipFile(skill) as bundle:
+        assert bundle.testzip() is None
+        assert set(bundle.namelist())=={'shixu-issues/'+p for p in manifest['sources']}
+        for relative,expected in manifest['sources'].items():
+            assert (source/relative).resolve().is_relative_to(source.resolve())
+            actual=(source/relative).read_bytes()
+            assert hashlib.sha256(actual).hexdigest()==expected
+            assert bundle.read('shixu-issues/'+relative)==actual
+    shutil.copyfile(skill,directory/skill.name)
+    (directory / 'SHA256SUMS.txt').write_text(digest+'  '+target.name+'\n'+skill_digest+'  '+skill.name+'\n',encoding='utf-8', newline='\n')
     with zipfile.ZipFile(target) as bundle:
         assert bundle.testzip() is None
         assert all(not any(part in SKIP_PARTS for part in Path(name).parts) for name in bundle.namelist())
         contract = json.loads(bundle.read('shixu-system/project-contract.json'))
-        assert contract['status'] == 'ready'
-    print(json.dumps({'zip': str(target), 'sha256': digest, 'files': len(files()), 'passed': True}, ensure_ascii=False))
+        assert args.ci or contract['status'] == 'ready'
+    print(json.dumps({'zip': str(target), 'sha256': digest, 'files': len(files()), 'skill_zip':str(directory/skill.name),'skill_sha256':skill_digest,'passed': True}, ensure_ascii=False))
 
 
 if __name__ == '__main__':

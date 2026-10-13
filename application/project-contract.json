@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.2",
   "project_name": "拾序系统",
   "status": "ready",
   "prototype": {
@@ -482,7 +482,7 @@
       "name": "public_http",
       "required": false,
       "status": "not_run",
-      "evidence": "verification/public-http-report.json"
+      "evidence": ""
     },
     {
       "name": "f02",
@@ -497,10 +497,16 @@
       "evidence": "verification/onboarding-report.json"
     },
     {
+      "name": "docker",
+      "required": true,
+      "status": "passed",
+      "evidence": "verification/docker-report.json"
+    },
+    {
       "name": "ai_task",
-      "status": "not_run",
-      "evidence": "",
-      "reason": "已完成固定SDK序列，不等同于AI自主选择工具验收"
+      "status": "passed",
+      "evidence": "verification/ai-task-report.json",
+      "reason": "独立AI任务证据与固定SDK序列分别核对"
     },
     {
       "name": "mysql",
@@ -517,7 +523,7 @@
     "HTTP兼容开关支持网页登录和PAT/API/MCP；标准远程OAuth仍要求HTTPS。HTTPS优先入口shixu.eliasliu.cc，HTTP明文兼容入口保留",
     "OAuth动态注册与S256 PKCE、read/write集合兼容；访问令牌1小时、刷新轮换最长30天，重放/撤销使授权整组失效；PAT1年",
     "当前MySQL连接未启用TLS；凭据仅从私有环境读取",
-    "Windows/Python3.11服务端与SDK验收；干净实体电脑及全部runtime实机、AI自主安装任务未验收，支持矩阵不得冒充验证通过",
+    "Docker Linux amd64 / Python3.11及Windows SDK和浏览器验收；其他CPU架构、全部客户端实机和AI自主安装任务未验收",
     "账号归属在应用事务校验，ER仅展示数据库真实物理外键，owner_id为逻辑关联",
     "未选择开放许可证；脱敏源快照使用独立hash，原始原型保持未修改",
     "ready表示源码及安装包交付验收，不等同于线上部署；public_http仅为部署后可选验收，旧delivery报告不复用为本轮通过"
@@ -528,80 +534,84 @@
     "tables": 20,
     "test_adapter": "SQLite仅用于隔离测试与无凭据分发包检查"
   },
-  "version": "3.2.0",
-  "delivery_id": "5c1c2eda-e1c7-4f15-8ba0-e95295f32551",
+  "version": "3.2.1",
+  "delivery_id": "0a31638d-1525-44f5-b7d6-1aa554f5c6cf",
   "diagrams": {
     "architecture": {
       "skill": "D04",
       "path": "static/diagrams/architecture.html",
-      "sha256": "192aa26faedeacc3ca7bc82ec5adf538d891d2c50f08994f00e9fc9ec8cdd4cf",
+      "sha256": "303b61732ce2e078a5b10c17266ce1e80d47f38e56fce1ce92d25f4fc2b49bc3",
       "maintenance": "updated",
-      "change_note": "AI接入、公开引导与Skill分发、OAuth刷新/轮换/设备证据更新；20实体6物理外键；自定义工具账号隔离与更新发现",
+      "change_note": "Docker单应用容器、外部MySQL、命名卷与完整同源入口",
       "sources": [
         {
           "path": "app/main.py",
-          "sha256": "99193ead3e6def30d9269e9a2406e0282bfe426669a0b0172eaa8afbc3540c84"
+          "sha256": "74f8bb3567ec3e10bff1d589ee357df9943a13dd1b32a6bfeb4142108d028e1e"
         },
         {
           "path": "app/domain.py",
-          "sha256": "849f8bea36e63f00884989f695d81f7419c08f8c777824fcfc4c12c4e5cd8de8"
+          "sha256": "b4914e8d85cac6fbc7e2326105f1a3a6bc9f0fcfa94c8802e1d6cc20f7a7f937"
         },
         {
           "path": "app/mysql_store.py",
-          "sha256": "dcb2bb301e64488bccadc11c78dbc65a02480f5c76065df0e8655a88e602ec6b"
+          "sha256": "4dbf110d7daa6c19b8a96d9fa7614bc117923ef051b562e55a6ed8dafef74ed9"
         },
         {
           "path": "mcp_server.py",
-          "sha256": "b0f0d8495f60b6c63bdb2b499f985cd0072cb587218c82cb52809d49b0ba7da5"
+          "sha256": "9b5c24e4ce71d032abf6687eb786fd6344569ba61196d9607a523d8901c4f145"
         },
         {
           "path": "app/mcp_http.py",
-          "sha256": "c8cff4096f6469b2b06ce80cc00e22bf3553098cdac56c7125f224954c582957"
+          "sha256": "69b14fce4d7cd5f0194b5ac696448ab1142397c888249809361b72e98f22c828"
         },
         {
           "path": "app/account_api.py",
-          "sha256": "64a61b40a307ad496f82a07559e3f805b756e6039bf746cdb42fe8e9824dba4b"
+          "sha256": "2c1495c0019847b6479bb49a913011da65350d093d155de1f5ef2ef43b8a86d2"
         },
         {
           "path": "app/accounts.py",
-          "sha256": "76a1e4a23d9363c31cbe5e9078559d414ba828cfae50f1438065524533815f63"
+          "sha256": "7478eaa39fbec35d52f543b25816af9c5504f305970e208df6c3ac6d4efae786"
         },
         {
           "path": "app/account_context.py",
-          "sha256": "aa4587152684213f0723122204458ecd98709342b84a333625282ead97d8dd8a"
+          "sha256": "210982f27d89f4fe2513a66bd5b4f2a06974c670daad96d9e2f0db7911b3c35e"
         },
         {
-          "path": "scripts/service.py",
-          "sha256": "5569117d3681f7be55103be9c287869545ee2be52083131362377d4b71de3230"
+          "path": "Dockerfile",
+          "sha256": "d962e0684040c19ac6f17b46b0d8e0c1735b6cae5c2c88950ab210aaa13dc2b2"
+        },
+        {
+          "path": "compose.yaml",
+          "sha256": "b3c1d0bf0b47dd6182590bbfbc852e6d49ec2976259802464796573db1e21b9b"
         },
         {
           "path": "app/onboarding.py",
-          "sha256": "7ec23d86eef26da6d21f9e91507a392dfbb710ba6be965031dd11137c32005dc"
+          "sha256": "abf2849b0f5803b59c91a2101ef0f5ad49c76acc265571e2d4d5c9e223b78c7d"
         },
         {
           "path": "app/onboarding_auth.py",
-          "sha256": "4fe9603fc8cab1743efd5056929059c704403d48752c66d77e821c4ab6ca8bce"
+          "sha256": "9a1e13480ab2266f984a2f0fcc91d8f226d99c14ee578d1b41b03419515013f5"
         }
       ]
     },
     "erd": {
       "skill": "G02",
       "path": "static/diagrams/erd.html",
-      "sha256": "49ad2f75b392cae4cd1f232f1fb7714b3a1602933807b812f6565d21b700b385",
-      "maintenance": "updated",
-      "change_note": "AI接入、公开引导与Skill分发、OAuth刷新/轮换/设备证据更新；20实体6物理外键；自定义工具账号隔离与更新发现",
+      "sha256": "435588d34baf0556da54edde4de75cce46c52c81e03c383a9d9c3fd31442eb84",
+      "maintenance": "reviewed_unchanged",
+      "change_note": "Docker化不改DDL/实体/关系；核对20表6物理外键并重新进行浏览器双态几何验收",
       "sources": [
         {
           "path": "data/mysql-schema.sql",
-          "sha256": "884a7fef8c21324e2f734902880f62e0dbf215a97702dd5fb9f2cb6a060ebbdc"
+          "sha256": "26151e441fb8c79e153cc99efb676a55bc3a602bfa8f0e6eca9a1829ae522d14"
         },
         {
           "path": "scripts/migrate_accounts.py",
-          "sha256": "efa2ce8567b2ffd7a6e056ef74cc43555f3e43c055312d1d67730f94f478bfa0"
+          "sha256": "10ed677317ef9f513589816ec49747f9096f904bc47184f876d5f066e2bcda9d"
         },
         {
           "path": "scripts/migrate_onboarding.py",
-          "sha256": "51a77198d75188e5261b4680902c8a63aad84e6a82b3e83d004ced51dae25339"
+          "sha256": "9366f98ffb4086d5701ab0a2f067c63443beca4e7f5316715b0d2d59ef285ef9"
         },
         {
           "path": "scripts/migrate_custom_tools.py",
@@ -609,18 +619,53 @@
         },
         {
           "path": "app/onboarding_auth.py",
-          "sha256": "4fe9603fc8cab1743efd5056929059c704403d48752c66d77e821c4ab6ca8bce"
+          "sha256": "9a1e13480ab2266f984a2f0fcc91d8f226d99c14ee578d1b41b03419515013f5"
         },
         {
           "path": "app/accounts.py",
-          "sha256": "76a1e4a23d9363c31cbe5e9078559d414ba828cfae50f1438065524533815f63"
+          "sha256": "7478eaa39fbec35d52f543b25816af9c5504f305970e208df6c3ac6d4efae786"
         },
         {
           "path": "app/mysql_store.py",
-          "sha256": "dcb2bb301e64488bccadc11c78dbc65a02480f5c76065df0e8655a88e602ec6b"
+          "sha256": "4dbf110d7daa6c19b8a96d9fa7614bc117923ef051b562e55a6ed8dafef74ed9"
         }
       ]
     }
   },
-  "iteration": "HTTP/HTTPS compatibility; source prototype unchanged"
+  "iteration": "正式Docker发布整理：复用测试集中、历史部署脚本移除、账号交互与故障处理修复",
+  "docker": {
+    "required": true,
+    "mcp_mode": "embedded",
+    "stateful": true,
+    "compose_files": [
+      "compose.yaml"
+    ],
+    "dockerfiles": [
+      "Dockerfile"
+    ],
+    "ignore_files": [
+      ".dockerignore"
+    ],
+    "guide": "docs/Docker部署.md",
+    "inputs": [
+      "app",
+      "static",
+      "docs",
+      "examples",
+      "downloads",
+      "skills",
+      "data",
+      "scripts",
+      "mcp_server.py",
+      "requirements-lock.txt",
+      "Dockerfile",
+      "compose.yaml",
+      ".dockerignore",
+      ".env.docker.example"
+    ],
+    "services": [
+      "app"
+    ],
+    "evidence": "verification/docker-report.json"
+  }
 }

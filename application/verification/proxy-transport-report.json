@@ -1,0 +1,29 @@
+{
+  "passed": true,
+  "delivery_id": "0a31638d-1525-44f5-b7d6-1aa554f5c6cf",
+  "checks": [
+    {
+      "scheme": "http",
+      "passed": true,
+      "scope": "Non-loopback browser origin; register/login session, mobile tabs, generated URL, 29 MCP tools, create/read, revoke, logout, Cookie attributes, and delayed real ME response preserves registration draft"
+    },
+    {
+      "scheme": "https",
+      "passed": true,
+      "scope": "Non-loopback browser origin; register/login session, mobile tabs, generated URL, 29 MCP tools, create/read, revoke, logout, Cookie attributes, and delayed real ME response preserves registration draft"
+    },
+    {
+      "scheme": "http+https",
+      "passed": true,
+      "same_browser_context": true,
+      "scope": "Both origins stay on original scheme; UI registration and explicit login; session-authenticated business create/read; cross-account 404; each logout preserves the other scheme session; login restores own data"
+    }
+  ],
+  "browser_errors": [],
+  "public_tls_deployed": false,
+  "production_writes": 0,
+  "tls": "Real TLS with ephemeral self-signed test certificate; MCP verifies test CA; no change to public TLS",
+  "forwarded_header_spoof_rejected": true,
+  "backend": "proxy-sqlite-test",
+  "upstream": "http://127.0.0.1:64034"
+}

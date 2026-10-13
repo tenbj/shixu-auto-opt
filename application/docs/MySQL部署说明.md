@@ -18,7 +18,7 @@
 2. 将 DB_NAME 设置为该新库，配置仓库外私有文件及 `.env` 指针。
 3. 在 system 目录执行 `python scripts/init_mysql.py --database shixu_your_workspace`。脚本检查目标库为空才创建表，非空直接拒绝；不会 DROP、覆盖或自动迁移已有表。
 4. 执行 `python scripts/service.py start`，检查 `/api/health` 的 backend 为 mysql，database 为指定的新库。
-5. 如需真实集成测试，另外新建并初始化 `shixu_your_workspace_test`，运行 `python scripts/check.py --mysql`。该命令只将测试数据写入新建的 `_test` 库。
+5. 如需真实集成测试，另外新建并初始化 `shixu_your_workspace_test`，运行 `python tests/run_suite.py --mysql`。该命令只将测试数据写入新建的 `_test` 库。
 
 运行服务只验证专属库标记，不执行建库或建表。数据库必须为 `shixu_` 前缀且包含正确的应用标记。涉及数据库结构变化需显式迁移，不在每次启动时更改用户库结构。
 

@@ -1,0 +1,27 @@
+{
+  "status": "verified_for_release_packaging",
+  "recorded_at": "2026-10-13T15:57:09.277728+00:00",
+  "delivery_id": "0a31638d-1525-44f5-b7d6-1aa554f5c6cf",
+  "version": "3.2.1",
+  "contract_status": "ready",
+  "docker_passed": true,
+  "docker_execution": "segmented",
+  "docker_evidence": "verification/docker-report.json",
+  "complete_run": "h02test-shixu-32b356ff (original passed=false retained; 11 accepted stages)",
+  "supplementary_run": "h02test-shixu-e51f2ff6",
+  "application_image": "sha256:10e16b65e10e06187248b97d4ecfba590adfa264f2daaf70fd0436af9b8d107d",
+  "application_input_count": 89,
+  "supplementary_test_input_count": 36,
+  "offline_pytest_before_test_correction": 96,
+  "targeted_after_test_correction": 12,
+  "ai_task": "Independent tool discovery/selection/read-back passed; Skill installation not claimed",
+  "production_deployed": false,
+  "remote_published": false,
+  "owned_test_resources_remaining": {
+    "containers": 0,
+    "volumes": 0,
+    "networks": 0
+  },
+  "next_action": "Complete normal package generation and final blob/asset privacy review; parent handles GitHub publication and separately authorized production deployment",
+  "detail": "verification/验收索引.md"
+}

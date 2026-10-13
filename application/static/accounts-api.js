@@ -15,7 +15,18 @@ async function logoutAccount(){
  currentUser=null;csrfToken='';loaded=false;profiles=[];restoreCustomTools([],{});activeProfileId='';db={issues:[],tasks:[],identityProfiles:[]};pendingWrite=null;lastPreviewConfig=null;
  document.querySelectorAll('dialog[open]').forEach(d=>d.close());showLogin();window.scrollTo(0,0);
 }
-async function bootAccount(){try{const result=await request('/api/auth/me');await loginAccount(result)}catch(e){showLogin('login',e.status===401?'':e.message)}}
+async function bootAccount(){
+ try{
+  const response=await fetch('/api/auth/me',{signal:AbortSignal.timeout(15000)}),result=await response.json();
+  if(!response.ok){const error=new Error(typeof result.detail==='string'?result.detail:'登录状态检查失败');error.status=response.status;throw error}
+  if(!currentUser)await loginAccount(result);
+ }catch(e){
+  if(currentUser)return;
+  const form=document.querySelector('#account-auth-form');
+  if(!form)showLogin('login',e.status===401?'':e.message);
+  else if(e.status!==401){const notice=document.querySelector('#account-auth-error');if(notice)notice.textContent=e.message}
+ }finally{document.documentElement.dataset.accountBoot='complete'}
+}
 async function showAuthorization(){
  const key=new URLSearchParams(location.search).get('authorize');
  if(!key&&currentUser.connection?.oauthAvailable===false){show('HTTP 连接方法',`<p>当前HTTP地址使用访问令牌连接。请在“AI接入 → 手动配置”生成并下载配置，再导入客户端。</p><p>“访问令牌”也适用于个人电脑上的AI客户端。标准OAuth登录授权需要HTTPS。</p>`);return}
@@ -43,7 +54,13 @@ let accountDraft='';
 function accountFormSnapshot(){return JSON.stringify([...document.querySelectorAll('#account-modal form')].map(f=>[f.id,[...new FormData(f)]]))}
 function accountHasDraft(){return document.querySelector('#account-modal')?.open&&accountDraft!==accountFormSnapshot()}
 function allowAccountDiscard(){return !accountHasDraft()||confirm('有未保存的修改。确定放弃吗？取消可继续编辑。')}
-function closeAccountPanel(){document.querySelector('#account-modal')?.close();[...document.querySelectorAll('.account-pill')].find(x=>x.getBoundingClientRect().width>0)?.focus({preventScroll:true})};
+function closeAccountPanel(){
+ const modal=document.querySelector('#account-modal');modal?.close();
+ const restore=()=>[...document.querySelectorAll('.account-pill')].find(x=>x.getClientRects().length&&getComputedStyle(x).visibility!=='hidden')?.focus({preventScroll:true});
+ restore();requestAnimationFrame(()=>{if(!modal?.open&&!document.querySelector('dialog[open]'))restore()});
+};
+// Handle Escape deterministically after tab DOM replacement and nested-dialog closure.
+document.addEventListener('keydown',e=>{const modal=document.querySelector('#account-modal');if(e.key!=='Escape'||!modal?.open||document.querySelector('#modal')?.open)return;e.preventDefault();e.stopPropagation();if(allowAccountDiscard())closeAccountPanel()},true);
 const accountRenderPage=renderAccountPage;
 renderAccountPage=function(){
  accountRenderPage();

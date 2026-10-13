@@ -1,0 +1,24 @@
+[
+  {
+    "project": "h02test-shixu-32b356ff",
+    "service": "app",
+    "image": "sha256:10e16b65e10e06187248b97d4ecfba590adfa264f2daaf70fd0436af9b8d107d",
+    "created": "2026-10-13T15:31:49.955841861Z",
+    "started_at": "2026-10-13T15:31:52.032768676Z",
+    "health": "healthy",
+    "memory_mib": 512,
+    "cpus": 0.75,
+    "restart": "no"
+  },
+  {
+    "project": "h02test-shixu-32b356ff",
+    "service": "db",
+    "image": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242",
+    "created": "2026-10-13T15:29:23.604717935Z",
+    "started_at": "2026-10-13T15:29:25.460036049Z",
+    "health": "healthy",
+    "memory_mib": 512,
+    "cpus": 0.75,
+    "restart": "no"
+  }
+]

@@ -10,7 +10,7 @@
 |---|---|---|
 | [prototype/](prototype/) | v1.9.0 交互原型、需求、设计合同与验证材料 | [原型说明](prototype/README.md)，直接用浏览器打开 [prototype.html](prototype/prototype.html) |
 | [prototype-accounts/](prototype-accounts/) | v1.9.0 自定义AI工具原型 | [账号原型说明](prototype-accounts/README.md) |
-| [application/](application/) | v3.2.0 自定义AI工具与接入更新应用、HTTP API、MCP、测试与部署文档 | [应用安装与运行](application/README.md) |
+| [application/](application/) | v3.2.1 Docker部署与账号交互修复应用、HTTP API、MCP、测试与部署文档 | [应用安装与运行](application/README.md) |
 
 应用使用 Python 3.11+ 与独立 MySQL 8.0，页面、业务及账号 API 与 29 个 MCP 工具共用后端规则。默认入口 http://127.0.0.1:8765/，API 文档 `/docs`，MCP 默认随服务提供 `/mcp` HTTP 入口与账号OAuth/PAT认证，同时保留 stdio。
 

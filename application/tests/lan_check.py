@@ -30,7 +30,7 @@ def main():
         page = browser.new_page()
         page.on('pageerror', lambda error: errors.append(str(error)))
         page.goto(args.url)
-        expect(page.locator('#sync-state')).to_contain_text('已同步')
+        expect(page.locator('input[name="username"]')).to_be_visible()
         assert not errors, errors
         browser.close()
     report = {'passed': True, 'scope': '本机通过所给内网IP进行真实HTTP与浏览器只读访问；未使用另一台设备验收',

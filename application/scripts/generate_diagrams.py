@@ -89,8 +89,8 @@ def model():
 def main():
     data=model()
     erd=(ROOT / 'scripts' / 'erd-template.html').read_text(encoding='utf-8')
-    (OUT/'erd.html').write_text(erd.replace('__MODEL__',json.dumps(data,ensure_ascii=False)),encoding='utf-8')
-    (OUT/'architecture.html').write_text((ROOT/'scripts'/'architecture-template.html').read_text(encoding='utf-8'),encoding='utf-8')
+    (OUT/'erd.html').write_text(erd.replace('__MODEL__',json.dumps(data,ensure_ascii=False)),encoding='utf-8', newline='\n')
+    (OUT/'architecture.html').write_text((ROOT/'scripts'/'architecture-template.html').read_text(encoding='utf-8'),encoding='utf-8', newline='\n')
     print(f'ER model: {len(data["tables"])} entities, {len(data["relations"])} physical foreign keys')
 
 

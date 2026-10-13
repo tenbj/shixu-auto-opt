@@ -1,9 +1,0 @@
-{
-  "passed": true,
-  "version": "2.2.1",
-  "revision": 10,
-  "backend": "mysql",
-  "delete_guards": 9,
-  "public_same_instance": true,
-  "business_writes": 0
-}

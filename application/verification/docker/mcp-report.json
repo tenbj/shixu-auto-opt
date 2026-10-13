@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "transport": "streamable-http",
+  "tools": 29,
+  "checks": [
+    "authenticated SDK initialize",
+    "29 tools discovered",
+    "health",
+    "identity list",
+    "real API write",
+    "idempotent replay",
+    "readback"
+  ],
+  "scope": "SDK固定序列；不代表AI自主验收",
+  "token_printed": false
+}

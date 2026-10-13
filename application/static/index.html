@@ -587,7 +587,7 @@ function render(){
  if(!document.querySelector('.mobile-header')){
   document.body.insertAdjacentHTML('afterbegin',`<header class="mobile-header"><div class="mobile-brand"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="10" fill="#42684e"/><path d="m8 16 5-3 6 6 5-3" fill="none" stroke="#f6f8f0" stroke-width="2" stroke-linecap="round"/></svg>拾序<span id="mobile-sync-state" role="status" class="mobile-sync-state">连接中…</span></div><div id="mobile-identity"></div>${mobileAttrs(btn('···','mobile-more','','mobile-more'),' aria-label="更多功能"')}</header><nav class="mobile-bottom" aria-label="移动主导航"></nav>`);
  }
- document.querySelector('#mobile-identity').innerHTML=identitySwitch('mobile-identity');
+ // Account chrome owns the mobile identity control and preserves its focus across renders.
  const names={today:'今日',issues:'问题',tasks:'行动',analysis:'统计',review:'复盘'};
  document.querySelector('.mobile-bottom').innerHTML=Object.keys(names).map(id=>mobileAttrs(btn(mobileSvg(id)+`<span>${names[id]}</span>`,'nav',id,view===id?'active':''),` aria-label="${names[id]}" ${view===id?'aria-current="page"':''}`)).join('');
  if(mobileViewport.matches){
@@ -620,6 +620,8 @@ function accountField(label,control){return `<label class="account-field"><span>
 function accountInput(name,type='text',value='',placeholder='',attrs=''){return `<input data-event-id="EVT-ACCOUNT" name="${name}" type="${type}" value="${esc(value)}" placeholder="${esc(placeholder)}" ${attrs}>`}
 function showLogin(mode='login',notice=''){
  closeAccountMenu();
+ document.querySelectorAll('#account-menu,#mobile-identity').forEach(x=>{x.replaceChildren();delete x.dataset.accountControl});
+
  document.querySelectorAll('dialog[open]').forEach(d=>d.close());document.body.classList.add('account-logged-out');
  let box=document.querySelector('#account-auth');if(!box){box=document.createElement('section');box.id='account-auth';document.body.prepend(box)}box.hidden=false;
  box.innerHTML=`<div class="auth-story"><div class="auth-wordmark"><span>⌁</span> 拾序</div><div><div class="auth-eyebrow">A LITTLE MORE CLARITY</div><h1>每个人，<br>都有自己的空间。</h1><p>记下困扰，整理行动。<br>把生活里重要的事，慢慢理出头绪。</p></div><small>你的问题、行动和接入授权，只属于你的工作台。</small></div><div class="auth-panel"><div class="auth-panel-inner"><span class="auth-preview">拾序 · 独立工作台</span><h2>${mode==='register'?'开始你的工作台':'欢迎回来'}</h2><p>${mode==='register'?'新账号从空工作台开始，记录不会与他人互通。':'登录，继续整理属于你的问题和行动。'}</p><form id="account-auth-form" data-event-id="EVT-ACCOUNT" data-mode="${mode}">${accountField('账号',accountInput('username','text','', '输入账号','required maxlength="40" autocomplete="username"'))}${mode==='register'?accountField('显示名称',accountInput('displayName','text','','你希望如何被称呼','maxlength="60"')):''}${accountField('密码',accountInput('password','password','','输入密码','required minlength="4" autocomplete="'+(mode==='login'?'current-password':'new-password')+'"'))}${mode==='register'?accountField('确认密码',accountInput('confirm','password','','再次输入密码','required minlength="8" autocomplete="new-password"')):''}<div id="account-auth-error" class="account-error" role="alert">${esc(notice)}</div><button type="submit" data-event-id="EVT-ACCOUNT" class="primary auth-submit">${mode==='register'?'创建账号并进入':'登录工作台'} <span>→</span></button></form><p><a href="/connect">连接 AI · 查看接入指引</a></p><div class="auth-switch">${mode==='register'?'已经有账号？':'第一次使用？'}${accountButton(mode==='register'?'返回登录':'创建独立工作台',mode==='register'?'login-mode':'register-mode','','account-link')}</div></div></div>`;
@@ -629,8 +631,8 @@ function renderAccountChrome(){
  document.querySelectorAll('aside [data-action="nav"][data-id="settings"],aside [data-action="nav"][data-id="connections"]').forEach(x=>x.remove());
  const user=accountNow();document.querySelector('#account-auth')?.setAttribute('hidden','');document.body.classList.remove('account-logged-out');
  let top=document.querySelector('#account-menu');if(!top){top=document.createElement('div');top.id='account-menu';document.querySelector('.topbar-right').append(top)}
- const control=accountButton(`<span class="account-avatar">${esc(user.displayName.slice(0,1).toUpperCase())}</span><span>${esc(user.displayName)}<small>独立工作台</small></span><span>⌄</span>`,'toggle-menu','','account-pill');top.innerHTML=control;top.querySelector('button').setAttribute('aria-haspopup','menu');top.querySelector('button').setAttribute('aria-expanded','false');
- document.querySelector('#mobile-identity').innerHTML=control;document.querySelector('#mobile-identity button').setAttribute('aria-label','账号菜单：'+user.displayName);document.querySelector('#mobile-identity button').setAttribute('aria-haspopup','menu');document.querySelector('#mobile-identity button').setAttribute('aria-expanded','false');closeAccountMenu();document.querySelector('.nav-label').textContent=user.displayName+' 的工作台';
+ const control=accountButton(`<span class="account-avatar">${esc(user.displayName.slice(0,1).toUpperCase())}</span><span>${esc(user.displayName)}<small>独立工作台</small></span><span>⌄</span>`,'toggle-menu','','account-pill');if(top.dataset.accountControl!==control){top.innerHTML=control;top.dataset.accountControl=control;closeAccountMenu()};top.querySelector('button').setAttribute('aria-haspopup','menu');top.querySelector('button').setAttribute('aria-expanded',String(!!document.querySelector('#account-dropdown')));
+ const mobileControl=document.querySelector('#mobile-identity');if(mobileControl.dataset.accountControl!==control){mobileControl.innerHTML=control;mobileControl.dataset.accountControl=control;closeAccountMenu()};document.querySelector('#mobile-identity button').setAttribute('aria-label','账号菜单：'+user.displayName);document.querySelector('#mobile-identity button').setAttribute('aria-haspopup','menu');document.querySelector('#mobile-identity button').setAttribute('aria-expanded',String(!!document.querySelector('#account-dropdown')));document.querySelector('.nav-label').textContent=user.displayName+' 的工作台';
  document.querySelector('.topbar>span').innerHTML=esc(user.displayName)+' 的工作台 <span class="breadcrumb-separator">/</span><span id="breadcrumb">'+({settings:'账号设置',connections:'AI接入',today:'今日概览',issues:'问题池',tasks:'行动看板',analysis:'统计分析',review:'复盘记录'}[view])+'</span>';
  
 }
@@ -718,7 +720,18 @@ async function logoutAccount(){
  currentUser=null;csrfToken='';loaded=false;profiles=[];restoreCustomTools([],{});activeProfileId='';db={issues:[],tasks:[],identityProfiles:[]};pendingWrite=null;lastPreviewConfig=null;
  document.querySelectorAll('dialog[open]').forEach(d=>d.close());showLogin();window.scrollTo(0,0);
 }
-async function bootAccount(){try{const result=await request('/api/auth/me');await loginAccount(result)}catch(e){showLogin('login',e.status===401?'':e.message)}}
+async function bootAccount(){
+ try{
+  const response=await fetch('/api/auth/me',{signal:AbortSignal.timeout(15000)}),result=await response.json();
+  if(!response.ok){const error=new Error(typeof result.detail==='string'?result.detail:'登录状态检查失败');error.status=response.status;throw error}
+  if(!currentUser)await loginAccount(result);
+ }catch(e){
+  if(currentUser)return;
+  const form=document.querySelector('#account-auth-form');
+  if(!form)showLogin('login',e.status===401?'':e.message);
+  else if(e.status!==401){const notice=document.querySelector('#account-auth-error');if(notice)notice.textContent=e.message}
+ }finally{document.documentElement.dataset.accountBoot='complete'}
+}
 async function showAuthorization(){
  const key=new URLSearchParams(location.search).get('authorize');
  if(!key&&currentUser.connection?.oauthAvailable===false){show('HTTP 连接方法',`<p>当前HTTP地址使用访问令牌连接。请在“AI接入 → 手动配置”生成并下载配置，再导入客户端。</p><p>“访问令牌”也适用于个人电脑上的AI客户端。标准OAuth登录授权需要HTTPS。</p>`);return}
@@ -746,7 +759,13 @@ let accountDraft='';
 function accountFormSnapshot(){return JSON.stringify([...document.querySelectorAll('#account-modal form')].map(f=>[f.id,[...new FormData(f)]]))}
 function accountHasDraft(){return document.querySelector('#account-modal')?.open&&accountDraft!==accountFormSnapshot()}
 function allowAccountDiscard(){return !accountHasDraft()||confirm('有未保存的修改。确定放弃吗？取消可继续编辑。')}
-function closeAccountPanel(){document.querySelector('#account-modal')?.close();[...document.querySelectorAll('.account-pill')].find(x=>x.getBoundingClientRect().width>0)?.focus({preventScroll:true})};
+function closeAccountPanel(){
+ const modal=document.querySelector('#account-modal');modal?.close();
+ const restore=()=>[...document.querySelectorAll('.account-pill')].find(x=>x.getClientRects().length&&getComputedStyle(x).visibility!=='hidden')?.focus({preventScroll:true});
+ restore();requestAnimationFrame(()=>{if(!modal?.open&&!document.querySelector('dialog[open]'))restore()});
+};
+// Handle Escape deterministically after tab DOM replacement and nested-dialog closure.
+document.addEventListener('keydown',e=>{const modal=document.querySelector('#account-modal');if(e.key!=='Escape'||!modal?.open||document.querySelector('#modal')?.open)return;e.preventDefault();e.stopPropagation();if(allowAccountDiscard())closeAccountPanel()},true);
 const accountRenderPage=renderAccountPage;
 renderAccountPage=function(){
  accountRenderPage();

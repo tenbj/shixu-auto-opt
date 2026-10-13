@@ -70,12 +70,15 @@ def run(url):
                 expect(page.locator('#ai-copy-status')).to_contain_text('已复制')
                 page.screenshot(path=str(ROOT/f'verification/onboarding-quick-{width}.png'),timeout=30000)
                 page.locator('[role=tab][data-id=list]').click();expect(page.locator('#account-tabpanel')).to_contain_text('MCP 已验证')
-                page.locator('[data-ai-action=rename]').click();page.locator('#ai-rename-form [name=name]').fill('重命名设备')
-                page.locator('#ai-rename-form [type=submit]').click();expect(page.locator('#account-tabpanel')).to_contain_text('重命名设备')
+                # Each viewport must wait for its own rename response/render, not a prior identical label.
+                renamed='重命名设备'+str(width)
+                page.locator('[data-ai-action=rename]').click();page.locator('#ai-rename-form [name=name]').fill(renamed)
+                page.locator('#ai-rename-form [type=submit]').click();expect(page.locator('#account-tabpanel')).to_contain_text(renamed)
+                expect(page.locator('#modal')).not_to_be_visible()
                 page.locator('[role=tab][data-id=server]').click();expect(page.locator('#account-tabpanel')).to_contain_text('访问令牌')
                 page.locator('[role=tab][data-id=server]').press('Home');expect(page.locator('[role=tab][aria-selected=true]')).to_contain_text('快速接入')
                 page.keyboard.press('Escape');expect(page.locator('#account-modal')).not_to_be_visible()
-                assert page.evaluate('document.activeElement.classList.contains("account-pill")')
+                assert page.evaluate('document.activeElement.classList.contains("account-pill")'), {'width':width,'active':page.evaluate('document.activeElement.outerHTML'),'dialog':page.locator('#account-modal').get_attribute('open')}
                 assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
                 checks.append(f'{width}px public copy, account top-right entry, three tabs, rename, keyboard and context return')
                 page.close()

@@ -1,7 +1,0 @@
-{
-  "passed": true,
-  "delivery_id": "2d67f27c-c432-47bf-a6f7-730b425d1d78",
-  "method": "G02 static_errors and rendered_errors on real Playwright browser DOM; CLI dump-dom cleanup timed out",
-  "sha256": "56fc697e3f4fb1bf3fc483dcb537aff6be7fd3af02712134550079ce004d1c21",
-  "errors": []
-}
