@@ -82,7 +82,15 @@ def main():
                     context=browser.new_context(ignore_https_errors=True,viewport={'width':390,'height':844})
                     page=context.new_page();page.on('pageerror',lambda e:errors.append(str(e)))
                     origin=f'{scheme}://shixu.test:{p}';url=f'{scheme}://127.0.0.1:{p}'
-                    page.goto(origin,wait_until='domcontentloaded');page.locator('[data-account-action=register-mode]').click()
+                    pending=[];page.route('**/api/auth/me',lambda route:pending.append(route))
+                    page.goto(origin,wait_until='domcontentloaded');page.wait_for_function("!!document.querySelector('[data-account-action=register-mode]')")
+                    page.locator('[data-account-action=register-mode]').click()
+                    page.locator('[name=username]').fill('preserve_registration_draft')
+                    assert len(pending)==1
+                    pending[0].continue_();page.wait_for_function("document.documentElement.dataset.accountBoot==='complete'")
+                    expect(page.locator('#account-auth-form')).to_have_attribute('data-mode','register')
+                    expect(page.locator('[name=username]')).to_have_value('preserve_registration_draft')
+                    expect(page.locator('[name=confirm]')).to_be_visible();page.unroute('**/api/auth/me')
                     username='transport_'+uuid4().hex[:10];password=uuid4().hex
                     for name,value in [('username',username),('displayName','协议验收'),('password',password),('confirm',password)]:page.locator('[name='+name+']').fill(value)
                     page.locator('#account-auth-form [type=submit]').click();expect(page.locator('.account-pill:visible')).to_contain_text('协议验收')
@@ -107,8 +115,47 @@ def main():
                     assert cookie['secure']==(scheme=='https') and cookie['httpOnly']
                     page.locator('[data-account-action=close-account-panel]').click();page.locator('.account-pill:visible').click();page.locator('#account-dropdown [data-account-action=logout]').click()
                     expect(page.locator('#account-auth')).to_be_visible()
-                    checks.append(dict(scheme=scheme,passed=True,scope='Non-loopback browser origin; register/login session, mobile tabs, generated URL, 29 MCP tools, create/read, revoke, logout and Cookie attributes'))
+                    checks.append(dict(scheme=scheme,passed=True,scope='Non-loopback browser origin; register/login session, mobile tabs, generated URL, 29 MCP tools, create/read, revoke, logout, Cookie attributes, and delayed real ME response preserves registration draft'))
                     context.close()
+                # Same browser, same hostname, two schemes: each session must survive the other's login/logout.
+                shared=browser.new_context(ignore_https_errors=True,viewport={'width':390,'height':844})
+                pages={};credentials={};users={};issue_ids={}
+                def json_request(page,path):
+                    return page.evaluate("async path=>{const r=await fetch(path);return {status:r.status,body:await r.json()}}",path)
+                def logout(page):
+                    page.locator('.account-pill:visible').click();page.locator('#account-dropdown [data-account-action=logout]').click()
+                    expect(page.locator('#account-auth')).to_be_visible()
+                def login(page,scheme):
+                    user,password=credentials[scheme]
+                    page.locator('[name=username]').fill(user);page.locator('[name=password]').fill(password)
+                    page.locator('#account-auth-form [type=submit]').click()
+                    expect(page.locator('.account-pill:visible')).to_contain_text('双入口'+scheme)
+                for scheme,p in ports.items():
+                    page=shared.new_page();pages[scheme]=page
+                    response=page.goto(f'{scheme}://shixu.test:{p}',wait_until='domcontentloaded')
+                    assert response.status==200 and page.url.startswith(scheme+'://')
+                    page.locator('[data-account-action=register-mode]').click()
+                    user='shared_'+uuid4().hex[:10];password=uuid4().hex;credentials[scheme]=(user,password)
+                    for name,value in [('username',user),('displayName','双入口'+scheme),('password',password),('confirm',password)]:page.locator('[name='+name+']').fill(value)
+                    page.locator('#account-auth-form [type=submit]').click();expect(page.locator('.account-pill:visible')).to_contain_text('双入口'+scheme)
+                    me=json_request(page,'/api/auth/me');assert me['status']==200;users[scheme]=me['body']['user']['id']
+                    made=page.evaluate("""async input=>{const me=await (await fetch('/api/auth/me')).json();const ws=await (await fetch('/api/workspace')).json();const r=await fetch('/api/issues',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':me.csrf},body:JSON.stringify({title:input.title,request_id:input.request,expected_version:ws.revision})});return {status:r.status,body:await r.json()}}""",{'title':'Synthetic shared browser '+scheme,'request':str(uuid4())})
+                    assert made['status']==200;issue_ids[scheme]=made['body']['resource']['id']
+                    assert json_request(page,'/api/issues/'+issue_ids[scheme])['body']['item']['title']=='Synthetic shared browser '+scheme
+                assert users['http']!=users['https']
+                for scheme,page in pages.items():
+                    page.reload(wait_until='domcontentloaded')
+                    assert json_request(page,'/api/auth/me')['body']['user']['id']==users[scheme]
+                    assert json_request(page,'/api/issues/'+issue_ids['https' if scheme=='http' else 'http'])['status']==404
+                logout(pages['http']);assert json_request(pages['http'],'/api/auth/me')['status']==401
+                assert json_request(pages['https'],'/api/auth/me')['body']['user']['id']==users['https']
+                login(pages['http'],'http');logout(pages['https'])
+                assert json_request(pages['https'],'/api/auth/me')['status']==401
+                assert json_request(pages['http'],'/api/auth/me')['body']['user']['id']==users['http']
+                login(pages['https'],'https')
+                for scheme,page in pages.items():assert json_request(page,'/api/issues/'+issue_ids[scheme])['status']==200
+                checks.append(dict(scheme='http+https',passed=True,same_browser_context=True,scope='Both origins stay on original scheme; UI registration and explicit login; session-authenticated business create/read; cross-account 404; each logout preserves the other scheme session; login restores own data'))
+                shared.close()
                 browser.close()
             assert not errors,errors
             assert httpx.post(f'http://127.0.0.1:{ports["http"]}/oauth/register',headers={'Host':'shixu.test','X-Forwarded-Proto':'https'},json={},trust_env=False).status_code==400
