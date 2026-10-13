@@ -1,19 +1,19 @@
 {
   "passed": true,
-  "delivery_id": "5c1c2eda-e1c7-4f15-8ba0-e95295f32551",
-  "diagram_sha256": "49ad2f75b392cae4cd1f232f1fb7714b3a1602933807b812f6565d21b700b385",
+  "delivery_id": "0a31638d-1525-44f5-b7d6-1aa554f5c6cf",
+  "diagram_sha256": "435588d34baf0556da54edde4de75cce46c52c81e03c383a9d9c3fd31442eb84",
   "sources": [
     {
       "path": "data/mysql-schema.sql",
-      "sha256": "884a7fef8c21324e2f734902880f62e0dbf215a97702dd5fb9f2cb6a060ebbdc"
+      "sha256": "26151e441fb8c79e153cc99efb676a55bc3a602bfa8f0e6eca9a1829ae522d14"
     },
     {
       "path": "scripts/migrate_accounts.py",
-      "sha256": "efa2ce8567b2ffd7a6e056ef74cc43555f3e43c055312d1d67730f94f478bfa0"
+      "sha256": "10ed677317ef9f513589816ec49747f9096f904bc47184f876d5f066e2bcda9d"
     },
     {
       "path": "scripts/migrate_onboarding.py",
-      "sha256": "51a77198d75188e5261b4680902c8a63aad84e6a82b3e83d004ced51dae25339"
+      "sha256": "9366f98ffb4086d5701ab0a2f067c63443beca4e7f5316715b0d2d59ef285ef9"
     },
     {
       "path": "scripts/migrate_custom_tools.py",
@@ -21,26 +21,19 @@
     },
     {
       "path": "app/onboarding_auth.py",
-      "sha256": "4fe9603fc8cab1743efd5056929059c704403d48752c66d77e821c4ab6ca8bce"
+      "sha256": "9a1e13480ab2266f984a2f0fcc91d8f226d99c14ee578d1b41b03419515013f5"
     },
     {
       "path": "app/accounts.py",
-      "sha256": "76a1e4a23d9363c31cbe5e9078559d414ba828cfae50f1438065524533815f63"
+      "sha256": "7478eaa39fbec35d52f543b25816af9c5504f305970e208df6c3ac6d4efae786"
     },
     {
       "path": "app/mysql_store.py",
-      "sha256": "dcb2bb301e64488bccadc11c78dbc65a02480f5c76065df0e8655a88e602ec6b"
+      "sha256": "4dbf110d7daa6c19b8a96d9fa7614bc117923ef051b562e55a6ed8dafef74ed9"
     }
   ],
   "source_consistent": true,
   "details": "verification/diagrams/report.json",
   "scope": "真实浏览器离线几何与交互；源码、DDL、迁移、元数据核对",
-  "live_schema": {
-    "status": "pass",
-    "tables": 20,
-    "columns": 153,
-    "foreign_keys": 6,
-    "business_rows_read": 0,
-    "writes": 0
-  }
+  "live_schema": null
 }

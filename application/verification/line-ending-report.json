@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "delivery_id": "0a31638d-1525-44f5-b7d6-1aa554f5c6cf",
+  "files_checked": 89,
+  "mismatched_paths": [],
+  "scope": "Every declared Docker input raw blob compared with Git clean-filter result; frozen source exceptions retain exact bytes"
+}

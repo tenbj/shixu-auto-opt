@@ -1,8 +1,0 @@
-{
-  "passed": true,
-  "version": "codex-cli 0.118.0",
-  "scope": "isolated PAT add/get and preservation of another MCP; no real credentials or user configuration used",
-  "oauth_login_verified": false,
-  "skill_discovery_verified": false,
-  "end_to_end_verified": false
-}

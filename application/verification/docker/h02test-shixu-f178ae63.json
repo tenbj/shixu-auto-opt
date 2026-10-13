@@ -1,0 +1,99 @@
+{
+  "passed": false,
+  "environment": "isolated",
+  "run_id": "h02test-shixu-f178ae63",
+  "compose_project": "h02test-shixu-f178ae63",
+  "mcp_mode": "embedded",
+  "delivery_id": "0a31638d-1525-44f5-b7d6-1aa554f5c6cf",
+  "started_at": "2026-10-13T13:37:13.191257+00:00",
+  "checks": [
+    {
+      "name": "compose_config",
+      "status": "passed",
+      "observations": [
+        "Test composition parsed without exposing interpolated secrets"
+      ]
+    },
+    {
+      "name": "build",
+      "status": "passed",
+      "observations": [
+        "Current Dockerfile build completed in this invocation; cache allowed; pip check and application import in Dockerfile; actual image ID recorded",
+        "No production environment or private files in COPY allowlist"
+      ]
+    },
+    {
+      "name": "startup",
+      "status": "passed",
+      "observations": [
+        "Cold isolated MySQL initialized with application identity; non-root application healthy",
+        "http://127.0.0.1:54616"
+      ]
+    },
+    {
+      "name": "auth",
+      "status": "passed",
+      "observations": [
+        "Missing/invalid credentials 401; read token cannot write (403); valid authenticated account access"
+      ]
+    },
+    {
+      "name": "mcp",
+      "status": "passed",
+      "observations": [
+        "Real MCP SDK initialize, 29 tools, authenticated read/write/readback; report verification/docker/mcp-report.json"
+      ]
+    }
+  ],
+  "url": "http://127.0.0.1:54616",
+  "images": [
+    {
+      "service": "app",
+      "id": "sha256:05e04c5e36508f2fddbfe5a74bfed87b9165cea6a4920fb8ba4c3c6952a88d14"
+    },
+    {
+      "service": "db",
+      "id": "sha256:6ea90827b1100f8f2ae306a539f86d2c264a26ed435a2a9f75551dd5c3aeb242"
+    }
+  ],
+  "baseline_image": "sha256:90c1bebc5d84fb7114b9303e21a47069c1162bef9f14787b76e362975e3439c0",
+  "cold_start_evidence": null,
+  "existing_containers": [
+    "00d453e6ea87",
+    "1f4dca65b416",
+    "23ffcf98c369",
+    "29d57c1513df",
+    "2d6a9c2631d3",
+    "381f0635f47e",
+    "3f25aa33c828",
+    "418518876f65",
+    "435d6b83e812",
+    "4644c5e09d87",
+    "4fbfe384a0ca",
+    "5b8b52f80bb1",
+    "5e0a9c3e2fe0",
+    "5e3a764d8433",
+    "612a90d3614a",
+    "67f53a2e1ad8",
+    "9af351ce9bf4",
+    "a0080a52a657",
+    "ab22b52ad7f8",
+    "b1a1d407088d",
+    "b39136c1acf2",
+    "b68531abc3be",
+    "bf274ff5299a",
+    "d353dae7441e",
+    "d70dc2015e50",
+    "e90d8c920cc2",
+    "eae1efc58371",
+    "fa8fb534bfd9",
+    "fac77493c26d"
+  ],
+  "error": "onboarding_check.py: MCP initialize ReadTimeout; subsequent explicit 30-second probe also timed out. Docker CLI then returned Docker Desktop is unable to start. Cause not established; no engine restart attempted by this runner.",
+  "finished_at": "2026-10-13T13:49:41.201977+00:00",
+  "limitations": [
+    "Interrupted attempt: only recorded completed stages passed; not release acceptance.",
+    "Initial runner excluded all h02test name prefixes; subsequent exact-label inventory is separate evidence and does not retroactively change this attempt.",
+    "Image predates final MCP server version and architecture badge corrections."
+  ]
+}

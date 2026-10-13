@@ -1,0 +1,32 @@
+PASS: 首屏从真实 API 加载
+PASS: 页面创建问题并通过 API 回读
+PASS: 刷新持久化与搜索过滤
+PASS: 页面梳理流转
+PASS: 子弹窗创建关联行动
+PASS: 页面完成行动、提交验证、确认解决
+PASS: 跟进保存与 HTML 安全显示
+PASS: 五个工作视图可用
+PASS: 行动日历
+PASS: JSON 导出完整记录
+PASS: 390px 布局不横向溢出
+PASS: 4K 自适应
+PASS: 并发冲突提示且保留表单草稿
+PASS: 冲突后明确重试成功
+PASS: 响应丢失使用同号重试，不重复创建（此项模拟网络故障）
+PASS: 360px 五视图和底部导航无横向溢出
+PASS: 360px 创建问题、梳理和子表单创建行动并返回详情
+PASS: 360px 行动卡片开始、完成写入真实API
+PASS: 360px 日程按日期分组且问题筛选生效
+PASS: 360px 编辑、服务端导出、刷新持久化且不用原型存储
+PASS: 390px 五视图和底部导航无横向溢出
+PASS: 390px 创建问题、梳理和子表单创建行动并返回详情
+PASS: 390px 行动卡片开始、完成写入真实API
+PASS: 390px 日程按日期分组且问题筛选生效
+PASS: 390px 编辑、服务端导出、刷新持久化且不用原型存储
+PASS: 430px 五视图和底部导航无横向溢出
+PASS: 430px 创建问题、梳理和子表单创建行动并返回详情
+PASS: 430px 行动卡片开始、完成写入真实API
+PASS: 430px 日程按日期分组且问题筛选生效
+PASS: 430px 编辑、服务端导出、刷新持久化且不用原型存储
+PASS: 无 JavaScript 运行错误
+{"kind": "real-browser-api-mysql", "mock": false, "simulated_fault": "仅响应丢失场景使用网络拦截模拟", "checks": [{"name": "首屏从真实 API 加载", "passed": true}, {"name": "页面创建问题并通过 API 回读", "passed": true}, {"name": "刷新持久化与搜索过滤", "passed": true}, {"name": "页面梳理流转", "passed": true}, {"name": "子弹窗创建关联行动", "passed": true}, {"name": "页面完成行动、提交验证、确认解决", "passed": true}, {"name": "跟进保存与 HTML 安全显示", "passed": true}, {"name": "五个工作视图可用", "passed": true}, {"name": "行动日历", "passed": true}, {"name": "JSON 导出完整记录", "passed": true}, {"name": "390px 布局不横向溢出", "passed": true}, {"name": "4K 自适应", "passed": true}, {"name": "并发冲突提示且保留表单草稿", "passed": true}, {"name": "冲突后明确重试成功", "passed": true}, {"name": "响应丢失使用同号重试，不重复创建（此项模拟网络故障）", "passed": true}, {"name": "360px 五视图和底部导航无横向溢出", "passed": true}, {"name": "360px 创建问题、梳理和子表单创建行动并返回详情", "passed": true}, {"name": "360px 行动卡片开始、完成写入真实API", "passed": true}, {"name": "360px 日程按日期分组且问题筛选生效", "passed": true}, {"name": "360px 编辑、服务端导出、刷新持久化且不用原型存储", "passed": true}, {"name": "390px 五视图和底部导航无横向溢出", "passed": true}, {"name": "390px 创建问题、梳理和子表单创建行动并返回详情", "passed": true}, {"name": "390px 行动卡片开始、完成写入真实API", "passed": true}, {"name": "390px 日程按日期分组且问题筛选生效", "passed": true}, {"name": "390px 编辑、服务端导出、刷新持久化且不用原型存储", "passed": true}, {"name": "430px 五视图和底部导航无横向溢出", "passed": true}, {"name": "430px 创建问题、梳理和子表单创建行动并返回详情", "passed": true}, {"name": "430px 行动卡片开始、完成写入真实API", "passed": true}, {"name": "430px 日程按日期分组且问题筛选生效", "passed": true}, {"name": "430px 编辑、服务端导出、刷新持久化且不用原型存储", "passed": true}, {"name": "无 JavaScript 运行错误", "passed": true}], "passed": true}

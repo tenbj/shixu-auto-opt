@@ -1,7 +1,10 @@
 {
   "passed": true,
-  "tests": 89,
+  "tests": 93,
   "failures": 0,
-  "scope": "FastAPI TestClient + 真实临时SQLite；包括事务回滚、幂等、并发与状态机",
-  "delivery_id": "5c1c2eda-e1c7-4f15-8ba0-e95295f32551"
+  "scope": "FastAPI TestClient + 真实临时SQLite；包括事务回滚、幂等、并发与状态机；另含3项Docker资源归属保护测试",
+  "delivery_id": "0a31638d-1525-44f5-b7d6-1aa554f5c6cf",
+  "business_api_tests": 90,
+  "docker_inventory_tests": 3,
+  "evidence": "verification/pytest.xml"
 }
