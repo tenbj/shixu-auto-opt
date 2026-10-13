@@ -83,6 +83,7 @@ def finalize(run_id):
     report['checks'].append({'name':'cleanup','status':'passed','observations':['Only owned isolated project containers/volumes removed; preexisting non-test containers retained']})
     report['auxiliary_images']=[x for x in report['images'] if x['service']!='app'];report['images']=[x for x in report['images'] if x['service']=='app']
     contract=json.loads((ROOT/'project-contract.json').read_text(encoding='utf-8'));assert report['inputs']==snapshot(ROOT,contract['docker']['inputs']),'Source changed after image build; rebuild and rerun acceptance'
+    assert report['test_inputs']==snapshot(ROOT,['tests']),'Test helpers changed during acceptance'
     report['passed']=True;report['finished_at']=now();path.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
     (ROOT/'verification'/'docker-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
     print(json.dumps({'passed':True,'report':str(path),'image':image}))
@@ -132,6 +133,7 @@ def main():
     report={'passed':False,'environment':'isolated','run_id':run_id,'compose_project':project,'mcp_mode':'embedded','delivery_id':json.loads((ROOT/'project-contract.json').read_text(encoding='utf-8'))['delivery_id'],'started_at':now(),'checks':[],'url':f'http://127.0.0.1:{port}','images':[], 'baseline_image':None, 'cold_start_evidence':('verification/docker/'+project+'.json' if args.resume else None)}
     from docker_contract import snapshot
     report['inputs']=snapshot(ROOT,json.loads((ROOT/'project-contract.json').read_text(encoding='utf-8'))['docker']['inputs'])
+    report['test_inputs']=snapshot(ROOT,['tests'])
     report['resource_limits']={'db':{'memory_mib':512,'cpus':0.75,'restart':'no'},'app':{'memory_mib':512,'cpus':0.75,'restart':'no'}}
     report['runner_sha256']=hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     def save(): (output/(run_id+'.json')).write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
