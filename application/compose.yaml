@@ -1,0 +1,25 @@
+services:
+  app:
+    image: ${SHIXU_IMAGE:-shixu-system:3.2.1}
+    build: .
+    env_file:
+      - ${SHIXU_DOCKER_ENV_FILE:?Set SHIXU_DOCKER_ENV_FILE to a private runtime env file}
+    environment:
+      SHIXU_SKIP_DOTENV: 'true'
+    ports:
+      - '${SHIXU_BIND_HOST:-127.0.0.1}:${SHIXU_PORT:-8765}:8765'
+    volumes:
+      - runtime:/app/runtime
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+volumes:
+  runtime:
