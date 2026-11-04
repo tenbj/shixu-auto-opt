@@ -16,9 +16,61 @@ def expect_mobile_account_position(page):
   return rightGap >= 0 && rightGap < 35;
  }""", timeout=20000).dispose()
 
+def expect_boot_notice(page,url,fail,text):
+ calls=[]
+ def handle(route):
+  calls.append(route.request.url)
+  if len(calls)==1:fail(route)
+  else:route.continue_()
+ page.route('**/api/auth/me',handle)
+ page.goto(url)
+ notice=page.locator('#account-auth-error')
+ expect(notice).to_contain_text(text)
+ expect(notice.locator('button[data-event-id="EVT-ACCOUNT-BOOT-RETRY"]')).to_have_text('重试')
+ notice.locator('button[data-event-id="EVT-ACCOUNT-BOOT-RETRY"]').click()
+ expect(page.locator('#account-auth')).to_be_visible();expect(page.locator('#account-auth-form')).to_be_visible()
+ expect(page.locator('[data-event-id="EVT-ACCOUNT-BOOT-RETRY"]')).to_have_count(0)
+ assert len(calls)==2,calls
+ page.unroute('**/api/auth/me')
+
+def expect_boot_faults(url,errors):
+ with sync_playwright() as pw:
+  browser=pw.chromium.launch()
+  for fail,text in [(lambda route:route.fulfill(status=502,content_type='text/html',body='<html>bad gateway</html>'),'服务暂不可用，请稍后重试'),(lambda route:route.abort('timedout'),'连接超时，请检查网络后重试')]:
+   page=browser.new_page(viewport=dict(width=1440,height=900));page.on('pageerror',lambda e:errors.append(str(e)))
+   expect_boot_notice(page,url,fail,text);page.close()
+  browser.close()
+
+def expect_boot_slow_login(url,errors):
+ # Hold /api/auth/me for about 10s, then let the real session succeed. Client timeout stays 15s.
+ with sync_playwright() as pw:
+  browser=pw.chromium.launch()
+  page=browser.new_page(viewport=dict(width=1440,height=900));page.on('pageerror',lambda e:errors.append(str(e)))
+  username='slow_'+uuid4().hex[:12];secret=uuid4().hex
+  page.goto(url)
+  page.locator('[data-account-action=register-mode]').click()
+  page.locator('[name=username]').fill(username);page.locator('[name=displayName]').fill('慢登录')
+  page.locator('[name=password]').fill(secret);page.locator('[name=confirm]').fill(secret)
+  page.locator('#account-auth-form [type=submit]').click();expect(page.locator('.account-pill:visible')).to_contain_text('慢登录')
+  held=[]
+  page.route('**/api/auth/me',lambda route:held.append(route))
+  page.reload(wait_until='domcontentloaded')
+  expect(page.locator('#account-boot-status')).to_have_text('正在确认登录状态…')
+  expect(page.locator('#account-auth-form')).to_be_hidden()
+  page.wait_for_timeout(10000)
+  assert len(held)==1,held
+  held[0].continue_()
+  expect(page.locator('.account-pill:visible')).to_contain_text('慢登录')
+  expect(page.locator('#account-auth')).to_be_hidden()
+  expect(page.locator('[data-event-id="EVT-ACCOUNT-BOOT-RETRY"]')).to_have_count(0)
+  expect(page.get_by_role('heading',name='把困扰理清，把今天过好。')).to_be_visible()
+  page.unroute('**/api/auth/me');page.close();browser.close()
+
 def run(url):
  expect.set_options(timeout=20000)
  checks=[];errors=[]
+ expect_boot_faults(url,errors)
+ expect_boot_slow_login(url,errors)
  with sync_playwright() as pw:
   browser=pw.chromium.launch()
   for width in [1440,537,390,360]:
