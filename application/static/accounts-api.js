@@ -15,18 +15,44 @@ async function logoutAccount(){
  currentUser=null;csrfToken='';loaded=false;profiles=[];restoreCustomTools([],{});activeProfileId='';db={issues:[],tasks:[],identityProfiles:[]};pendingWrite=null;lastPreviewConfig=null;
  document.querySelectorAll('dialog[open]').forEach(d=>d.close());showLogin();window.scrollTo(0,0);
 }
-async function bootAccount(){
- try{
-  const response=await fetch('/api/auth/me',{signal:AbortSignal.timeout(15000)}),result=await response.json();
-  if(!response.ok){const error=new Error(typeof result.detail==='string'?result.detail:'登录状态检查失败');error.status=response.status;throw error}
-  if(!currentUser)await loginAccount(result);
- }catch(e){
-  if(currentUser)return;
-  const form=document.querySelector('#account-auth-form');
-  if(!form)showLogin('login',e.status===401?'':e.message);
-  else if(e.status!==401){const notice=document.querySelector('#account-auth-error');if(notice)notice.textContent=e.message}
- }finally{document.documentElement.dataset.accountBoot='complete'}
+function accountBootPending(){
+ let box=document.querySelector('#account-auth');
+ if(!box){showLogin('login','');box=document.querySelector('#account-auth')}
+ box.hidden=true;
+ let status=document.querySelector('#account-boot-status');
+ if(!status){status=document.createElement('p');status.id='account-boot-status';status.className='account-muted';status.setAttribute('role','status');status.style.margin='24px';status.style.fontSize='16px';document.body.prepend(status)}
+ status.textContent='正在确认登录状态…';
 }
+function accountBootSettle(showAuth){
+ document.querySelector('#account-boot-status')?.remove();
+ const box=document.querySelector('#account-auth');if(box)box.hidden=!showAuth;
+}
+let accountBootRunning=false;
+async function bootAccount(){
+ if(accountBootRunning)return;accountBootRunning=true;
+ accountBootPending();
+ try{
+  const response=await fetch('/api/auth/me',{signal:AbortSignal.timeout(15000)});
+  const ok=response.ok,json=(response.headers.get('content-type')||'').toLowerCase().includes('application/json');
+  if(!ok&&response.status===401){const error=new Error('登录状态检查失败');error.status=401;throw error}
+  if(!ok&&(response.status>=500||!json)||!json){const error=new Error('服务暂不可用，请稍后重试');error.status=response.status;throw error}
+  let result;try{result=await response.json()}catch{const error=new Error('服务暂不可用，请稍后重试');error.status=response.status;throw error}
+  if(!ok){const error=new Error(result&&typeof result.detail==='string'?result.detail:'登录状态检查失败');error.status=response.status;throw error}
+  if(!currentUser)await loginAccount(result);
+  accountBootSettle(false);
+ }catch(e){
+  if(currentUser){accountBootSettle(false);return}
+  accountBootSettle(true);
+  const form=document.querySelector('#account-auth-form');
+  const reason=e.name==='TimeoutError'||e.name==='AbortError'||e.name==='TypeError'?'连接超时，请检查网络后重试':e.message;
+  if(!form)showLogin('login',e.status===401?'':'');
+  const notice=document.querySelector('#account-auth-error');
+  if(e.status===401){if(notice?.querySelector('[data-event-id="EVT-ACCOUNT-BOOT-RETRY"]'))notice.replaceChildren()}
+  else if(notice)notice.innerHTML=`${esc(reason||'登录状态检查失败')} <button type="button" class="account-link" data-event-id="EVT-ACCOUNT-BOOT-RETRY">重试</button>`;
+ }finally{accountBootRunning=false;document.documentElement.dataset.accountBoot='complete'}
+}
+document.addEventListener('click',e=>{if(e.target.closest('[data-event-id="EVT-ACCOUNT-BOOT-RETRY"]'))bootAccount()});
+const accountBootRender=render;render=function(){accountBootRender();if(accountBootRunning&&!currentUser)accountBootPending()};
 async function showAuthorization(){
  const key=new URLSearchParams(location.search).get('authorize');
  if(!key&&currentUser.connection?.oauthAvailable===false){show('HTTP 连接方法',`<p>当前HTTP地址使用访问令牌连接。请在“AI接入 → 手动配置”生成并下载配置，再导入客户端。</p><p>“访问令牌”也适用于个人电脑上的AI客户端。标准OAuth登录授权需要HTTPS。</p>`);return}

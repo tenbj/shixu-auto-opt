@@ -103,11 +103,15 @@ def main():
                     page=context.new_page();page.on('pageerror',lambda e:errors.append(str(e)))
                     browser_origin=origin(scheme,p);url=f'{scheme}://127.0.0.1:{p}'
                     pending=[];page.route('**/api/auth/me',lambda route:pending.append(route))
-                    page.goto(browser_origin,wait_until='domcontentloaded');page.wait_for_function("!!document.querySelector('[data-account-action=register-mode]')")
-                    page.locator('[data-account-action=register-mode]').click()
-                    page.locator('[name=username]').fill('preserve_registration_draft')
+                    page.goto(browser_origin,wait_until='domcontentloaded')
+                    expect(page.locator('#account-boot-status')).to_have_text('正在确认登录状态…')
+                    expect(page.locator('#account-auth-form')).to_be_hidden()
                     assert len(pending)==1
                     pending[0].continue_();page.wait_for_function("document.documentElement.dataset.accountBoot==='complete'")
+                    expect(page.locator('#account-boot-status')).to_have_count(0)
+                    expect(page.locator('#account-auth-form')).to_be_visible()
+                    page.locator('[data-account-action=register-mode]').click()
+                    page.locator('[name=username]').fill('preserve_registration_draft')
                     expect(page.locator('#account-auth-form')).to_have_attribute('data-mode','register')
                     expect(page.locator('[name=username]')).to_have_value('preserve_registration_draft')
                     expect(page.locator('[name=confirm]')).to_be_visible();page.unroute('**/api/auth/me')
@@ -135,7 +139,7 @@ def main():
                     assert cookie['secure']==(scheme=='https') and cookie['httpOnly']
                     page.locator('[data-account-action=close-account-panel]').click();page.locator('.account-pill:visible').click();page.locator('#account-dropdown [data-account-action=logout]').click()
                     expect(page.locator('#account-auth')).to_be_visible()
-                    checks.append(dict(scheme=scheme,passed=True,scope='Non-loopback browser origin; register/login session, mobile tabs, generated URL, 29 MCP tools, create/read, revoke, logout, Cookie attributes, and delayed real ME response preserves registration draft'))
+                    checks.append(dict(scheme=scheme,passed=True,scope='Non-loopback browser origin; register/login session, mobile tabs, generated URL, 29 MCP tools, create/read, revoke, logout, Cookie attributes, and delayed ME hides the login form until the check finishes'))
                     context.close()
                 # Same browser, same hostname, two schemes: each session must survive the other's login/logout.
                 shared=browser.new_context(ignore_https_errors=True,viewport={'width':390,'height':844})
