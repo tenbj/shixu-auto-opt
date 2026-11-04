@@ -36,10 +36,42 @@ def expect_boot_notice(page,url,fail,text):
 def expect_boot_faults(url,errors):
  with sync_playwright() as pw:
   browser=pw.chromium.launch()
-  for fail,text in [(lambda route:route.fulfill(status=502,content_type='text/html',body='<html>bad gateway</html>'),'服务暂不可用，请稍后重试'),(lambda route:route.abort('timedout'),'连接超时，请检查网络后重试')]:
+  for fail,text in [(lambda route:route.fulfill(status=502,content_type='text/html',body='<html>bad gateway</html>'),'服务暂不可用，请稍后重试'),(lambda route:route.abort('timedout'),'连接超时，请检查网络后重试'),(lambda route:route.fulfill(status=403,content_type='application/json',body='{"detail":"账号已停用"}'),'账号已停用')]:
    page=browser.new_page(viewport=dict(width=1440,height=900));page.on('pageerror',lambda e:errors.append(str(e)))
    expect_boot_notice(page,url,fail,text);page.close()
   browser.close()
+
+def expect_boot_signed_out(url,errors):
+ # 401 returns to the login screen and does not surface the failure or its detail.
+ with sync_playwright() as pw:
+  browser=pw.chromium.launch()
+  page=browser.new_page(viewport=dict(width=1440,height=900));page.on('pageerror',lambda e:errors.append(str(e)))
+  page.route('**/api/auth/me',lambda route:route.fulfill(status=401,content_type='application/json',body='{"detail":"未登录"}'))
+  page.goto(url)
+  page.wait_for_function("() => document.documentElement.dataset.accountBoot==='complete'")
+  expect(page.locator('#account-auth')).to_be_visible();expect(page.locator('#account-auth-form')).to_be_visible()
+  expect(page.locator('#account-boot-status')).to_have_count(0)
+  notice=page.locator('#account-auth-error')
+  expect(notice).to_have_text('')
+  expect(page.locator('[data-event-id="EVT-ACCOUNT-BOOT-RETRY"]')).to_have_count(0)
+  expect(notice).not_to_contain_text('未登录');expect(notice).not_to_contain_text('登录状态检查失败');expect(notice).not_to_contain_text('连接超时')
+  page.unroute('**/api/auth/me');page.close();browser.close()
+
+def expect_boot_page_fault(url,errors):
+ # A page exception after a successful JSON parse is not a network timeout.
+ with sync_playwright() as pw:
+  browser=pw.chromium.launch()
+  page=browser.new_page(viewport=dict(width=1440,height=900));page.on('pageerror',lambda e:errors.append(str(e)))
+  page.goto(url)
+  page.wait_for_function("() => document.documentElement.dataset.accountBoot==='complete'")
+  page.route('**/api/auth/me',lambda route:route.fulfill(status=200,content_type='application/json',body='{"user":{"id":"page-fault","displayName":"页面错误"},"csrf":"t"}'))
+  with page.expect_console_message(lambda msg:msg.type=='error' and 'render failed' in msg.text):
+   page.evaluate("""() => { loginAccount = async () => { throw new TypeError('render failed') }; return bootAccount() }""")
+  notice=page.locator('#account-auth-error')
+  expect(notice).to_contain_text('页面出错，请刷新重试')
+  expect(notice).not_to_contain_text('连接超时')
+  expect(notice.locator('button[data-event-id="EVT-ACCOUNT-BOOT-RETRY"]')).to_have_text('重试')
+  page.unroute('**/api/auth/me');page.close();browser.close()
 
 def expect_boot_slow_login(url,errors):
  # Hold /api/auth/me for about 10s, then let the real session succeed. Client timeout stays 15s.
@@ -70,6 +102,8 @@ def run(url):
  expect.set_options(timeout=20000)
  checks=[];errors=[]
  expect_boot_faults(url,errors)
+ expect_boot_signed_out(url,errors)
+ expect_boot_page_fault(url,errors)
  expect_boot_slow_login(url,errors)
  with sync_playwright() as pw:
   browser=pw.chromium.launch()

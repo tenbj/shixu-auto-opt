@@ -737,7 +737,12 @@ async function bootAccount(){
  if(accountBootRunning)return;accountBootRunning=true;
  accountBootPending();
  try{
-  const response=await fetch('/api/auth/me',{signal:AbortSignal.timeout(15000)});
+  let response;
+  try{response=await fetch('/api/auth/me',{signal:AbortSignal.timeout(15000)})}
+  catch(e){
+   if(e.name==='TimeoutError'||e.name==='AbortError'||e.name==='TypeError'){const error=new Error('连接超时，请检查网络后重试');error.network=true;throw error}
+   throw e
+  }
   const ok=response.ok,json=(response.headers.get('content-type')||'').toLowerCase().includes('application/json');
   if(!ok&&response.status===401){const error=new Error('登录状态检查失败');error.status=401;throw error}
   if(!ok&&(response.status>=500||!json)||!json){const error=new Error('服务暂不可用，请稍后重试');error.status=response.status;throw error}
@@ -746,10 +751,12 @@ async function bootAccount(){
   if(!currentUser)await loginAccount(result);
   accountBootSettle(false);
  }catch(e){
-  if(currentUser){accountBootSettle(false);return}
+  const pageFault=!e.network&&!e.status;
+  if(pageFault)console.error(e);
+  if(currentUser&&!pageFault){accountBootSettle(false);return}
   accountBootSettle(true);
   const form=document.querySelector('#account-auth-form');
-  const reason=e.name==='TimeoutError'||e.name==='AbortError'||e.name==='TypeError'?'连接超时，请检查网络后重试':e.message;
+  const reason=e.network?'连接超时，请检查网络后重试':pageFault?'页面出错，请刷新重试':e.message;
   if(!form)showLogin('login',e.status===401?'':'');
   const notice=document.querySelector('#account-auth-error');
   if(e.status===401){if(notice?.querySelector('[data-event-id="EVT-ACCOUNT-BOOT-RETRY"]'))notice.replaceChildren()}
