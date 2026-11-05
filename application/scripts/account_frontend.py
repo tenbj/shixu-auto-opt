@@ -43,6 +43,21 @@ def integrate(html,root):
     layer=layer.replace('MCP 接入','AI 接入').replace('MCP接入','AI接入').replace('服务器令牌','访问令牌').replace("connections:'list'","connections:'quick'")
     layer=layer.replace('<div class="auth-switch">','<p><a href="/connect">连接 AI · 查看接入指引</a></p><div class="auth-switch">')
     css+='\n'+(root/'static/ai-access.css').read_text(encoding='utf-8')
+    # 类名与冻结原型 v0.4.0 的 style 块一致；只追加 CSS，不改写 build 已生成的标记。
+    css += '''
+/* R4: 9 处内联样式 → 类（含视觉微调） */
+.sidebar-meta{font-size:11px;line-height:1.7;margin-top:10px;color:#8a957f}
+.crumb-sep{margin:0 10px;color:#bcc6b2;font-weight:300}
+.sync-state{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);white-space:nowrap}
+.sync-state::before{content:"";width:6px;height:6px;border-radius:50%;background:#91a985}
+.issue-progress-text{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.note-motto{margin-top:20px;padding-top:14px;border-top:1px dashed #d3dcc6}
+.list-issue-title{margin-top:10px;line-height:1.45}
+.detail-title{margin-top:14px;line-height:1.4;overflow-wrap:anywhere}
+.panelhead.panelhead-inline{padding:12px 0 8px;margin-top:6px;border-top:1px solid #e6ebdf}
+.form-context{margin-bottom:18px;padding:10px 12px;border-radius:8px;background:#f3f6ee;color:#5c7053;font-size:13px;overflow-wrap:anywhere}
+@media(max-width:700px){.sync-state{display:none}.form-context{font-size:14px}}
+'''
     layer="let currentUser=null,csrfToken='',lastPreviewConfig=null;\n"+layer+'\n'+(root/'static/accounts-api.js').read_text(encoding='utf-8')+'\n'+(root/'static/ai-access-api.js').read_text(encoding='utf-8')
     html=html.replace('\nloadWorkspace();\n','\nqueueMicrotask(bootAccount);\n',1)
     html=html.replace("document.querySelector('#mobile-identity').innerHTML=identitySwitch('mobile-identity');", "// Account chrome owns the mobile identity control and preserves its focus across renders.")
