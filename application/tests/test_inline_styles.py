@@ -59,8 +59,8 @@ def test_static_classes_match_prototype():
         assert snippet in BUILD
     assert PROTOTYPE_CSS in ACCOUNTS
     assert PROTOTYPE_CSS in INDEX
-    assert 'class="sync-state">本地保存' in INDEX
-    assert 'class="sync-state">本地保存' in BUILD
+    assert 'class="sync-state">连接中…' in INDEX
+    assert 'class="sync-state">连接中…' in BUILD
 
 
 def test_runtime_widths_stay_inline():
