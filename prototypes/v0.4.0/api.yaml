@@ -1,0 +1,1099 @@
+openapi: 3.1.0
+info:
+  title: 拾序后续工程接口合同
+  version: 1.8.0
+  description: AI接入后续工程设计合同；当前HTML仅离线模拟，下述新增接入路径未上线。
+paths:
+  /issues:
+    get:
+      summary: 读取问题列表
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Issue'
+        '400':
+          description: 输入为空或字段不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不属于本账号
+        '409':
+          description: 状态冲突，例如未完成行动阻止问题解决
+        '500':
+          description: 保存失败，可重试，不能误报成功
+        '401':
+          description: 未登录或会话失效
+      parameters:
+      - name: category
+        in: query
+        required: false
+        description: 按分类精确匹配；省略时不限分类
+        schema:
+          type: string
+      x-workspace-scope: authenticated-account; never trust request-supplied owner
+    post:
+      summary: 记录问题
+      responses:
+        '201':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+        '400':
+          description: 输入为空或字段不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不属于本账号
+        '409':
+          description: 状态冲突，例如未完成行动阻止问题解决
+        '500':
+          description: 保存失败，可重试，不能误报成功
+        '401':
+          description: 未登录或会话失效
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssueWrite'
+      x-workspace-scope: authenticated-account; never trust request-supplied owner
+  /issues/{id}:
+    get:
+      summary: 问题详情
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+        '400':
+          description: 输入为空或字段不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不属于本账号
+        '409':
+          description: 状态冲突，例如未完成行动阻止问题解决
+        '500':
+          description: 保存失败，可重试，不能误报成功
+        '401':
+          description: 未登录或会话失效
+      x-workspace-scope: authenticated-account; never trust request-supplied owner
+    put:
+      summary: 更新问题内容
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+        '400':
+          description: 输入为空或字段不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不属于本账号
+        '409':
+          description: 状态冲突，例如未完成行动阻止问题解决
+        '500':
+          description: 保存失败，可重试，不能误报成功
+        '401':
+          description: 未登录或会话失效
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssueWrite'
+      x-workspace-scope: authenticated-account; never trust request-supplied owner
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  /tasks:
+    get:
+      summary: 读取全部行动，客户端按日期和状态组织
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '400':
+          description: 输入为空或字段不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不属于本账号
+        '409':
+          description: 状态冲突，例如未完成行动阻止问题解决
+        '500':
+          description: 保存失败，可重试，不能误报成功
+        '401':
+          description: 未登录或会话失效
+      x-workspace-scope: authenticated-account; never trust request-supplied owner
+    post:
+      summary: 新建独立或关联行动
+      responses:
+        '201':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: 输入为空或字段不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不属于本账号
+        '409':
+          description: 状态冲突，例如未完成行动阻止问题解决
+        '500':
+          description: 保存失败，可重试，不能误报成功
+        '401':
+          description: 未登录或会话失效
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskWrite'
+      x-workspace-scope: authenticated-account; never trust request-supplied owner
+  /tasks/{id}:
+    put:
+      summary: 更新行动内容或状态，重开行动时联动问题
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: 输入为空或字段不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不属于本账号
+        '409':
+          description: 状态冲突，例如未完成行动阻止问题解决
+        '500':
+          description: 保存失败，可重试，不能误报成功
+        '401':
+          description: 未登录或会话失效
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskUpdate'
+      x-workspace-scope: authenticated-account; never trust request-supplied owner
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  /export:
+    get:
+      summary: 导出全部问题和行动
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Export'
+        '400':
+          description: 输入为空或字段不合法
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 对象不存在或不属于本账号
+        '409':
+          description: 状态冲突，例如未完成行动阻止问题解决
+        '500':
+          description: 保存失败，可重试，不能误报成功
+        '401':
+          description: 未登录或会话失效
+      x-workspace-scope: authenticated-account; never trust request-supplied owner
+  /issues/{id}/transitions:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    post:
+      summary: 执行问题状态流转及关联行动处置
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Transition'
+      responses:
+        '200':
+          description: 返回更新问题
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+        '400':
+          description: 字段或日期不合法
+        '404':
+          description: 对象不存在或不属于本账号
+        '409':
+          description: 状态冲突或存在未完成必要行动
+        '401':
+          description: 未登录或会话失效
+      x-workspace-scope: authenticated-account; never trust request-supplied owner
+  /issues/{id}/followups:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    post:
+      summary: 追加跟进，不改变问题状态；正文去除首尾空白后校验
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - content
+              properties:
+                content:
+                  type: string
+                  minLength: 1
+                  maxLength: 5000
+      responses:
+        '201':
+          description: 保存成功；时间与记录人由服务端生成
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Followup'
+        '400':
+          description: 正文为空或超长
+        '404':
+          description: 对象不存在或不属于本账号
+        '500':
+          description: 保存失败，不得报成功
+        '401':
+          description: 未登录或会话失效
+      x-workspace-scope: authenticated-account; never trust request-supplied owner
+  /issues/{id}/background:
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    patch:
+      summary: 单独更新问题背景，不改变状态与跟进
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - description
+              properties:
+                description:
+                  type: string
+                  maxLength: 5000
+      responses:
+        '200':
+          description: 更新后的问题
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Issue'
+        '400':
+          description: 背景超长或不合法
+        '404':
+          description: 对象不存在或不属于本账号
+        '500':
+          description: 保存失败
+        '401':
+          description: 未登录或会话失效
+      x-workspace-scope: authenticated-account; never trust request-supplied owner
+  /auth/login:
+    post:
+      summary: 登录账号
+      responses:
+        '200':
+          description: 成功
+        '400':
+          description: 输入或授权请求无效
+        '401':
+          description: 凭据失效
+        '403':
+          description: 未授权操作范围
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                  writeOnly: true
+              additionalProperties: false
+  /auth/register:
+    post:
+      summary: 注册独立账号与空工作台
+      responses:
+        '200':
+          description: 成功
+        '400':
+          description: 输入或授权请求无效
+        '401':
+          description: 凭据失效
+        '403':
+          description: 未授权操作范围
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                  writeOnly: true
+                displayName:
+                  type: string
+              additionalProperties: false
+  /auth/logout:
+    post:
+      summary: 注销当前会话
+      responses:
+        '200':
+          description: 成功
+        '400':
+          description: 输入或授权请求无效
+        '401':
+          description: 凭据失效
+        '403':
+          description: 未授权操作范围
+  /account:
+    get:
+      summary: 读取当前账号
+      responses:
+        '200':
+          description: 成功
+        '400':
+          description: 输入或授权请求无效
+        '401':
+          description: 凭据失效
+        '403':
+          description: 未授权操作范围
+    patch:
+      summary: 修改显示名称
+      responses:
+        '200':
+          description: 成功
+        '400':
+          description: 输入或授权请求无效
+        '401':
+          description: 凭据失效
+        '403':
+          description: 未授权操作范围
+  /account/password:
+    post:
+      summary: 校验原密码并修改密码
+      responses:
+        '200':
+          description: 成功
+        '400':
+          description: 输入或授权请求无效
+        '401':
+          description: 凭据失效
+        '403':
+          description: 未授权操作范围
+  /account/mcp-access:
+    get:
+      summary: 列出本账号接入
+      responses:
+        '200':
+          description: 成功
+        '400':
+          description: 输入或授权请求无效
+        '401':
+          description: 凭据失效
+        '403':
+          description: 未授权操作范围
+    post:
+      summary: 创建本账号独立只读/读写令牌，仅一次返回秘密
+      responses:
+        '200':
+          description: 成功
+        '400':
+          description: 输入或授权请求无效
+        '401':
+          description: 凭据失效
+        '403':
+          description: 未授权操作范围
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  maxLength: 60
+                scope:
+                  type: string
+                  enum:
+                  - read
+                  - write
+              additionalProperties: false
+  /account/mcp-access/{access_id}/revoke:
+    post:
+      summary: 撤销属于当前账号的接入
+      responses:
+        '200':
+          description: 成功
+        '400':
+          description: 输入或授权请求无效
+        '401':
+          description: 凭据失效
+        '403':
+          description: 未授权操作范围
+      parameters:
+      - name: access_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /oauth/authorize:
+    get:
+      summary: 经认证显示客户端与账号范围
+      responses:
+        '200':
+          description: 成功
+        '400':
+          description: 输入或授权请求无效
+        '401':
+          description: 凭据失效
+        '403':
+          description: 未授权操作范围
+    post:
+      summary: 确认或拒绝授权，授权码绑定用户/客户端/重定向/PKCE
+      responses:
+        '200':
+          description: 成功
+        '400':
+          description: 输入或授权请求无效
+        '401':
+          description: 凭据失效
+        '403':
+          description: 未授权操作范围
+  /oauth/token:
+    post:
+      summary: 按OAuth规范交换授权码/刷新令牌
+      responses:
+        '200':
+          description: 成功
+        '400':
+          description: 输入或授权请求无效
+        '401':
+          description: 凭据失效
+        '403':
+          description: 未授权操作范围
+      security: []
+  /.well-known/oauth-protected-resource:
+    get:
+      summary: MCP受保护资源发现
+      responses:
+        '200':
+          description: 成功
+        '400':
+          description: 输入或授权请求无效
+        '401':
+          description: 凭据失效
+        '403':
+          description: 未授权操作范围
+      security: []
+  /.well-known/oauth-authorization-server:
+    get:
+      summary: 授权服务发现
+      responses:
+        '200':
+          description: 成功
+        '400':
+          description: 输入或授权请求无效
+        '401':
+          description: 凭据失效
+        '403':
+          description: 未授权操作范围
+      security: []
+  /mcp:
+    post:
+      summary: 通过Bearer令牌调用本账号授权范围内工具
+      responses:
+        '200':
+          description: 成功
+        '400':
+          description: 输入或授权请求无效
+        '401':
+          description: 凭据失效
+        '403':
+          description: 未授权操作范围
+      security:
+      - mcpBearer: []
+  /connect:
+    get:
+      summary: 公开接入帮助页面
+      security: []
+      responses:
+        '200':
+          description: 不含凭据的公开引导资料
+        '503':
+          description: 发布资料暂不可用，保留重试入口
+  /connect.md:
+    get:
+      summary: AI可读取的公开接入指南
+      security: []
+      responses:
+        '200':
+          description: 不含凭据的公开引导资料
+        '503':
+          description: 发布资料暂不可用，保留重试入口
+  /connect/manifest.json:
+    get:
+      summary: 版本化runtime适配和Skill下载清单
+      security: []
+      responses:
+        '200':
+          description: 不含凭据的公开引导资料
+        '503':
+          description: 发布资料暂不可用，保留重试入口
+  /account/mcp-access/{access_id}:
+    patch:
+      summary: 重命名本账号接入设备
+      parameters:
+      - name: access_id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - name
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 60
+              additionalProperties: false
+      responses:
+        '200':
+          description: 已更新名称
+        '401':
+          description: 未登录
+        '404':
+          description: 设备不存在或非本账号
+components:
+  schemas:
+    IssueWrite:
+      type: object
+      required:
+      - title
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 160
+          pattern: .*\S.*
+        description:
+          type: string
+          maxLength: 5000
+          default: ''
+        priority:
+          type: string
+          enum:
+          - 高
+          - 中
+          - 低
+          default: 中
+        tag:
+          type: string
+          maxLength: 40
+          default: 未分类
+    TaskWrite:
+      type: object
+      required:
+      - title
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 160
+          pattern: .*\S.*
+        issueId:
+          type:
+          - string
+          - 'null'
+        due:
+          type:
+          - string
+          - 'null'
+          format: date
+        required:
+          type: boolean
+          default: true
+    Issue:
+      allOf:
+      - $ref: '#/components/schemas/IssueWrite'
+      - type: object
+        required:
+        - id
+        - status
+        - logs
+        - resolution
+        properties:
+          id:
+            type: string
+          status:
+            type: string
+            enum: &id006
+            - 待梳理
+            - 待处理
+            - 处理中
+            - 待验证
+            - 已解决
+            - 已暂缓
+            - 已关闭
+          resolution:
+            type: string
+          logs:
+            type: array
+            items:
+              type: string
+          nextStep:
+            type: string
+          successCriteria:
+            type: string
+          treatment:
+            type: string
+          verificationMethod:
+            type: string
+          pauseReason:
+            type: string
+          reviewDate:
+            type: string
+          pausedFrom:
+            type: string
+          closeReason:
+            type: string
+          closeType:
+            type: string
+          duplicateOf:
+            type: string
+          history:
+            type: array
+            items:
+              $ref: '#/components/schemas/History'
+          followups:
+            type: array
+            default: []
+            items:
+              $ref: '#/components/schemas/Followup'
+      properties:
+        createdByActorId: &id001
+          type: string
+          nullable: true
+          readOnly: true
+        initiatedByPersonId: &id002
+          type: string
+          nullable: true
+          readOnly: true
+        createdVia: &id003
+          type: string
+          readOnly: true
+          x-preset-values:
+          - manual
+          - claude_code
+          - workbuddy
+          - codex
+          - deepseek_harness
+          - unknown
+          description: Preset source ID or owner-scoped custom:<uuid> source ID
+        createdAt: &id004
+          type: string
+          format: date-time
+          nullable: true
+          readOnly: true
+        modelInfo: &id005
+          type: object
+          nullable: true
+          readOnly: true
+          properties:
+            name:
+              type: string
+              maxLength: 160
+            provider:
+              type: string
+              maxLength: 80
+        creatorName:
+          type: string
+          nullable: true
+          readOnly: true
+          description: display-name snapshot at creation
+    Task:
+      allOf:
+      - $ref: '#/components/schemas/TaskWrite'
+      - type: object
+        required:
+        - id
+        - status
+        properties:
+          id:
+            type: string
+          status:
+            type: string
+            enum:
+            - 待办
+            - 进行中
+            - 已完成
+            - 已取消
+          cancelReason:
+            type: string
+      properties:
+        createdByActorId: *id001
+        initiatedByPersonId: *id002
+        createdVia: *id003
+        createdAt: *id004
+        modelInfo: *id005
+        creatorName:
+          type: string
+          nullable: true
+          readOnly: true
+          description: display-name snapshot at creation
+    TaskUpdate:
+      allOf:
+      - $ref: '#/components/schemas/TaskWrite'
+      - type: object
+        properties:
+          status:
+            type: string
+            enum:
+            - 待办
+            - 进行中
+            - 已完成
+            - 已取消
+          cancelReason:
+            type: string
+            description: 状态改为已取消时必填；服务端校验
+    Resolution:
+      type: object
+      required:
+      - resolution
+      properties:
+        resolution:
+          type: string
+          minLength: 1
+          maxLength: 5000
+          pattern: .*\S.*
+    Error:
+      type: object
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+    Export:
+      type: object
+      required:
+      - version
+      - issues
+      - tasks
+      properties:
+        version:
+          type: integer
+          const: 1
+        issues:
+          type: array
+          items:
+            $ref: '#/components/schemas/Issue'
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Task'
+        schemaVersion:
+          type: integer
+          const: 2
+    History:
+      type: object
+      required:
+      - from
+      - to
+      - reason
+      - at
+      - actor
+      properties:
+        from:
+          type: string
+          enum: *id006
+        to:
+          type: string
+          enum: *id006
+        reason:
+          type: string
+        at:
+          type: string
+          format: date-time
+        actor:
+          type: string
+    Transition:
+      type: object
+      required:
+      - action
+      properties:
+        action:
+          type: string
+          enum:
+          - triage
+          - start
+          - verify
+          - resolve
+          - reject
+          - pause
+          - resume
+          - close-issue
+          - reopen
+          - retriage
+        reason:
+          type: string
+        nextStep:
+          type: string
+        successCriteria:
+          type: string
+        treatment:
+          type: string
+        verificationMethod:
+          type: string
+        resolution:
+          type: string
+        reviewDate:
+          type: string
+        closeType:
+          type: string
+        duplicateOf:
+          type: string
+        taskPolicy:
+          type: string
+      description: 按action逐项校验必填条件，参见x-workflow；所有文本trim后不可为空。
+    Followup:
+      type: object
+      required:
+      - id
+      - content
+      - at
+      - actor
+      properties:
+        id:
+          type: string
+        content:
+          type: string
+          minLength: 1
+          maxLength: 5000
+        at:
+          type: string
+          format: date-time
+        actor:
+          type: string
+    CreationIdentity:
+      type: object
+      description: 只读创建元数据，正式服务从认证上下文和绑定工具推导；原型用手动选择演示
+      properties:
+        createdByActorId: *id001
+        initiatedByPersonId: *id002
+        createdVia: *id003
+        createdAt: *id004
+        modelInfo: *id005
+        creatorName:
+          type: string
+          nullable: true
+          readOnly: true
+          description: display-name snapshot at creation
+  securitySchemes:
+    session:
+      type: apiKey
+      in: cookie
+      name: shixu_session
+    mcpBearer:
+      type: http
+      scheme: bearer
+x-workflow:
+  triage:
+    from:
+    - 待梳理
+    to: 待处理
+    required:
+    - nextStep
+    - successCriteria
+  start:
+    from:
+    - 待处理
+    to: 处理中
+    guard: nextStep与successCriteria已填写
+  verify:
+    from:
+    - 待梳理
+    - 待处理
+    - 处理中
+    to: 待验证
+    required:
+    - successCriteria
+    - treatment
+    - verificationMethod
+    guard: 无未完成必要行动；前两种源状态仅在零关联行动时允许直接观察验证
+  resolve:
+    from:
+    - 待验证
+    to: 已解决
+    required:
+    - resolution
+    guard: 无未完成必要行动
+  reject:
+    from:
+    - 待验证
+    to: 处理中
+    required:
+    - reason
+  pause:
+    from:
+    - 待梳理
+    - 待处理
+    - 处理中
+    - 待验证
+    to: 已暂缓
+    required:
+    - reason
+    - reviewDate
+    guard: 回看日期不得早于今天；保存pausedFrom
+  resume:
+    from:
+    - 已暂缓
+    to: pausedFrom
+    guard: 恢复待验证时若有未完成必要行动则退回处理中
+  close-issue:
+    from:
+    - 待梳理
+    - 待处理
+    - 处理中
+    - 待验证
+    - 已暂缓
+    to: 已关闭
+    required:
+    - reason
+    - closeType
+    guard: 重复需duplicateOf，存在未完成行动需taskPolicy=detach或cancel
+  reopen:
+    from:
+    - 已解决
+    - 已关闭
+    to: 已解决重开到处理中；已关闭重开到待梳理
+    required:
+    - reason
+  retriage:
+    from:
+    - 待处理
+    to: 待梳理
+    required:
+    - reason
+x-creation-identity:
+  requirement_id: REQ-017
+  runtime: design-only; prototype localStorage
+  legacy: unknown
+  updates: creation fields immutable
+  ai_identity: bound connection actor, optional explicit human initiator; never infer
+  filters:
+  - creator
+  - createdVia
+  model: Persist actual model name/id and provider from call metadata; absence unknown;
+    never infer from tool
+  profiles: Generic person/agent registry; custom name; source/model defaults; historical
+    name snapshot
+security:
+- session: []
+x-authorization-design:
+  account-isolation: all API, MCP, audit, export, identities, idempotency and counters
+    scoped to authenticated user
+  oauth: OAuth 2.1 discovery/PKCE; verify real clients; never accept arbitrary redirect
+  legacy: Existing records assigned test; preserve snapshots; legacy global keys revoked
+    or bound test; no unsecured bypass
+  csrf: Authenticated cookie write endpoints require CSRF protection
+x-ai-onboarding:
+  status: design-only
+  scope: Parse standard space-separated scope sets; never broaden user consent
+  refresh: Rotating refresh token, revoke authorization family; no implementation
+    in this prototype
+  runtime: Verify native tools and Skill in target client; a generated file is not
+    a successful connection
+  secrets: Public prompts/manifest/skill contain no credentials
+  preferred_mcp: https://shixu.eliasliu.cc/mcp
+x-custom-tools:
+  requirement: REQ-090
+  prototype-only: true
+  identity-profile-field: toolName
+  source-id: custom:<uuid>
+  name-max-length: 80
+  deduplication: trim, case-insensitive
+  application-status: not implemented in this change

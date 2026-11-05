@@ -1,0 +1,273 @@
+{
+  "checked_at": "2026-11-05T01:44:38.362454+00:00",
+  "status": "passed",
+  "passed": true,
+  "prototype_sha256": "bffc3676d6e4f223aea8f56daf369cd8eb8e763830d53a125010a8ed9606ea48",
+  "config_sha256": "83d8b6b69d354e5375a7ce366e49676f111b540f02d2dfc69d629df761b865c6",
+  "results": [
+    {
+      "width": 360,
+      "height": 844,
+      "passed": true,
+      "scenarios": [
+        {
+          "id": "account-login-error-success",
+          "passed": true
+        },
+        {
+          "id": "workspace-create",
+          "passed": true
+        },
+        {
+          "id": "new-account-empty",
+          "passed": true
+        },
+        {
+          "id": "ai-quick-copy",
+          "passed": true
+        },
+        {
+          "id": "ai-authorize-verify-manage",
+          "passed": true
+        },
+        {
+          "id": "ai-deny-readonly",
+          "passed": true
+        },
+        {
+          "id": "ai-fail-retry",
+          "passed": true
+        },
+        {
+          "id": "ai-reload",
+          "passed": true
+        },
+        {
+          "id": "ai-manual-token",
+          "passed": true
+        },
+        {
+          "id": "ai-public-guide",
+          "passed": true
+        },
+        {
+          "id": "custom-tool-add",
+          "passed": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "passed": true,
+      "scenarios": [
+        {
+          "id": "account-login-error-success",
+          "passed": true
+        },
+        {
+          "id": "workspace-create",
+          "passed": true
+        },
+        {
+          "id": "new-account-empty",
+          "passed": true
+        },
+        {
+          "id": "ai-quick-copy",
+          "passed": true
+        },
+        {
+          "id": "ai-authorize-verify-manage",
+          "passed": true
+        },
+        {
+          "id": "ai-deny-readonly",
+          "passed": true
+        },
+        {
+          "id": "ai-fail-retry",
+          "passed": true
+        },
+        {
+          "id": "ai-reload",
+          "passed": true
+        },
+        {
+          "id": "ai-manual-token",
+          "passed": true
+        },
+        {
+          "id": "ai-public-guide",
+          "passed": true
+        },
+        {
+          "id": "custom-tool-add",
+          "passed": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "width": 430,
+      "height": 844,
+      "passed": true,
+      "scenarios": [
+        {
+          "id": "account-login-error-success",
+          "passed": true
+        },
+        {
+          "id": "workspace-create",
+          "passed": true
+        },
+        {
+          "id": "new-account-empty",
+          "passed": true
+        },
+        {
+          "id": "ai-quick-copy",
+          "passed": true
+        },
+        {
+          "id": "ai-authorize-verify-manage",
+          "passed": true
+        },
+        {
+          "id": "ai-deny-readonly",
+          "passed": true
+        },
+        {
+          "id": "ai-fail-retry",
+          "passed": true
+        },
+        {
+          "id": "ai-reload",
+          "passed": true
+        },
+        {
+          "id": "ai-manual-token",
+          "passed": true
+        },
+        {
+          "id": "ai-public-guide",
+          "passed": true
+        },
+        {
+          "id": "custom-tool-add",
+          "passed": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "width": 537,
+      "height": 884,
+      "passed": true,
+      "scenarios": [
+        {
+          "id": "account-login-error-success",
+          "passed": true
+        },
+        {
+          "id": "workspace-create",
+          "passed": true
+        },
+        {
+          "id": "new-account-empty",
+          "passed": true
+        },
+        {
+          "id": "ai-quick-copy",
+          "passed": true
+        },
+        {
+          "id": "ai-authorize-verify-manage",
+          "passed": true
+        },
+        {
+          "id": "ai-deny-readonly",
+          "passed": true
+        },
+        {
+          "id": "ai-fail-retry",
+          "passed": true
+        },
+        {
+          "id": "ai-reload",
+          "passed": true
+        },
+        {
+          "id": "ai-manual-token",
+          "passed": true
+        },
+        {
+          "id": "ai-public-guide",
+          "passed": true
+        },
+        {
+          "id": "custom-tool-add",
+          "passed": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "height": 1000,
+      "passed": true,
+      "scenarios": [
+        {
+          "id": "account-login-error-success",
+          "passed": true
+        },
+        {
+          "id": "workspace-create",
+          "passed": true
+        },
+        {
+          "id": "new-account-empty",
+          "passed": true
+        },
+        {
+          "id": "ai-quick-copy",
+          "passed": true
+        },
+        {
+          "id": "ai-authorize-verify-manage",
+          "passed": true
+        },
+        {
+          "id": "ai-deny-readonly",
+          "passed": true
+        },
+        {
+          "id": "ai-fail-retry",
+          "passed": true
+        },
+        {
+          "id": "ai-reload",
+          "passed": true
+        },
+        {
+          "id": "ai-manual-token",
+          "passed": true
+        },
+        {
+          "id": "ai-public-guide",
+          "passed": true
+        },
+        {
+          "id": "custom-tool-add",
+          "passed": true
+        }
+      ],
+      "errors": []
+    }
+  ],
+  "errors": [],
+  "engine_sha256": "6617c1acda7652009e45f8794995a4c33424d65d4769ddf3404237e66561225e",
+  "scope": "本地自包含HTML、Chromium视口/触摸模拟；不代表iOS、软键盘或真机验收",
+  "browser_version": "156.0.8078.4"
+}

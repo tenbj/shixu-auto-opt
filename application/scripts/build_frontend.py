@@ -94,7 +94,22 @@ html = html.replace("document.addEventListener('drop',e=>", "document.addEventLi
 html = html.replace('if(reorderTask(', 'if(await reorderTask(').replace('target&&reorderTask(', 'target&&await reorderTask(')
 html = html.replace('个人工作台 · 本地体验版<br>数据仅保存在当前浏览器', '个人工作台 · 系统版<br>数据由服务端持久保存')
 html = html.replace('交互原型 · 初始内容为演示数据，可自由编辑。', '拾序 · 记录已接入服务端，页面与 AI 共用同一工作台。')
-html = html.replace('<div class="topbar-right">', '<div class="topbar-right"><span id="sync-state" role="status" style="font-size:11px">连接中…</span><button id="sync-button" class="subtle">刷新数据</button>')
+html = html.replace('<div class="topbar-right">', '<div class="topbar-right"><span id="sync-state" role="status" class="sync-state">连接中…</span><button id="sync-button" class="subtle">刷新数据</button>')
+# 冻结原型 v0.4.0：9 处静态内联样式改为类。运行时宽度（progress、--issue-width、distribution）保持内联。
+_static_styles = {
+    '<p style="font-size:11px;margin-top:10px">': '<p class="sidebar-meta">',
+    '<span style="margin:0 12px;color:#bcc6b2">/': '<span class="crumb-sep" aria-hidden="true">/',
+    '<small style="font-size:10px;color:var(--muted)">': '<small class="issue-progress-text">',
+    '<div style="margin-top:20px"><small>SMALL STEPS. REAL CHANGE.</small>': '<div class="note-motto"><small>SMALL STEPS. REAL CHANGE.</small>',
+    '<h3 style="margin-top:10px">': '<h3 class="list-issue-title">',
+    '<h2 style="margin-top:15px">': '<h2 class="detail-title">',
+    '<div class="panelhead" style="padding:8px 0">': '<div class="panelhead panelhead-inline">',
+    '<p style="margin-bottom:18px">': '<p class="form-context">',
+}
+for _old, _new in _static_styles.items():
+    if html.count(_old) != 1:
+        raise SystemExit(f'静态样式锚点不唯一：{_old}')
+    html = html.replace(_old, _new)
 html = html.replace("const KEY='shixu-mobile-prototype-v1'", "const KEY='shixu-system-v2'")
 html = html.replace('if(numberingMigrated&&!storageBlocked)save();', '')
 html = html.replace('仅保存在当前浏览器；不永久删除，也不自动清空。', '由服务端保存；不永久删除，也不自动清空。')
