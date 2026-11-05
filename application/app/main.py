@@ -1,13 +1,16 @@
 """HTTP 系统入口：python -m uvicorn app.main:app --host 127.0.0.1 --port 8765"""
 import os
+import gzip
+import re
 from contextlib import asynccontextmanager
 import sqlite3
 import pymysql
 from pathlib import Path
 from typing import Literal
 from fastapi import FastAPI, Query, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
+from starlette.concurrency import run_in_threadpool
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from pydantic import BaseModel, ConfigDict, Field, StrictBool
 from .domain import DomainError, get, live_issues, live_tasks, matches_creation
@@ -60,6 +63,29 @@ def create_app(db_path=None):
         response.headers['X-Content-Type-Options'] = 'nosniff'
         response.headers['Referrer-Policy'] = 'no-referrer'
         response.headers['Cache-Control'] = 'no-store'
+        static = request.url.path == '/' or request.url.path.startswith(('/static/', '/examples/'))
+        if static and request.method in ('GET', 'HEAD') and response.status_code in (200, 304) and 'etag' in response.headers:
+            response.headers['Cache-Control'] = 'no-cache'
+            # Both encodings represent the same file; use a weak validator.
+            response.headers['ETag'] = 'W/' + response.headers['etag'].removeprefix('W/')
+            response.headers['Vary'] = ', '.join(filter(None, [response.headers.get('vary'), 'Accept-Encoding']))
+            if any(tag.strip().removeprefix('W/') in ('*', response.headers['etag'][2:])
+                   for tag in request.headers.get('if-none-match', '').split(',')):
+                return Response(status_code=304, headers={k: v for k, v in response.headers.items()
+                                if k not in ('content-length', 'content-type')}, background=response.background)
+            media_type = response.headers.get('content-type', '').split(';')[0]
+            text = media_type.startswith('text/') or media_type in ('application/javascript', 'application/json', 'image/svg+xml')
+            accepts_gzip = re.search(r'(?:^|,)\s*gzip\s*(?:;\s*q=([01](?:\.\d+)?))?\s*(?:,|$)',
+                                     request.headers.get('accept-encoding', ''), re.I)
+            if (request.method == 'GET' and response.status_code == 200 and text
+                    and int(response.headers.get('content-length', 0)) > 1024
+                    and 'content-encoding' not in response.headers and accepts_gzip
+                    and 0 < float(accepts_gzip.group(1) or 1) <= 1):
+                body = b''.join([chunk async for chunk in response.body_iterator])
+                body = await run_in_threadpool(gzip.compress, body, mtime=0)
+                response.headers['Content-Encoding'] = 'gzip'
+                response.headers['Content-Length'] = str(len(body))
+                response = Response(body, headers=response.headers, background=response.background)
         return response
 
     @app.exception_handler(DomainError)
