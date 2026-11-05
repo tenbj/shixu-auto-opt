@@ -5,6 +5,7 @@ import json
 import os
 import re
 import ssl
+import threading
 import pymysql
 from . import domain
 from .store import dumps
@@ -20,6 +21,9 @@ class RetainingCursor(pymysql.cursors.DictCursor):
         return super().execute(query, args)
 
 APP_ID = 'shixu-system-entities-v2'
+# 与原先每次建连后执行的语句保持一致。隔离级不加 SESSION，只作用于下一个事务。
+TIME_ZONE_SQL = "SET time_zone = '+00:00'"
+ISOLATION_SQL = 'SET TRANSACTION ISOLATION LEVEL REPEATABLE READ'
 ISSUE_FIELDS = {'id': 'id', 'number': 'number', 'title': 'title', 'description': 'description', 'priority': 'priority',
                 'tag': 'tag', 'status': 'status', 'resolution': 'resolution', 'nextStep': 'next_step',
                 'successCriteria': 'success_criteria', 'treatment': 'treatment', 'verificationMethod': 'verification_method',
@@ -62,6 +66,8 @@ class MySQLStore:
     def __init__(self, database=None):
         self.options = settings(database)
         self.database = self.options['database']
+        # 每个线程单独持有连接；for_owner 的浅拷贝共用这一槽位，仍按线程隔离。
+        self._local = threading.local()
         # 只验证已有标记；运行服务不执行建库、建表或迁移DDL。
         with self.connect() as connection:
             with connection.cursor() as cur:
@@ -70,20 +76,102 @@ class MySQLStore:
                 if not row or row['application_id'] != APP_ID:
                     raise RuntimeError('数据库不是已初始化的拾序专属库，拒绝操作')
 
+    def _open(self):
+        options = dict(self.options)
+        # 物理建连时先设定时区。隔离级必须在每个事务开始前再执行一次。
+        options.setdefault('init_command', TIME_ZONE_SQL)
+        return pymysql.connect(**options)
+
+    def _close_quietly(self, connection):
+        try:
+            connection.close()
+        except Exception:
+            pass
+
+    def _alive(self, connection):
+        if not getattr(connection, 'open', False):
+            return False
+        try:
+            connection.ping(reconnect=False)
+        except Exception:
+            return False
+        return True
+
+    def _drop(self, connection, pooled):
+        if pooled:
+            local = self._local
+            if getattr(local, 'conn', None) is connection:
+                local.conn = None
+            local.busy = False
+        self._close_quietly(connection)
+
+    def _take(self):
+        """取出本线程的空闲连接。没有、已失效，或外层事务仍占用时，另建一条。"""
+        local = self._local
+        busy = getattr(local, 'busy', False)
+        current = getattr(local, 'conn', None)
+        if not busy and current is not None and self._alive(current):
+            local.busy = True
+            return current, True
+        if not busy and current is not None:
+            local.conn = None
+            self._close_quietly(current)
+        connection = self._open()
+        if busy:
+            return connection, False
+        local.conn = connection
+        local.busy = True
+        return connection, True
+
+    def _apply_session(self, connection):
+        with connection.cursor() as cur:
+            cur.execute(TIME_ZONE_SQL)
+            cur.execute(ISOLATION_SQL)
+
+    def _acquire(self):
+        connection, pooled = self._take()
+        try:
+            self._apply_session(connection)
+            return connection, pooled
+        except Exception:
+            self._drop(connection, pooled)
+        connection, pooled = self._take()
+        try:
+            self._apply_session(connection)
+            return connection, pooled
+        except Exception:
+            self._drop(connection, pooled)
+            raise
+
+    def _release(self, connection, pooled, discard):
+        if not pooled:
+            self._close_quietly(connection)
+            return
+        local = self._local
+        if discard or getattr(local, 'conn', None) is not connection:
+            if getattr(local, 'conn', None) is connection:
+                local.conn = None
+            local.busy = False
+            self._close_quietly(connection)
+            return
+        local.busy = False
+
     @contextmanager
     def connect(self):
-        connection = pymysql.connect(**self.options)
+        """复用当前线程的连接。正常结束提交，异常回滚，未提交状态不留给下一次。"""
+        connection, pooled = self._acquire()
+        discard = False
         try:
-            with connection.cursor() as cur:
-                cur.execute("SET time_zone = '+00:00'")
-                cur.execute('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ')
             yield connection
             connection.commit()
         except Exception:
-            connection.rollback()
+            try:
+                connection.rollback()
+            except Exception:
+                discard = True
             raise
         finally:
-            connection.close()
+            self._release(connection, pooled, discard)
 
     def for_owner(self, identifier):
         import copy
