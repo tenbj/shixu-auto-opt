@@ -87,7 +87,8 @@ def expect_boot_slow_login(url,errors):
   held=[]
   page.route('**/api/auth/me',lambda route:held.append(route))
   page.reload(wait_until='domcontentloaded')
-  expect(page.locator('#account-boot-status')).to_have_text('正在确认登录状态…')
+  expect(page.locator('#sync-state')).to_have_text('同步中')
+  expect(page.locator('.account-pill:visible')).to_contain_text('慢登录')
   expect(page.locator('#account-auth-form')).to_be_hidden()
   page.wait_for_timeout(10000)
   assert len(held)==1,held

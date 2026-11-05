@@ -1,21 +1,34 @@
+const LOCAL_USER_KEY='shixu-local-user';
+let accountVersion=0;
+function cacheLocalUser(user){try{if(user)localStorage.setItem(LOCAL_USER_KEY,JSON.stringify({id:user.id,displayName:user.displayName}));else localStorage.removeItem(LOCAL_USER_KEY)}catch{}}
 async function loginAccount(result){
- currentUser={...result.user,connections:[]};csrfToken=result.csrf;
+ accountVersion++;loaded=false;db={issues:[],tasks:[],identityProfiles:[]};profiles=[];restoreCustomTools([],{});
+ const user=currentUser={...result.user,connections:[]};csrfToken=result.csrf;cacheLocalUser(user);
  view='today';query='';priority='全部';scope='全部';category='';parentIssueId=null;pendingWrite=null;taskFilter=null;taskGrouping='issues';selectedTaskIssue='all';taskIssueStatus='全部';taskActionStatus='全部';accountTabs={settings:'profile',connections:'quick'};
  creatorFilters.issues={person:'',via:''};creatorFilters.tasks={person:'',via:''};
- activeProfileId=localStorage.getItem('shixu-system-active-identity:'+currentUser.id)||'';
+ activeProfileId='';try{activeProfileId=localStorage.getItem('shixu-system-active-identity:'+currentUser.id)||''}catch{}
+ render();syncStatus('同步中');
  await loadWorkspace();
+ if(currentUser!==user||!loaded)return;
  if(loaded&&!profiles.some(x=>x.kind==='person'&&x.name===currentUser.displayName)){
   try{const made=await mutate('/api/identities','POST',{name:currentUser.displayName,kind:'person',via:'manual',modelName:'',modelProvider:''});activeProfileId=made.resource.id;persistProfiles();render()}catch(e){toast(e.message)}
  }
+ if(currentUser!==user)return;
  if(!activeProfileId){activeProfileId=profiles.find(x=>x.kind==='person'&&x.name===currentUser.displayName)?.id||'';persistProfiles();render()}
+ if(loaded)syncStatus('已同步');
  if(new URLSearchParams(location.search).has('authorize'))await showAuthorization();
 }
-async function logoutAccount(){
- try{await request('/api/auth/logout',{method:'POST',body:'{}'})}catch(e){if(e.status!==401){toast(e.message);return}}
+function clearLocalAccount(notice=''){
+ accountVersion++;cacheLocalUser(null);
  currentUser=null;csrfToken='';loaded=false;profiles=[];restoreCustomTools([],{});activeProfileId='';db={issues:[],tasks:[],identityProfiles:[]};pendingWrite=null;lastPreviewConfig=null;
- document.querySelectorAll('dialog[open]').forEach(d=>d.close());showLogin();window.scrollTo(0,0);
+ document.querySelectorAll('dialog[open]').forEach(d=>d.close());accountBootSettle(true);showLogin('login',notice);window.scrollTo(0,0);
+}
+async function logoutAccount(){
+ const logout=request('/api/auth/logout',{method:'POST',body:'{}'});clearLocalAccount();
+ try{await logout}catch(e){if(e.status!==401)toast(e.message)}
 }
 function accountBootPending(){
+ if(currentUser){syncStatus('同步中');return}
  let box=document.querySelector('#account-auth');
  if(!box){showLogin('login','');box=document.querySelector('#account-auth')}
  box.hidden=true;
@@ -30,6 +43,8 @@ function accountBootSettle(showAuth){
 let accountBootRunning=false;
 async function bootAccount(){
  if(accountBootRunning)return;accountBootRunning=true;
+ if(!currentUser)try{const user=JSON.parse(localStorage.getItem(LOCAL_USER_KEY));if(typeof user?.id==='string'&&user.id&&typeof user.displayName==='string'){currentUser={id:user.id,displayName:user.displayName};cacheLocalUser(currentUser);render()}}catch{}
+ const version=accountVersion;let checking=true;
  accountBootPending();
  try{
   let response;
@@ -43,23 +58,24 @@ async function bootAccount(){
   if(!ok&&(response.status>=500||!json)||!json){const error=new Error('服务暂不可用，请稍后重试');error.status=response.status;throw error}
   let result;try{result=await response.json()}catch{const error=new Error('服务暂不可用，请稍后重试');error.status=response.status;throw error}
   if(!ok){const error=new Error(result&&typeof result.detail==='string'?result.detail:'登录状态检查失败');error.status=response.status;throw error}
-  if(!currentUser)await loginAccount(result);
-  accountBootSettle(false);
+  if(!result?.user?.id||typeof result.user.displayName!=='string'||typeof result.csrf!=='string'){const error=new Error('服务暂不可用，请稍后重试');error.status=200;throw error}
+  if(version!==accountVersion)return;
+  checking=false;await loginAccount(result);
+  accountBootSettle(!currentUser);
  }catch(e){
+  if(checking&&version!==accountVersion)return;
+  if(e.status===401){clearLocalAccount(currentUser?'登录已过期，请重新登录':'');return}
   const pageFault=!e.network&&!e.status;
   if(pageFault)console.error(e);
-  if(currentUser&&!pageFault){accountBootSettle(false);return}
-  accountBootSettle(true);
-  const form=document.querySelector('#account-auth-form');
+  accountBootSettle(!currentUser);
   const reason=e.network?'连接超时，请检查网络后重试':pageFault?'页面出错，请刷新重试':e.message;
-  if(!form)showLogin('login',e.status===401?'':'');
-  const notice=document.querySelector('#account-auth-error');
-  if(e.status===401){if(notice?.querySelector('[data-event-id="EVT-ACCOUNT-BOOT-RETRY"]'))notice.replaceChildren()}
-  else if(notice)notice.innerHTML=`${esc(reason||'登录状态检查失败')} <button type="button" class="account-link" data-event-id="EVT-ACCOUNT-BOOT-RETRY">重试</button>`;
+  const notice=document.querySelector(currentUser?'#storage-warning':'#account-auth-error');
+  if(currentUser){syncStatus('同步未完成');notice?.classList.remove('hidden')}
+  if(notice)notice.innerHTML=`${esc(reason||'登录状态检查失败')} <button type="button" class="account-link" data-event-id="EVT-ACCOUNT-BOOT-RETRY">重试</button>`;
  }finally{accountBootRunning=false;document.documentElement.dataset.accountBoot='complete'}
 }
 document.addEventListener('click',e=>{if(e.target.closest('[data-event-id="EVT-ACCOUNT-BOOT-RETRY"]'))bootAccount()});
-const accountBootRender=render;render=function(){accountBootRender();if(accountBootRunning&&!currentUser)accountBootPending()};
+const accountBootRender=render;render=function(){accountBootRender();if(accountBootRunning)accountBootPending()};
 async function showAuthorization(){
  const key=new URLSearchParams(location.search).get('authorize');
  if(!key&&currentUser.connection?.oauthAvailable===false){show('HTTP 连接方法',`<p>当前HTTP地址使用访问令牌连接。请在“AI接入 → 手动配置”生成并下载配置，再导入客户端。</p><p>“访问令牌”也适用于个人电脑上的AI客户端。标准OAuth登录授权需要HTTPS。</p>`);return}
@@ -74,7 +90,7 @@ document.addEventListener('submit',async e=>{
    if(form.dataset.mode==='register'&&v.password!==v.confirm)throw Error('两次密码不一致');
    const result=await request('/api/auth/'+(form.dataset.mode==='register'?'register':'login'),{method:'POST',body:JSON.stringify({username:v.username,password:v.password,displayName:v.displayName||''})});await loginAccount(result);
   }
-  if(form.id==='account-profile-form'){const updated=await request('/api/account',{method:'PATCH',body:JSON.stringify({displayName:v.displayName})});Object.assign(currentUser,updated);render();renderAccountPage();toast('账号资料已保存')}
+  if(form.id==='account-profile-form'){const user=currentUser,updated=await request('/api/account',{method:'PATCH',body:JSON.stringify({displayName:v.displayName})});if(currentUser!==user)return;Object.assign(currentUser,updated);cacheLocalUser(currentUser);render();renderAccountPage();toast('账号资料已保存')}
   if(form.id==='account-password-form'){if(v.newPassword!==v.confirmPassword)throw Error('两次新密码不一致');await request('/api/account/password',{method:'POST',body:JSON.stringify({oldPassword:v.oldPassword,newPassword:v.newPassword})});await logoutAccount();toast('密码已修改，请重新登录')}
   if(form.id==='account-access-form'){
    const result=await request('/api/account/mcp-access',{method:'POST',body:JSON.stringify({name:v.name,scope:v.scope})});closeDialog();accountTabs.connections='list';await openAccountPanel('connections');showIssuedConfig({...result.item,url:result.url},result.token);
