@@ -21,9 +21,11 @@ class RetainingCursor(pymysql.cursors.DictCursor):
         return super().execute(query, args)
 
 APP_ID = 'shixu-system-entities-v2'
-# 与原先每次建连后执行的语句保持一致。隔离级不加 SESSION，只作用于下一个事务。
+# 时区只在建连 init_command 里设。隔离级必须带 SESSION，否则只作用于下一个事务。
 TIME_ZONE_SQL = "SET time_zone = '+00:00'"
-ISOLATION_SQL = 'SET TRANSACTION ISOLATION LEVEL REPEATABLE READ'
+ISOLATION_SQL = 'SET SESSION TRANSACTION ISOLATION LEVEL REPEATABLE READ'
+_WRITE_SQL = re.compile(r'(?is)^\s*(INSERT|UPDATE|DELETE|REPLACE|ALTER|CREATE|DROP|TRUNCATE|CALL|LOAD)\b')
+_GONE = (2006, 2013, 2055)
 ISSUE_FIELDS = {'id': 'id', 'number': 'number', 'title': 'title', 'description': 'description', 'priority': 'priority',
                 'tag': 'tag', 'status': 'status', 'resolution': 'resolution', 'nextStep': 'next_step',
                 'successCriteria': 'success_criteria', 'treatment': 'treatment', 'verificationMethod': 'verification_method',
@@ -39,6 +41,79 @@ ISSUE_FIELDS.update(CREATION_FIELDS)
 TASK_FIELDS.update(CREATION_FIELDS)
 IDENTITY_FIELDS = dict(id='id',name='name',kind='kind',via='via',modelName='model_name',
                        modelProvider='model_provider',createdAt='created_at',updatedAt='updated_at')
+
+
+def _is_write(query):
+    text = query.decode() if isinstance(query, bytes) else query
+    return bool(_WRITE_SQL.match(text))
+
+
+def _is_disconnect(exc):
+    if isinstance(exc, pymysql.err.InterfaceError):
+        return True
+    code = exc.args[0] if isinstance(exc, pymysql.err.OperationalError) and exc.args else None
+    return code in _GONE
+
+
+class _Attempt:
+    """一次 connect 的连接与是否已经写过数据。"""
+
+    def __init__(self, connection, pooled):
+        self.connection, self.pooled = connection, pooled
+        self.written = self.retried = self.started = self.broken = False
+
+
+class _RetryCursor:
+    """断线时只在首条语句写出数据前换连接并重试这一条。"""
+
+    def __init__(self, store, state, cursor):
+        self.store, self.state, self.cursor = store, state, cursor
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        closer = getattr(self.cursor, '__exit__', None)
+        return closer(*args) if closer else False
+
+    def __getattr__(self, name):
+        return getattr(self.cursor, name)
+
+    def execute(self, query, args=None):
+        if _is_write(query):
+            self.state.written = True
+        try:
+            result = self.cursor.execute(query, args)
+        except Exception as exc:
+            if not self._can_retry(exc):
+                if _is_disconnect(exc):
+                    self.state.broken = True
+                raise
+            self.store._reconnect(self.state)
+            self.cursor = self.state.connection.cursor()
+            try:
+                result = self.cursor.execute(query, args)
+            except Exception as retry_exc:
+                if _is_disconnect(retry_exc):
+                    self.state.broken = True
+                raise
+        self.state.started = True
+        return result
+
+    def executemany(self, query, args):
+        self.state.written = True
+        try:
+            result = self.cursor.executemany(query, args)
+        except Exception as exc:
+            if _is_disconnect(exc):
+                self.state.broken = True
+            raise
+        self.state.started = True
+        return result
+
+    def _can_retry(self, exc):
+        state = self.state
+        return not state.written and not state.started and not state.retried and _is_disconnect(exc)
 
 
 def settings(database=None):
@@ -78,9 +153,15 @@ class MySQLStore:
 
     def _open(self):
         options = dict(self.options)
-        # 物理建连时先设定时区。隔离级必须在每个事务开始前再执行一次。
         options.setdefault('init_command', TIME_ZONE_SQL)
-        return pymysql.connect(**options)
+        connection = pymysql.connect(**options)
+        try:
+            with connection.cursor() as cur:
+                cur.execute(ISOLATION_SQL)
+        except Exception:
+            self._close_quietly(connection)
+            raise
+        return connection
 
     def _close_quietly(self, connection):
         try:
@@ -88,14 +169,8 @@ class MySQLStore:
         except Exception:
             pass
 
-    def _alive(self, connection):
-        if not getattr(connection, 'open', False):
-            return False
-        try:
-            connection.ping(reconnect=False)
-        except Exception:
-            return False
-        return True
+    def _usable(self, connection):
+        return bool(getattr(connection, 'open', False))
 
     def _drop(self, connection, pooled):
         if pooled:
@@ -106,11 +181,11 @@ class MySQLStore:
         self._close_quietly(connection)
 
     def _take(self):
-        """取出本线程的空闲连接。没有、已失效，或外层事务仍占用时，另建一条。"""
+        """取出本线程的空闲连接。没有、已关闭，或外层事务仍占用时，另建一条。不 ping。"""
         local = self._local
         busy = getattr(local, 'busy', False)
         current = getattr(local, 'conn', None)
-        if not busy and current is not None and self._alive(current):
+        if not busy and current is not None and self._usable(current):
             local.busy = True
             return current, True
         if not busy and current is not None:
@@ -123,27 +198,34 @@ class MySQLStore:
         local.busy = True
         return connection, True
 
-    def _apply_session(self, connection):
-        with connection.cursor() as cur:
-            cur.execute(TIME_ZONE_SQL)
-            cur.execute(ISOLATION_SQL)
-
     def _acquire(self):
-        connection, pooled = self._take()
         try:
-            self._apply_session(connection)
-            return connection, pooled
+            return self._take()
         except Exception:
-            self._drop(connection, pooled)
-        connection, pooled = self._take()
-        try:
-            self._apply_session(connection)
-            return connection, pooled
-        except Exception:
-            self._drop(connection, pooled)
-            raise
+            return self._take()
+
+    def _reconnect(self, state):
+        state.retried = True
+        old, pooled = state.connection, state.pooled
+        state.connection = None
+        self._drop(old, pooled)
+        state.connection, state.pooled = self._take()
+
+    def _bind_cursor(self, host, state):
+        original = host.cursor
+
+        def cursor(*args, **kwargs):
+            target = state.connection
+            raw = original(*args, **kwargs) if target is host else target.cursor(*args, **kwargs)
+            return _RetryCursor(self, state, raw)
+
+        host.cursor = cursor
 
     def _release(self, connection, pooled, discard):
+        if connection is None:
+            if pooled:
+                self._local.busy = False
+            return
         if not pooled:
             self._close_quietly(connection)
             return
@@ -160,18 +242,25 @@ class MySQLStore:
     def connect(self):
         """复用当前线程的连接。正常结束提交，异常回滚，未提交状态不留给下一次。"""
         connection, pooled = self._acquire()
+        state = _Attempt(connection, pooled)
         discard = False
         try:
+            self._bind_cursor(connection, state)
             yield connection
-            connection.commit()
-        except Exception:
+            state.connection.commit()
+        except Exception as exc:
             try:
-                connection.rollback()
+                if state.connection is not None:
+                    state.connection.rollback()
             except Exception:
+                discard = True
+            # 断线后的连接不再放回线程槽；已写出的事务只回滚，不重放。
+            if state.broken or _is_disconnect(exc):
                 discard = True
             raise
         finally:
-            self._release(connection, pooled, discard)
+            connection.__dict__.pop('cursor', None)
+            self._release(state.connection, state.pooled, discard or state.connection is None)
 
     def for_owner(self, identifier):
         import copy
