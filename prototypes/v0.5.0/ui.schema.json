@@ -1,0 +1,383 @@
+{
+  "version": "1.0.0",
+  "page": {
+    "id": "shixu-r6-auth-session",
+    "states": [
+      "login",
+      "workbench_confirming",
+      "workbench_ready"
+    ],
+    "views": [
+      "login",
+      "today",
+      "issues",
+      "tasks"
+    ]
+  },
+  "components": [
+    {
+      "id": "auth-form",
+      "type": "form",
+      "states": [
+        "idle",
+        "error"
+      ],
+      "events": [
+        "EVT-AUTH-SUBMIT"
+      ]
+    },
+    {
+      "id": "auth-mode-toggle",
+      "type": "button",
+      "states": [
+        "login",
+        "register"
+      ],
+      "events": [
+        "EVT-AUTH-MODE"
+      ]
+    },
+    {
+      "id": "auth-connect-link",
+      "type": "link",
+      "states": [
+        "default",
+        "hover",
+        "focus"
+      ],
+      "events": [
+        "EVT-AUTH-CONNECT"
+      ]
+    },
+    {
+      "id": "connect-dialog",
+      "type": "dialog",
+      "states": [
+        "open",
+        "closed"
+      ],
+      "events": [
+        "EVT-CONNECT-CLOSE"
+      ]
+    },
+    {
+      "id": "refresh-button",
+      "type": "button",
+      "states": [
+        "idle"
+      ],
+      "events": [
+        "EVT-REFRESH"
+      ]
+    },
+    {
+      "id": "logout-button",
+      "type": "button",
+      "states": [
+        "idle"
+      ],
+      "events": [
+        "EVT-LOGOUT"
+      ]
+    },
+    {
+      "id": "nav-item",
+      "type": "button",
+      "states": [
+        "active",
+        "idle"
+      ],
+      "events": [
+        "EVT-NAV"
+      ]
+    },
+    {
+      "id": "account-pill",
+      "type": "button",
+      "states": [
+        "idle"
+      ],
+      "events": [
+        "EVT-ACCOUNT-MENU"
+      ]
+    },
+    {
+      "id": "demo-toggle",
+      "type": "button",
+      "states": [
+        "idle"
+      ],
+      "events": [
+        "EVT-DEMO-TOGGLE"
+      ]
+    },
+    {
+      "id": "demo-outcome",
+      "type": "button",
+      "states": [
+        "pressed",
+        "idle"
+      ],
+      "events": [
+        "EVT-DEMO-OUTCOME"
+      ]
+    },
+    {
+      "id": "demo-seed",
+      "type": "button",
+      "states": [
+        "idle"
+      ],
+      "events": [
+        "EVT-DEMO-SEED"
+      ]
+    },
+    {
+      "id": "demo-clear",
+      "type": "button",
+      "states": [
+        "idle"
+      ],
+      "events": [
+        "EVT-DEMO-CLEAR"
+      ]
+    },
+    {
+      "id": "sync-state",
+      "type": "status",
+      "states": [
+        "confirming",
+        "ok"
+      ],
+      "events": []
+    }
+  ],
+  "entity_states": {
+    "session": [
+      "anonymous",
+      "local_cached_confirming",
+      "confirmed",
+      "expired"
+    ]
+  },
+  "notes": [
+    "localStorage 键 shixu-local-user 仅含 id、displayName",
+    "连接 AI 使用 a.auth-connect，禁止浏览器默认蓝链观感",
+    "三态可通过演示控件复现：工作台同步中 / 已同步 / 401 回登录"
+  ],
+  "responsive": {
+    "mode": "adaptive",
+    "mobile_breakpoint": 700,
+    "layouts": {
+      "desktop": "登录双栏故事+表单；工作台左侧导航+顶栏同步徽标；演示控件右下角",
+      "mobile": "登录单列隐藏故事正文；工作台去侧栏，顶栏账号+底部三入口；演示控件上移避开底栏"
+    },
+    "viewports": [
+      {
+        "width": 360,
+        "height": 844
+      },
+      {
+        "width": 390,
+        "height": 844
+      },
+      {
+        "width": 430,
+        "height": 844
+      },
+      {
+        "width": 1440,
+        "height": 1000
+      }
+    ],
+    "scenarios": [
+      {
+        "id": "connect-link-style-and-open",
+        "requirement_ids": [
+          "REQ-001"
+        ],
+        "steps": [
+          {
+            "action": "expect_visible",
+            "selector": "a.auth-connect"
+          },
+          {
+            "action": "click",
+            "selector": "a.auth-connect[data-event-id='EVT-AUTH-CONNECT']"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#connect-title",
+            "value": "连接 AI"
+          },
+          {
+            "action": "click",
+            "selector": "[data-event-id='EVT-CONNECT-CLOSE']"
+          },
+          {
+            "action": "expect_visible",
+            "selector": "#account-auth-form"
+          }
+        ]
+      },
+      {
+        "id": "login-writes-local-cache",
+        "requirement_ids": [
+          "REQ-002",
+          "REQ-003"
+        ],
+        "steps": [
+          {
+            "action": "fill",
+            "selector": "#username",
+            "value": "test"
+          },
+          {
+            "action": "fill",
+            "selector": "#password",
+            "value": "1234"
+          },
+          {
+            "action": "click",
+            "selector": "#account-auth-form button[type='submit']"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#desk-name",
+            "value": "测试用户"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#sync-state",
+            "value": "已同步"
+          },
+          {
+            "action": "click",
+            "selector": "[data-event-id='EVT-DEMO-TOGGLE']"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#demo-meta",
+            "value": "displayName"
+          }
+        ]
+      },
+      {
+        "id": "refresh-shows-confirming-then-ok",
+        "requirement_ids": [
+          "REQ-002",
+          "REQ-003"
+        ],
+        "steps": [
+          {
+            "action": "click",
+            "selector": "[data-event-id='EVT-DEMO-TOGGLE']"
+          },
+          {
+            "action": "click",
+            "selector": "[data-event-id='EVT-DEMO-OUTCOME'][data-outcome='pending']"
+          },
+          {
+            "action": "click",
+            "selector": "[data-event-id='EVT-DEMO-SEED']"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#sync-state",
+            "value": "同步中"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#desk-name",
+            "value": "测试用户"
+          },
+          {
+            "action": "click",
+            "selector": "[data-event-id='EVT-DEMO-OUTCOME'][data-outcome='success']"
+          },
+          {
+            "action": "click",
+            "selector": "[data-event-id='EVT-REFRESH']"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#sync-state",
+            "value": "已同步"
+          }
+        ]
+      },
+      {
+        "id": "confirm-fail-401-back-to-login",
+        "requirement_ids": [
+          "REQ-004"
+        ],
+        "steps": [
+          {
+            "action": "click",
+            "selector": "[data-event-id='EVT-DEMO-TOGGLE']"
+          },
+          {
+            "action": "click",
+            "selector": "[data-event-id='EVT-DEMO-OUTCOME'][data-outcome='fail401']"
+          },
+          {
+            "action": "click",
+            "selector": "[data-event-id='EVT-DEMO-SEED']"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#account-auth-error",
+            "value": "登录已过期"
+          },
+          {
+            "action": "expect_visible",
+            "selector": "#account-auth-form"
+          }
+        ]
+      },
+      {
+        "id": "logout-clears-cache",
+        "requirement_ids": [
+          "REQ-004"
+        ],
+        "steps": [
+          {
+            "action": "fill",
+            "selector": "#username",
+            "value": "test"
+          },
+          {
+            "action": "fill",
+            "selector": "#password",
+            "value": "1234"
+          },
+          {
+            "action": "click",
+            "selector": "#account-auth-form button[type='submit']"
+          },
+          {
+            "action": "expect_visible",
+            "selector": "#workbench"
+          },
+          {
+            "action": "click",
+            "selector": "[data-event-id='EVT-LOGOUT']"
+          },
+          {
+            "action": "expect_visible",
+            "selector": "#account-auth-form"
+          },
+          {
+            "action": "click",
+            "selector": "[data-event-id='EVT-DEMO-TOGGLE']"
+          },
+          {
+            "action": "expect_text",
+            "selector": "#demo-meta",
+            "value": "（空）"
+          }
+        ]
+      }
+    ]
+  }
+}

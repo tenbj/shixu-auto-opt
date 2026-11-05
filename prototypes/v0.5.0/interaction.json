@@ -1,0 +1,147 @@
+{
+  "version": "1.0.0",
+  "runtime": "browser-localStorage",
+  "interactions": [
+    {
+      "id": "EVT-AUTH-SUBMIT",
+      "component_id": "auth-form",
+      "trigger": "submit",
+      "from_state": "login",
+      "to_state": "workbench_ready",
+      "action": "校验演示账号；成功则只写 id/displayName 到 localStorage 并进入工作台",
+      "requirement_ids": [
+        "REQ-002",
+        "REQ-003"
+      ],
+      "api": "POST /api/auth/login"
+    },
+    {
+      "id": "EVT-AUTH-MODE",
+      "component_id": "auth-mode-toggle",
+      "trigger": "click",
+      "from_state": "login",
+      "to_state": "login",
+      "action": "在登录/注册文案与字段间切换",
+      "requirement_ids": [
+        "REQ-001"
+      ]
+    },
+    {
+      "id": "EVT-AUTH-CONNECT",
+      "component_id": "auth-connect-link",
+      "trigger": "click",
+      "from_state": "login",
+      "to_state": "login",
+      "action": "打开连接 AI 说明弹层；链接使用 auth-connect 样式",
+      "requirement_ids": [
+        "REQ-001"
+      ]
+    },
+    {
+      "id": "EVT-CONNECT-CLOSE",
+      "component_id": "connect-dialog",
+      "trigger": "click",
+      "from_state": "login",
+      "to_state": "login",
+      "action": "关闭连接说明弹层",
+      "requirement_ids": [
+        "REQ-001"
+      ]
+    },
+    {
+      "id": "EVT-REFRESH",
+      "component_id": "refresh-button",
+      "trigger": "click",
+      "from_state": "workbench_confirming",
+      "to_state": "workbench_confirming",
+      "action": "模拟刷新：有缓存则先工作台+同步中，再按演示结果确认",
+      "requirement_ids": [
+        "REQ-002",
+        "REQ-003",
+        "REQ-004"
+      ],
+      "api": "GET /api/auth/me"
+    },
+    {
+      "id": "EVT-LOGOUT",
+      "component_id": "logout-button",
+      "trigger": "click",
+      "from_state": "workbench_ready",
+      "to_state": "login",
+      "action": "清除本地 id/displayName 并退回登录",
+      "requirement_ids": [
+        "REQ-004"
+      ],
+      "api": "POST /api/auth/logout"
+    },
+    {
+      "id": "EVT-NAV",
+      "component_id": "nav-item",
+      "trigger": "click",
+      "from_state": "workbench_ready",
+      "to_state": "workbench_ready",
+      "action": "切换工作台壳导航标签",
+      "requirement_ids": [
+        "REQ-002"
+      ]
+    },
+    {
+      "id": "EVT-ACCOUNT-MENU",
+      "component_id": "account-pill",
+      "trigger": "click",
+      "from_state": "workbench_ready",
+      "to_state": "workbench_ready",
+      "action": "账号入口（原型 alert；正式版下拉）",
+      "requirement_ids": [
+        "REQ-002"
+      ]
+    },
+    {
+      "id": "EVT-DEMO-TOGGLE",
+      "component_id": "demo-toggle",
+      "trigger": "click",
+      "from_state": "login",
+      "to_state": "login",
+      "action": "显示/隐藏三态演示控件",
+      "requirement_ids": [
+        "REQ-002",
+        "REQ-003",
+        "REQ-004"
+      ]
+    },
+    {
+      "id": "EVT-DEMO-OUTCOME",
+      "component_id": "demo-outcome",
+      "trigger": "click",
+      "from_state": "workbench_confirming",
+      "to_state": "workbench_confirming",
+      "action": "设置后台确认结果：success / pending / fail401",
+      "requirement_ids": [
+        "REQ-003",
+        "REQ-004"
+      ]
+    },
+    {
+      "id": "EVT-DEMO-SEED",
+      "component_id": "demo-seed",
+      "trigger": "click",
+      "from_state": "login",
+      "to_state": "workbench_confirming",
+      "action": "写入演示本地缓存并触发 boot",
+      "requirement_ids": [
+        "REQ-002"
+      ]
+    },
+    {
+      "id": "EVT-DEMO-CLEAR",
+      "component_id": "demo-clear",
+      "trigger": "click",
+      "from_state": "workbench_ready",
+      "to_state": "login",
+      "action": "清除本地缓存并回到登录",
+      "requirement_ids": [
+        "REQ-004"
+      ]
+    }
+  ]
+}

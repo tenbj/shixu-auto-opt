@@ -1,0 +1,116 @@
+{
+  "asoc_version": "1.0.0",
+  "skill": "H01_原型设计",
+  "intent": "第6轮合并原型（对齐 v0.5.0）：登录页「连接 AI」去默认蓝链样式；刷新先用本地 id/显示名渲染工作台并标同步中，后台确认成功保留、401 清缓存退回登录",
+  "capabilities": [
+    "responsive-web-v1"
+  ],
+  "artifacts": [
+    {
+      "id": "prd",
+      "path": "prd.md",
+      "layer": "human"
+    },
+    {
+      "id": "prototype",
+      "path": "prototype.html",
+      "layer": "human"
+    },
+    {
+      "id": "ui",
+      "path": "ui.schema.json",
+      "layer": "machine"
+    },
+    {
+      "id": "interaction",
+      "path": "interaction.json",
+      "layer": "machine"
+    },
+    {
+      "id": "flow",
+      "path": "user-flow.md",
+      "layer": "human"
+    },
+    {
+      "id": "api",
+      "path": "api.yaml",
+      "layer": "machine"
+    },
+    {
+      "id": "database",
+      "path": "database.sql",
+      "layer": "machine"
+    },
+    {
+      "id": "evaluation",
+      "path": "evaluation/report.json",
+      "layer": "evaluation"
+    },
+    {
+      "id": "responsive",
+      "path": "evaluation/responsive-report.json",
+      "layer": "evaluation"
+    }
+  ],
+  "input": {
+    "intent": "第6轮合并原型（对齐 v0.5.0）：登录页「连接 AI」去默认蓝链样式；刷新先用本地 id/显示名渲染工作台并标同步中，后台确认成功保留、401 清缓存退回登录",
+    "product_context": "拾序个人工作台 shixu-auto-opt；本轮只覆盖登录页链接样式与本地登录态三态，不改鉴权接口与数据库。",
+    "target_users": [
+      "个人工作台用户",
+      "需求官/编码代理"
+    ],
+    "target_platform": "web",
+    "responsive": {
+      "mode": "adaptive"
+    },
+    "constraints": [
+      "本地只存用户 id 与显示名，不存 token/密码/csrf",
+      "不动 account_api.py 与鉴权接口；登录是否有效仍由服务端判断",
+      "只动 shixu-auto-opt / daily-opt；禁止访问 shixu-personal-desk",
+      "原型离线可演示三态；不连接生产"
+    ],
+    "assumptions": [
+      "演示账号 test / 1234，显示名可用「测试用户」",
+      "localStorage 键名原型用 shixu-local-user，落地可改为与 accounts-api.js 约定一致",
+      "「连接 AI」目标页 /connect 在本原型用弹层说明，不跳外链",
+      "后台确认延迟可用演示控件切换：成功 / 延迟确认中 / 401 失效"
+    ],
+    "requirements": [
+      {
+        "id": "REQ-001",
+        "statement": "登录页「连接 AI」链接样式与整体一致",
+        "acceptance_criteria": [
+          "不再使用浏览器默认蓝色下划线",
+          "颜色与账号辅助链接一致（品牌绿），触达区≥44px",
+          "与登录按钮有清晰间距；hover/focus 可见"
+        ]
+      },
+      {
+        "id": "REQ-002",
+        "statement": "刷新时若有本地登录缓存，先显示工作台",
+        "acceptance_criteria": [
+          "本地仅存 id 与 displayName",
+          "有缓存时立即显示工作台与显示名，标「同步中」",
+          "不再先闪登录页或长时间「正在确认登录状态…」空白等待"
+        ]
+      },
+      {
+        "id": "REQ-003",
+        "statement": "后台确认成功后结束同步中",
+        "acceptance_criteria": [
+          "确认成功后同步徽标变为「已同步」",
+          "工作台保持，不重登"
+        ]
+      },
+      {
+        "id": "REQ-004",
+        "statement": "后台确认失效（401）清缓存并退回登录",
+        "acceptance_criteria": [
+          "401 立即清除本地 id/显示名",
+          "退回登录页并提示登录已过期",
+          "退出登录同样清除本地缓存"
+        ]
+      }
+    ]
+  }
+}

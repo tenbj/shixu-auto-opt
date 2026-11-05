@@ -1,0 +1,125 @@
+{
+  "checked_at": "2026-11-05T04:23:30.353789+00:00",
+  "status": "passed",
+  "passed": true,
+  "prototype_sha256": "d4798c77487ed5703952adc97f703c31c0636cb1dddfdf5a6a1ccb5c6181330a",
+  "config_sha256": "fcd924d3c46ef64bebe0ee2330797d35bb8034ba7c2d71fb6d63c92f22ed2e86",
+  "results": [
+    {
+      "width": 360,
+      "height": 844,
+      "passed": true,
+      "scenarios": [
+        {
+          "id": "connect-link-style-and-open",
+          "passed": true
+        },
+        {
+          "id": "login-writes-local-cache",
+          "passed": true
+        },
+        {
+          "id": "refresh-shows-confirming-then-ok",
+          "passed": true
+        },
+        {
+          "id": "confirm-fail-401-back-to-login",
+          "passed": true
+        },
+        {
+          "id": "logout-clears-cache",
+          "passed": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "passed": true,
+      "scenarios": [
+        {
+          "id": "connect-link-style-and-open",
+          "passed": true
+        },
+        {
+          "id": "login-writes-local-cache",
+          "passed": true
+        },
+        {
+          "id": "refresh-shows-confirming-then-ok",
+          "passed": true
+        },
+        {
+          "id": "confirm-fail-401-back-to-login",
+          "passed": true
+        },
+        {
+          "id": "logout-clears-cache",
+          "passed": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "width": 430,
+      "height": 844,
+      "passed": true,
+      "scenarios": [
+        {
+          "id": "connect-link-style-and-open",
+          "passed": true
+        },
+        {
+          "id": "login-writes-local-cache",
+          "passed": true
+        },
+        {
+          "id": "refresh-shows-confirming-then-ok",
+          "passed": true
+        },
+        {
+          "id": "confirm-fail-401-back-to-login",
+          "passed": true
+        },
+        {
+          "id": "logout-clears-cache",
+          "passed": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "height": 1000,
+      "passed": true,
+      "scenarios": [
+        {
+          "id": "connect-link-style-and-open",
+          "passed": true
+        },
+        {
+          "id": "login-writes-local-cache",
+          "passed": true
+        },
+        {
+          "id": "refresh-shows-confirming-then-ok",
+          "passed": true
+        },
+        {
+          "id": "confirm-fail-401-back-to-login",
+          "passed": true
+        },
+        {
+          "id": "logout-clears-cache",
+          "passed": true
+        }
+      ],
+      "errors": []
+    }
+  ],
+  "errors": [],
+  "engine_sha256": "6617c1acda7652009e45f8794995a4c33424d65d4769ddf3404237e66561225e",
+  "scope": "本地自包含HTML、Chromium视口/触摸模拟；不代表iOS、软键盘或真机验收",
+  "browser_version": "156.0.8078.4"
+}

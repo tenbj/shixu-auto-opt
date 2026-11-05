@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>拾序 · r6 登录态与连接 AI（v0.5.0）</title>
+<style>
+:root{--ink:#293e33;--muted:#818a7b;--green:#42684e;--line:#e5e8dd;--paper:#f7f8f2;--sage:#e8eee1}
+*{box-sizing:border-box}
+html{overflow-wrap:anywhere}
+body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.65 'Segoe UI','Microsoft YaHei',sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;border:0;background:none;color:inherit}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid #9eb78e;outline-offset:3px}
+input{border:1px solid #d9e1d0;border-radius:10px;padding:12px 14px;color:#314b36;background:#fff;font-size:16px;min-height:46px;width:100%;max-width:100%}
+
+/* —— 登录页（对齐线上） —— */
+#account-auth{min-height:100dvh;display:grid;grid-template-columns:1.05fr 1fr;background:#f6f7f1}
+#account-auth[hidden]{display:none!important}
+.auth-story{background:var(--sage);padding:50px 9%;display:flex;flex-direction:column;justify-content:space-between;gap:65px;min-height:100dvh}
+.auth-wordmark{font-size:25px;font-weight:700;color:#36563e;display:flex;align-items:center}
+.auth-wordmark>span{display:inline-grid;place-items:center;background:#42684e;color:#fff;width:46px;height:46px;border-radius:15px;margin-right:10px;font-size:22px}
+.auth-eyebrow{font-size:11px;letter-spacing:3px;color:#87977d}
+.auth-story h1{font-size:clamp(32px,4vw,52px);line-height:1.25;color:#34513c;margin:20px 0 28px;letter-spacing:-1px}
+.auth-story p{font-size:17px;line-height:1.9;color:#687c60}
+.auth-story>small{font-size:13px;color:#7b8b70;line-height:1.8}
+.auth-panel{display:grid;place-items:center;padding:50px 24px}
+.auth-panel-inner{width:100%;max-width:385px}
+.auth-preview{font-size:11px;background:#edf1e6;border:1px solid #dce5d2;padding:5px 9px;border-radius:15px;color:#7b896e}
+.auth-panel h2{font-size:29px;margin:26px 0 10px}
+.auth-panel> .auth-panel-inner > p.lead{font-size:14px;line-height:1.8;color:#7a8671;margin-bottom:25px}
+.account-field{display:grid;gap:6px;margin-bottom:14px}
+.account-field[hidden]{display:none!important}
+.account-field label{font-size:13px;color:#5f6f58}
+.auth-submit{width:100%;min-height:48px;display:flex;justify-content:space-between;align-items:center;padding:13px 18px;border-radius:10px;margin-top:15px;background:var(--green);color:#fff;font-size:15px}
+.auth-submit span{opacity:.85}
+.account-error{min-height:20px;color:#a33a32;font-size:13px;margin:4px 0 2px}
+.auth-switch{font-size:13px;color:#7d8975;text-align:center;margin:18px 0}
+.account-link{background:transparent;border:0;color:#42684e;padding:10px;min-height:44px;min-width:44px;text-decoration:underline;text-underline-offset:4px}
+
+/* REQ-001：连接 AI —— 去掉浏览器默认蓝链 */
+.auth-connect-wrap{margin:14px 0 0;text-align:center}
+a.auth-connect{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  min-height:44px;min-width:44px;padding:10px 12px;border-radius:8px;
+  color:var(--green);font-size:13px;text-decoration:none;
+  border:1px solid transparent;
+}
+a.auth-connect:hover{background:#edf1e6;text-decoration:underline;text-underline-offset:4px}
+a.auth-connect:visited{color:var(--green)}
+
+.auth-demo{border-top:1px solid #e1e7d9;margin-top:22px;padding-top:16px;display:grid;gap:4px;font-size:12px;color:#7d8b72}
+.auth-demo b{color:#526b47;font-weight:500}
+
+/* —— 工作台壳 —— */
+body.account-logged-out aside,
+body.account-logged-out main,
+body.account-logged-out .mobile-header,
+body.account-logged-out .mobile-bottom{display:none!important}
+aside{position:fixed;inset:0 auto 0 0;width:226px;padding:28px 18px;background:#edf0e6;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:8px;z-index:2}
+.brand{display:flex;gap:12px;align-items:center;margin-bottom:18px}
+.logo{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;color:#fff;background:var(--green);font-size:20px}
+.brand strong{display:block;font-size:16px}
+.brand small{color:var(--muted);font-size:10px;letter-spacing:1px}
+.desk-owner{font-size:12px;color:#5c7053;margin:0 0 16px;padding:0 4px}
+nav{display:grid;gap:4px}
+nav button{text-align:left;padding:10px 12px;border-radius:10px;min-height:44px;color:#445744}
+nav button.active{background:#dfe8d6;color:#2f4a36;font-weight:600}
+aside .note{margin-top:auto;font-size:11px;color:#8a957f;line-height:1.7;padding:10px 4px}
+main{margin-left:226px;padding:22px 28px 40px;min-height:100dvh}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-bottom:22px}
+.topbar-right{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.sync-state{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);white-space:nowrap}
+.sync-state::before{content:"";width:6px;height:6px;border-radius:50%;background:#91a985}
+.sync-state.is-confirming{color:#8a6a2b}
+.sync-state.is-confirming::before{background:#d4a017;animation:pulse 1s ease-in-out infinite}
+.sync-state.is-ok{color:#5c7053}
+.sync-state.is-ok::before{background:#91a985}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.account-pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;min-height:44px}
+.account-pill .avatar{width:28px;height:28px;border-radius:50%;background:#d7e3cc;display:grid;place-items:center;font-size:12px;font-weight:700;color:#36563e}
+.hero h1{font-size:clamp(26px,3vw,34px);margin:6px 0 18px;letter-spacing:-.5px}
+.hero .date{font-size:12px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.stat{padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.stat b{display:block;font-size:28px;font-variant-numeric:tabular-nums;letter-spacing:1px}
+.stat span{font-size:12px;color:var(--muted)}
+.stat.hl{background:#eef4e6;border-color:#d5e2c7}
+.panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px 22px}
+.panel h2{margin:0 0 8px;font-size:16px}
+.panel p{margin:0;color:var(--muted);font-size:13px}
+.grid-2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}
+.subtle{padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;min-height:44px;font-size:12px;color:#5c7053}
+.primary{background:var(--green);color:#fff;border-radius:8px;padding:11px 16px;min-height:44px}
+
+/* 手机壳 */
+.mobile-header,.mobile-bottom{display:none}
+.mobile-header{position:sticky;top:0;z-index:3;background:#edf0e6;border-bottom:1px solid var(--line);padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top));display:none;align-items:center;justify-content:space-between;gap:10px}
+.mobile-bottom{position:fixed;left:0;right:0;bottom:0;z-index:3;background:#edf0e6;border-top:1px solid var(--line);display:none;grid-template-columns:repeat(3,1fr);gap:4px;padding:8px 10px calc(8px + env(safe-area-inset-bottom))}
+.mobile-bottom button{min-height:44px;font-size:12px;border-radius:10px}
+.mobile-bottom button.active{background:#dfe8d6;font-weight:600}
+
+/* 演示控件 */
+.demo-dock{
+  display:block;
+  position:fixed;right:14px;bottom:14px;z-index:20;width:min(340px,calc(100vw - 28px));
+  background:#1f2a22;color:#e7efe0;border-radius:14px;padding:12px 14px;box-shadow:0 12px 40px rgba(20,30,18,.28);
+  font-size:12px;
+}
+.demo-dock[hidden]{display:none!important}
+.demo-dock h3{margin:0 0 8px;font-size:13px;font-weight:600;color:#fff}
+.demo-dock p{margin:0 0 10px;color:#b7c6ad;line-height:1.55}
+.demo-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.demo-dock button{background:#314739;color:#e7efe0;border-radius:8px;padding:8px 10px;min-height:44px;font-size:12px}
+.demo-dock button[aria-pressed="true"]{background:#6f9a6a;color:#102015}
+.demo-dock .demo-meta{color:#9aab90;font-size:11px;line-height:1.5}
+.demo-toggle{position:fixed;right:14px;bottom:14px;z-index:21;min-height:44px;min-width:44px;padding:10px 14px;border-radius:999px;background:#1f2a22;color:#fff;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+
+/* 连接指引弹层 */
+dialog#connect-dialog{border:0;border-radius:14px;padding:0;width:min(420px,calc(100vw - 32px));box-shadow:0 20px 60px rgba(30,40,28,.25)}
+dialog#connect-dialog::backdrop{background:rgba(30,40,28,.35)}
+.dialog-body{padding:22px 22px 18px}
+.dialog-body h2{margin:0 0 8px;font-size:18px}
+.dialog-body p{margin:0 0 14px;color:#687467;font-size:14px;line-height:1.7}
+.dialog-actions{display:flex;justify-content:flex-end;gap:8px;padding:0 18px 18px}
+
+@media(max-width:700px){
+  #account-auth{display:block;padding:26px 20px;min-height:100dvh}
+  .auth-story{min-height:auto;background:transparent;padding:0;gap:0}
+  .auth-story>div:nth-child(2),.auth-story>small{display:none}
+  .auth-wordmark{font-size:22px;margin-bottom:8px}
+  .auth-wordmark>span{width:38px;height:38px;border-radius:12px}
+  .auth-panel{padding:20px 0 0;display:block}
+  .auth-panel-inner{max-width:100%}
+  .auth-panel h2{font-size:26px;margin:18px 0 8px}
+  aside{display:none}
+  main{margin:0;padding:16px 16px calc(88px + env(safe-area-inset-bottom))}
+  .mobile-header{display:flex}
+  .mobile-bottom{display:grid}
+  .stats{grid-template-columns:1fr 1fr}
+  .grid-2{grid-template-columns:1fr}
+  .topbar .crumb{font-size:12px}
+  .demo-dock{bottom:76px}
+  .demo-toggle{bottom:76px}
+  dialog#connect-dialog{width:100%;max-width:100%;height:100%;max-height:100%;border-radius:0;margin:0}
+}
+</style>
+</head>
+<body class="account-logged-out">
+
+<section id="account-auth" data-view="login">
+  <div class="auth-story">
+    <div class="auth-wordmark"><span>⌁</span> 拾序</div>
+    <div>
+      <div class="auth-eyebrow">A LITTLE MORE CLARITY</div>
+      <h1>每个人，<br>都有自己的空间。</h1>
+      <p>记下困扰，整理行动。<br>把生活里重要的事，慢慢理出头绪。</p>
+    </div>
+    <small>你的问题、行动和接入授权，只属于你的工作台。</small>
+  </div>
+  <div class="auth-panel">
+    <div class="auth-panel-inner">
+      <span class="auth-preview">拾序 · 独立工作台</span>
+      <h2 id="auth-title">欢迎回来</h2>
+      <p class="lead" id="auth-lead">登录，继续整理属于你的问题和行动。</p>
+      <form id="account-auth-form" data-event-id="EVT-AUTH-SUBMIT" data-mode="login">
+        <div class="account-field">
+          <label for="username">账号</label>
+          <input id="username" name="username" type="text" placeholder="输入账号" required maxlength="40" autocomplete="username">
+        </div>
+        <div class="account-field" id="display-name-field" hidden>
+          <label for="displayName">显示名称</label>
+          <input id="displayName" name="displayName" type="text" placeholder="你希望如何被称呼" maxlength="60">
+        </div>
+        <div class="account-field">
+          <label for="password">密码</label>
+          <input id="password" name="password" type="password" placeholder="输入密码" required minlength="4" autocomplete="current-password">
+        </div>
+        <div id="account-auth-error" class="account-error" role="alert"></div>
+        <button type="submit" class="auth-submit" data-event-id="EVT-AUTH-SUBMIT">登录工作台 <span>→</span></button>
+      </form>
+      <p class="auth-connect-wrap">
+        <a class="auth-connect" href="#connect" data-event-id="EVT-AUTH-CONNECT">连接 AI · 查看接入指引</a>
+      </p>
+      <div class="auth-switch">
+        <span id="auth-switch-text">第一次使用？</span>
+        <button type="button" class="account-link" data-event-id="EVT-AUTH-MODE" id="auth-mode-btn">创建独立工作台</button>
+      </div>
+      <div class="auth-demo">
+        <div>演示账号 <b>test</b> / <b>1234</b></div>
+        <small>本包对齐 v0.5.0：本地只缓存 id 与显示名。</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<header class="mobile-header">
+  <div class="brand" style="margin:0">
+    <div class="logo">⌁</div>
+    <div><strong>拾序</strong><small>CLARITY</small></div>
+  </div>
+  <button type="button" class="account-pill" data-event-id="EVT-ACCOUNT-MENU" id="mobile-identity">
+    <span class="avatar" id="mobile-avatar">?</span>
+    <span id="mobile-name">…</span>
+  </button>
+</header>
+
+<aside>
+  <div class="brand">
+    <div class="logo">⌁</div>
+    <div><strong>拾序</strong><small>A LITTLE MORE CLARITY</small></div>
+  </div>
+  <p class="desk-owner" id="aside-owner">… 的工作台</p>
+  <nav>
+    <button type="button" class="active" data-event-id="EVT-NAV" data-nav="today">今日概览</button>
+    <button type="button" data-event-id="EVT-NAV" data-nav="issues">问题池</button>
+    <button type="button" data-event-id="EVT-NAV" data-nav="tasks">行动看板</button>
+  </nav>
+  <div class="note">让每个困扰，都有下一步。<br>个人工作台 · 本地只存 id/显示名</div>
+</aside>
+
+<main id="workbench" hidden>
+  <div class="topbar">
+    <div class="crumb"><span id="crumb-owner">…</span> 的工作台 <span class="crumb-sep">/</span> <span id="breadcrumb">今日概览</span></div>
+    <div class="topbar-right">
+      <span id="sync-state" class="sync-state is-confirming" role="status">同步中</span>
+      <button type="button" class="subtle" data-event-id="EVT-REFRESH">模拟刷新</button>
+      <button type="button" class="account-pill" data-event-id="EVT-ACCOUNT-MENU" id="account-menu">
+        <span class="avatar" id="desk-avatar">?</span>
+        <span id="desk-name">…</span>
+      </button>
+      <button type="button" class="subtle" data-event-id="EVT-LOGOUT">退出登录</button>
+    </div>
+  </div>
+  <section class="hero">
+    <div class="date" id="hero-date"></div>
+    <h1>把困扰理清，把今天过好。</h1>
+  </section>
+  <div class="stats">
+    <div class="stat"><b>00</b><span>待梳理的问题</span></div>
+    <div class="stat hl"><b>00</b><span>今天要推进</span></div>
+    <div class="stat"><b>00</b><span>正在行动</span></div>
+    <div class="stat"><b>00</b><span>已解决的问题</span></div>
+  </div>
+  <div class="grid-2">
+    <section class="panel">
+      <h2>今天，先做这些</h2>
+      <p id="today-empty">今天的清单很轻盈。有本地缓存时，这一屏会立刻出现，不必等后台确认。</p>
+    </section>
+    <section class="panel">
+      <h2>登录态说明</h2>
+      <p id="session-note">后台正在确认会话…</p>
+    </section>
+  </div>
+</main>
+
+<nav class="mobile-bottom" aria-label="底部导航">
+  <button type="button" class="active" data-event-id="EVT-NAV" data-nav="today">今日</button>
+  <button type="button" data-event-id="EVT-NAV" data-nav="issues">问题</button>
+  <button type="button" data-event-id="EVT-NAV" data-nav="tasks">行动</button>
+</nav>
+
+<dialog id="connect-dialog" aria-labelledby="connect-title">
+  <div class="dialog-body">
+    <h2 id="connect-title">连接 AI · 接入指引</h2>
+    <p>正式环境会打开 <code>/connect</code>。本原型只演示链接样式：品牌绿色、无默认蓝链，触达区 44px。</p>
+  </div>
+  <div class="dialog-actions">
+    <button type="button" class="subtle" data-event-id="EVT-CONNECT-CLOSE">关闭</button>
+  </div>
+</dialog>
+
+<button type="button" class="demo-toggle" data-event-id="EVT-DEMO-TOGGLE" id="demo-toggle">演示控件</button>
+<div class="demo-dock" id="demo-dock" hidden>
+  <h3>r6 演示 · 本地登录三态</h3>
+  <p>后台确认结果（影响「模拟刷新 / 启动」）：</p>
+  <div class="demo-row" role="group" aria-label="确认结果">
+    <button type="button" data-event-id="EVT-DEMO-OUTCOME" data-outcome="success" aria-pressed="true">确认成功</button>
+    <button type="button" data-event-id="EVT-DEMO-OUTCOME" data-outcome="pending" aria-pressed="false">停留确认中</button>
+    <button type="button" data-event-id="EVT-DEMO-OUTCOME" data-outcome="fail401" aria-pressed="false">确认失效 401</button>
+  </div>
+  <div class="demo-row">
+    <button type="button" data-event-id="EVT-DEMO-SEED">写入本地缓存并刷新</button>
+    <button type="button" data-event-id="EVT-DEMO-CLEAR">清除本地缓存</button>
+  </div>
+  <div class="demo-meta" id="demo-meta">localStorage: （空）</div>
+</div>
+
+<script>
+(function () {
+  const STORAGE_KEY = 'shixu-local-user'; // 只存 {id, displayName}
+  const DEMO_USER = { id: 'u-test', username: 'test', password: '1234', displayName: '测试用户' };
+  let mode = 'login';
+  let currentUser = null; // {id, displayName}
+  let confirming = false;
+  let confirmTimer = null;
+  let demoOutcome = 'success'; // success | pending | fail401
+  let bootGeneration = 0;
+
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+
+  function esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  function readLocalUser() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      if (!data || typeof data.id !== 'string' || typeof data.displayName !== 'string') return null;
+      // 硬约束：只接受 id / displayName
+      return { id: data.id, displayName: data.displayName };
+    } catch {
+      return null;
+    }
+  }
+
+  function writeLocalUser(user) {
+    const payload = { id: user.id, displayName: user.displayName };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    refreshDemoMeta();
+  }
+
+  function clearLocalUser() {
+    localStorage.removeItem(STORAGE_KEY);
+    refreshDemoMeta();
+  }
+
+  function refreshDemoMeta() {
+    const u = readLocalUser();
+    const keys = Object.keys(u || {});
+    const bad = keys.some(k => !['id', 'displayName'].includes(k));
+    $('#demo-meta').textContent = u
+      ? `localStorage.${STORAGE_KEY} = ${JSON.stringify(u)}${bad ? ' ⚠ 含非法字段' : ' · 仅 id/显示名'}`
+      : `localStorage.${STORAGE_KEY} = （空） · 确认结果=${demoOutcome}`;
+  }
+
+  function setAuthMode(next) {
+    mode = next;
+    const form = $('#account-auth-form');
+    form.dataset.mode = mode;
+    $('#display-name-field').hidden = mode !== 'register';
+    $('#auth-title').textContent = mode === 'register' ? '开始你的工作台' : '欢迎回来';
+    $('#auth-lead').textContent = mode === 'register'
+      ? '新账号从空工作台开始，记录不会与他人互通。'
+      : '登录，继续整理属于你的问题和行动。';
+    $('#auth-switch-text').textContent = mode === 'register' ? '已经有账号？' : '第一次使用？';
+    $('#auth-mode-btn').textContent = mode === 'register' ? '返回登录' : '创建独立工作台';
+    const submit = form.querySelector('[type=submit]');
+    submit.innerHTML = (mode === 'register' ? '创建账号并进入' : '登录工作台') + ' <span>→</span>';
+    $('#password').autocomplete = mode === 'login' ? 'current-password' : 'new-password';
+  }
+
+  function showLogin(notice = '') {
+    currentUser = null;
+    confirming = false;
+    document.body.classList.add('account-logged-out');
+    $('#account-auth').hidden = false;
+    $('#workbench').hidden = true;
+    $('#account-auth-error').textContent = notice || '';
+    setAuthMode(mode === 'register' ? 'register' : 'login');
+  }
+
+  function paintWorkbench(user, sync) {
+    document.body.classList.remove('account-logged-out');
+    $('#account-auth').hidden = true;
+    $('#workbench').hidden = false;
+    const name = user.displayName || '用户';
+    const initial = Array.from(name)[0] || '?';
+    $('#aside-owner').textContent = name + ' 的工作台';
+    $('#crumb-owner').textContent = name;
+    $('#desk-name').textContent = name;
+    $('#mobile-name').textContent = name;
+    $('#desk-avatar').textContent = initial;
+    $('#mobile-avatar').textContent = initial;
+    const syncEl = $('#sync-state');
+    syncEl.classList.remove('is-confirming', 'is-ok');
+    if (sync === 'confirming') {
+      syncEl.classList.add('is-confirming');
+      syncEl.textContent = '同步中';
+      $('#session-note').textContent = '已用本地显示名打开工作台，正在后台确认登录是否仍有效…';
+    } else {
+      syncEl.classList.add('is-ok');
+      syncEl.textContent = '已同步';
+      $('#session-note').textContent = '后台确认成功。会话有效；本地仍只保留 id 与显示名。';
+    }
+    const now = new Date();
+    const weeks = '日一二三四五六';
+    $('#hero-date').textContent = `${now.getMonth() + 1}月${now.getDate()}日 星期${weeks[now.getDay()]}`;
+  }
+
+  function mockAuthMe() {
+    return new Promise((resolve, reject) => {
+      if (demoOutcome === 'pending') {
+        // 永不 resolve，保持「确认中」；可用其它结果或刷新打断
+        confirmTimer = setTimeout(() => {}, 3600000);
+        return;
+      }
+      const delay = demoOutcome === 'fail401' ? 700 : 900;
+      confirmTimer = setTimeout(() => {
+        if (demoOutcome === 'fail401') {
+          const err = new Error('登录已过期，请重新登录');
+          err.status = 401;
+          reject(err);
+        } else {
+          resolve({ user: { id: currentUser.id, displayName: currentUser.displayName } });
+        }
+      }, delay);
+    });
+  }
+
+  async function confirmSession(gen) {
+    confirming = true;
+    try {
+      await mockAuthMe();
+      if (gen !== bootGeneration) return;
+      confirming = false;
+      if (currentUser) paintWorkbench(currentUser, 'ok');
+    } catch (e) {
+      if (gen !== bootGeneration) return;
+      confirming = false;
+      clearLocalUser();
+      currentUser = null;
+      showLogin(e.status === 401 ? '登录已过期，请重新登录' : (e.message || '登录状态检查失败'));
+    }
+  }
+
+  function bootFromLocal() {
+    if (confirmTimer) { clearTimeout(confirmTimer); confirmTimer = null; }
+    const gen = ++bootGeneration;
+    const cached = readLocalUser();
+    if (cached) {
+      currentUser = cached;
+      paintWorkbench(cached, 'confirming');
+      confirmSession(gen);
+    } else {
+      showLogin('');
+    }
+    refreshDemoMeta();
+  }
+
+  function loginSuccess(user) {
+    currentUser = { id: user.id, displayName: user.displayName };
+    writeLocalUser(currentUser);
+    paintWorkbench(currentUser, 'ok');
+  }
+
+  function logout() {
+    if (confirmTimer) { clearTimeout(confirmTimer); confirmTimer = null; }
+    bootGeneration += 1;
+    clearLocalUser();
+    currentUser = null;
+    showLogin('');
+  }
+
+  // —— 事件绑定（每个 EVT-* 字符串出现在脚本中，且使用 addEventListener）——
+  document.addEventListener('submit', (e) => {
+    const form = e.target.closest('[data-event-id="EVT-AUTH-SUBMIT"]');
+    if (!form) return;
+    e.preventDefault();
+    const v = Object.fromEntries(new FormData(form));
+    const err = $('#account-auth-error');
+    if (form.dataset.mode === 'register') {
+      if (!v.username || !v.password) { err.textContent = '请填写账号和密码'; return; }
+      const name = (v.displayName || v.username).trim() || v.username;
+      loginSuccess({ id: 'u-' + v.username, displayName: name });
+      err.textContent = '';
+      return;
+    }
+    if (v.username === DEMO_USER.username && v.password === DEMO_USER.password) {
+      err.textContent = '';
+      loginSuccess({ id: DEMO_USER.id, displayName: DEMO_USER.displayName });
+    } else {
+      err.textContent = '账号或密码不正确';
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-event-id]');
+    if (!t) return;
+    const id = t.getAttribute('data-event-id');
+
+    if (id === 'EVT-AUTH-SUBMIT') return; // form submit handler
+
+    if (id === 'EVT-AUTH-MODE') {
+      setAuthMode(mode === 'login' ? 'register' : 'login');
+      $('#account-auth-error').textContent = '';
+      return;
+    }
+
+    if (id === 'EVT-AUTH-CONNECT') {
+      e.preventDefault();
+      const dlg = $('#connect-dialog');
+      if (typeof dlg.showModal === 'function') dlg.showModal();
+      else dlg.setAttribute('open', '');
+      return;
+    }
+
+    if (id === 'EVT-CONNECT-CLOSE') {
+      const dlg = $('#connect-dialog');
+      if (typeof dlg.close === 'function') dlg.close();
+      else dlg.removeAttribute('open');
+      return;
+    }
+
+    if (id === 'EVT-LOGOUT') { logout(); return; }
+
+    if (id === 'EVT-REFRESH') { bootFromLocal(); return; }
+
+    if (id === 'EVT-NAV') {
+      const nav = t.dataset.nav;
+      $$('[data-event-id="EVT-NAV"]').forEach(b => b.classList.toggle('active', b.dataset.nav === nav));
+      const labels = { today: '今日概览', issues: '问题池', tasks: '行动看板' };
+      $('#breadcrumb').textContent = labels[nav] || '今日概览';
+      return;
+    }
+
+    if (id === 'EVT-ACCOUNT-MENU') {
+      // 原型：点击账号胶囊等同打开菜单提示
+      alert('账号菜单（原型）：资料 / 退出登录入口位。正式版沿用账号下拉。');
+      return;
+    }
+
+    if (id === 'EVT-DEMO-TOGGLE') {
+      const dock = $('#demo-dock');
+      dock.hidden = !dock.hidden;
+      return;
+    }
+
+    if (id === 'EVT-DEMO-OUTCOME') {
+      demoOutcome = t.dataset.outcome;
+      $$('[data-event-id="EVT-DEMO-OUTCOME"]').forEach(b => b.setAttribute('aria-pressed', b.dataset.outcome === demoOutcome ? 'true' : 'false'));
+      refreshDemoMeta();
+      return;
+    }
+
+    if (id === 'EVT-DEMO-SEED') {
+      writeLocalUser({ id: DEMO_USER.id, displayName: DEMO_USER.displayName });
+      bootFromLocal();
+      return;
+    }
+
+    if (id === 'EVT-DEMO-CLEAR') {
+      clearLocalUser();
+      bootFromLocal();
+      return;
+    }
+  });
+
+  // 启动
+  refreshDemoMeta();
+  bootFromLocal();
+})();
+</script>
+</body>
+</html>
