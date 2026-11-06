@@ -100,7 +100,35 @@ a.auth-connect:hover{text-decoration:underline;text-underline-offset:4px}
 .form-context{margin-bottom:18px;padding:10px 12px;border-radius:8px;background:#f3f6ee;color:#5c7053;font-size:13px;overflow-wrap:anywhere}
 @media(max-width:700px){.sync-state{display:none}.form-context{font-size:14px}}
 
-</style></head><body><aside><div class="brand"><div class="logo">⌁</div><div><b>拾序</b><small>A LITTLE MORE CLARITY</small></div></div><div class="nav-label">我的空间 / PERSONAL</div><nav id="nav"></nav><div class="sidebar-bottom"><b>让每个困扰，都有下一步。</b><p class="sidebar-meta">个人工作台 · 系统版<br>数据由服务端持久保存</p></div></aside><main><div class="topbar"><span>我的空间 <span class="crumb-sep" aria-hidden="true">/</span><span id="breadcrumb">今日概览</span></span><div class="topbar-right"><span id="sync-state" role="status" class="sync-state">连接中…</span><button id="sync-button" class="subtle">刷新数据</button><button data-event-id="EVT-ACTION" data-action="workflow-guide" class="subtle">状态流转</button><button data-event-id="EVT-ACTION" data-action="export" class="subtle">↓ 导出记录</button><div id="desktop-identity"></div></div></div><div id="storage-warning" class="banner hidden" role="alert"></div><div id="app" aria-live="polite">正在整理你的工作台…</div><div class="prototype-note">拾序 · 记录已接入服务端，页面与 AI 共用同一工作台。</div></main><dialog id="modal" aria-labelledby="modal-title"><div class="modal-head"><h2 id="modal-title"></h2><button data-event-id="EVT-ACTION" data-action="close" aria-label="关闭弹窗">✕</button></div><div id="modal-content" class="modal-body"></div></dialog><div id="toast" class="toast hidden" role="status"></div><script>
+.account-logged-out>#workbench{display:none!important}.shell-panel{padding:20px}.shell-block,.shell-line{background:#eef0e8;border-radius:6px;height:34px;width:56px;margin:8px 0}.shell-line{height:12px;width:70%;margin:14px 0}.shell-line:last-child{width:55%}
+
+</style></head><body class="account-logged-out"><div id="workbench" hidden><header class="mobile-header"><div class="mobile-brand"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="10" fill="#42684e"/><path d="m8 16 5-3 6 6 5-3" fill="none" stroke="#f6f8f0" stroke-width="2" stroke-linecap="round"/></svg>拾序<span id="mobile-sync-state" role="status" class="mobile-sync-state">连接中…</span></div><div id="mobile-identity"></div></header><nav class="mobile-bottom" aria-label="移动主导航"><button class="nav active" data-event-id="EVT-ACTION" data-action="nav" data-id="today">今日</button><button class="nav" data-event-id="EVT-ACTION" data-action="nav" data-id="issues">问题</button><button class="nav" data-event-id="EVT-ACTION" data-action="nav" data-id="tasks">行动</button><button class="nav" data-event-id="EVT-ACTION" data-action="nav" data-id="analysis">统计</button><button class="nav" data-event-id="EVT-ACTION" data-action="nav" data-id="review">复盘</button></nav><aside><div class="brand"><div class="logo">⌁</div><div><b>拾序</b><small>A LITTLE MORE CLARITY</small></div></div><div class="nav-label">我的空间 / PERSONAL</div><nav id="nav"><button class="nav active" data-event-id="EVT-ACTION" data-action="nav" data-id="today">今日</button><button class="nav" data-event-id="EVT-ACTION" data-action="nav" data-id="issues">问题</button><button class="nav" data-event-id="EVT-ACTION" data-action="nav" data-id="tasks">行动</button><button class="nav" data-event-id="EVT-ACTION" data-action="nav" data-id="analysis">统计</button><button class="nav" data-event-id="EVT-ACTION" data-action="nav" data-id="review">复盘</button></nav><div class="sidebar-bottom"><b>让每个困扰，都有下一步。</b><p class="sidebar-meta">个人工作台 · 系统版<br>数据由服务端持久保存</p></div></aside><main><div class="topbar"><span>我的空间 <span class="crumb-sep" aria-hidden="true">/</span><span id="breadcrumb">今日概览</span></span><div class="topbar-right"><span id="sync-state" role="status" class="sync-state">连接中…</span><button id="sync-button" class="subtle">刷新数据</button><button data-event-id="EVT-ACTION" data-action="workflow-guide" class="subtle">状态流转</button><button data-event-id="EVT-ACTION" data-action="export" class="subtle">↓ 导出记录</button><div id="desktop-identity"></div><div id="account-menu"></div></div></div><div id="storage-warning" class="banner hidden" role="alert"></div><div id="app" aria-live="polite">正在整理你的工作台…</div><div class="prototype-note">拾序 · 记录已接入服务端，页面与 AI 共用同一工作台。</div></main></div><template id="shell-skeleton"><div class="pagehead"><h1>把困扰理清，把今天过好。</h1></div><div class="stats"><div class="stat"><div class="shell-block"></div><p>待梳理的问题</p></div><div class="stat"><div class="shell-block"></div><p>今天要推进</p></div><div class="stat"><div class="shell-block"></div><p>正在行动</p></div><div class="stat"><div class="shell-block"></div><p>已解决的问题</p></div></div><section class="panel shell-panel"><h2>今天，先做这些</h2><div class="shell-line"></div><div class="shell-line"></div></section></template><dialog id="modal" aria-labelledby="modal-title"><div class="modal-head"><h2 id="modal-title"></h2><button data-event-id="EVT-ACTION" data-action="close" aria-label="关闭弹窗">✕</button></div><div id="modal-content" class="modal-body"></div></dialog><div id="toast" class="toast hidden" role="status"></div><script id="early-shell">
+function readLocalUser(){
+ try{const u=JSON.parse(localStorage.getItem('shixu-local-user'));if(u&&typeof u.id==='string'&&u.id.trim()&&typeof u.displayName==='string'&&u.displayName.trim()&&Object.keys(u).every(k=>k==='id'||k==='displayName'))return u}catch{}
+ try{localStorage.removeItem('shixu-local-user')}catch{}return null;
+}
+function resetShell(){
+ const wb=document.querySelector('#workbench');delete wb.dataset.shellOwner;wb.dataset.fill='pending';wb.dataset.sync='confirming';
+ document.querySelector('#app').innerHTML=document.querySelector('#shell-skeleton').innerHTML;
+ document.querySelectorAll('#account-menu,#mobile-identity,#desktop-identity,.nav-label,.topbar>span,#modal-content,#modal-title').forEach(e=>e.replaceChildren());
+ document.querySelectorAll('#account-dropdown,#account-modal,#child-modal').forEach(e=>e.remove());
+ document.querySelectorAll('#nav span').forEach(e=>e.textContent='');document.querySelector('#storage-warning').classList.add('hidden');
+}
+function paintShell(user){
+ const wb=document.querySelector('#workbench');if(wb.dataset.shellOwner===user.id&&!wb.hidden)return;
+ resetShell();
+ document.querySelectorAll('#account-menu,#mobile-identity').forEach(el=>{
+  el.innerHTML='<button type="button" class="account-pill" data-event-id="EVT-ACCOUNT" data-account-action="toggle-menu" aria-haspopup="menu" aria-expanded="false"><span class="account-avatar"></span><span><b></b><small>独立工作台</small></span><span>⌄</span></button>';
+  el.querySelector('.account-avatar').textContent=Array.from(user.displayName)[0];el.querySelector('b').textContent=user.displayName;el.querySelector('button').setAttribute('aria-label','账号菜单：'+user.displayName);
+ });
+ document.querySelector('.nav-label').textContent=user.displayName+' 的工作台';
+ document.querySelector('.topbar>span').textContent=user.displayName+' 的工作台 / 今日概览';
+ document.querySelectorAll('#sync-state,#mobile-sync-state').forEach(el=>el.textContent='同步中');
+ document.querySelector('#account-auth')?.setAttribute('hidden','');document.body.classList.remove('account-logged-out');wb.hidden=false;wb.dataset.shellOwner=user.id;
+}
+{const user=readLocalUser();if(user)paintShell(user)}
+</script>
+<script>
 const KEY='shixu-system-v2',$=s=>activeDialog()?.querySelector(s)||document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const date=d=>{const x=new Date(Date.now()+d*86400000);return new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}).format(x)},today=date(0),uid=()=>globalThis.crypto?.randomUUID?.()||`id-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
@@ -528,7 +556,7 @@ document.addEventListener('submit',async e=>{
  finally{if(button)button.disabled=false}
 });
 
-function syncStatus(message){document.querySelector('#sync-state').textContent=message;const mobile=document.querySelector('#mobile-sync-state');if(mobile)mobile.textContent=message}
+function syncStatus(message){if(message==='同步中'||message.startsWith('已同步'))document.querySelector('#workbench').dataset.sync=message==='同步中'?'confirming':'ok';document.querySelector('#sync-state').textContent=message;const mobile=document.querySelector('#mobile-sync-state');if(mobile)mobile.textContent=message}
 function showConnection(message){const el=document.querySelector('#storage-warning');el.replaceChildren(document.createTextNode(message+' '));el.classList.remove('hidden');const b=document.createElement('button');b.textContent='重新连接';b.onclick=()=>loadWorkspace();el.append(b)}
 async function request(route,options={}){
  const user=currentUser;
@@ -537,6 +565,7 @@ async function request(route,options={}){
  const result=await response.json();if(!response.ok){const e=new Error(typeof result.detail==='string'?result.detail:'输入不符合要求，请检查必填内容和长度');e.status=response.status;throw e}return result;
 }
 async function loadWorkspace(){
+ if(!csrfToken){bootAccount();return;}
  const user=currentUser;
  try{const result=await request('/api/workspace');if(currentUser!==user)return;db=result.data;syncProfiles();revision=result.revision;loaded=true;document.querySelector('#storage-warning').classList.add('hidden');render();syncStatus('已同步 · '+revision)}
  catch(e){if(currentUser!==user)return;loaded=false;showConnection('连接服务失败，尚未加载记录。');syncStatus('连接失败');document.querySelector('#app').textContent='服务暂时不可用，请恢复连接后重试。'}
@@ -599,6 +628,8 @@ function mobileTaskBoard(){
 }
 function render(){
  if(!currentUser){showLogin();return;}
+ if(!loaded){paintShell(currentUser);return;}
+ document.querySelector('#workbench').dataset.fill='ready';
 
  renderDesktop();
  document.querySelector('#desktop-identity').innerHTML=identitySwitch('desktop-identity');
@@ -628,7 +659,7 @@ document.addEventListener('click',async e=>{
  if(b.dataset.action==='nav'){window.scrollTo(0,0)}
 });
 mobileViewport.addEventListener('change',()=>render());
-let currentUser=null,csrfToken='',lastPreviewConfig=null;
+let currentUser=readLocalUser(),csrfToken='',lastPreviewConfig=null;
 /* Account flows are a local interaction preview, never a production auth implementation. */
 let accountPanelView='settings';
 let accountTabs={settings:'profile',connections:'quick'};
@@ -726,12 +757,12 @@ const LOCAL_USER_KEY='shixu-local-user';
 let accountVersion=0;
 function cacheLocalUser(user){try{if(user)localStorage.setItem(LOCAL_USER_KEY,JSON.stringify({id:user.id,displayName:user.displayName}));else localStorage.removeItem(LOCAL_USER_KEY)}catch{}}
 async function loginAccount(result){
- accountVersion++;loaded=false;db={issues:[],tasks:[],identityProfiles:[]};profiles=[];restoreCustomTools([],{});
+ accountVersion++;if(currentUser?.id!==result.user.id)resetShell();loaded=false;db={issues:[],tasks:[],identityProfiles:[]};profiles=[];restoreCustomTools([],{});
  const user=currentUser={...result.user,connections:[]};csrfToken=result.csrf;cacheLocalUser(user);
  view='today';query='';priority='全部';scope='全部';category='';parentIssueId=null;pendingWrite=null;taskFilter=null;taskGrouping='issues';selectedTaskIssue='all';taskIssueStatus='全部';taskActionStatus='全部';accountTabs={settings:'profile',connections:'quick'};
  creatorFilters.issues={person:'',via:''};creatorFilters.tasks={person:'',via:''};
  activeProfileId='';try{activeProfileId=localStorage.getItem('shixu-system-active-identity:'+currentUser.id)||''}catch{}
- render();syncStatus('同步中');
+ paintShell(user);renderAccountChrome();syncStatus('同步中');
  await loadWorkspace();
  if(currentUser!==user||!loaded)return;
  if(loaded&&!profiles.some(x=>x.kind==='person'&&x.name===currentUser.displayName)){
@@ -742,13 +773,13 @@ async function loginAccount(result){
  if(loaded)syncStatus('已同步');
  if(new URLSearchParams(location.search).has('authorize'))await showAuthorization();
 }
-function clearLocalAccount(notice=''){
- accountVersion++;cacheLocalUser(null);
+function clearLocalAccount(notice='',forget=true){
+ accountVersion++;accountBootRunning=false;if(forget)cacheLocalUser(null);resetShell();document.querySelector('#workbench').hidden=true;
  currentUser=null;csrfToken='';loaded=false;profiles=[];restoreCustomTools([],{});activeProfileId='';db={issues:[],tasks:[],identityProfiles:[]};pendingWrite=null;lastPreviewConfig=null;
  document.querySelectorAll('dialog[open]').forEach(d=>d.close());accountBootSettle(true);showLogin('login',notice);window.scrollTo(0,0);
 }
 async function logoutAccount(){
- const logout=request('/api/auth/logout',{method:'POST',body:'{}'});clearLocalAccount();
+ const logout=request('/api/auth/logout',{method:'POST',body:'{}'});clearLocalAccount('登录已过期，请重新登录');
  try{await logout}catch(e){if(e.status!==401)toast(e.message)}
 }
 function accountBootPending(){
@@ -764,10 +795,11 @@ function accountBootSettle(showAuth){
  document.querySelector('#account-boot-status')?.remove();
  const box=document.querySelector('#account-auth');if(box)box.hidden=!showAuth;
 }
-let accountBootRunning=false;
+let accountBootRunning=false,accountBootGeneration=0;
+window.addEventListener('storage',e=>{if(e.storageArea===localStorage&&(e.key===LOCAL_USER_KEY||e.key===null)){clearLocalAccount('登录已过期，请重新登录',false);if(readLocalUser())bootAccount()}});
 async function bootAccount(){
- if(accountBootRunning)return;accountBootRunning=true;
- if(!currentUser)try{const user=JSON.parse(localStorage.getItem(LOCAL_USER_KEY));if(typeof user?.id==='string'&&user.id&&typeof user.displayName==='string'){currentUser={id:user.id,displayName:user.displayName};cacheLocalUser(currentUser);render()}}catch{}
+ if(accountBootRunning)return;accountBootRunning=true;const generation=++accountBootGeneration;
+ if(!currentUser)currentUser=readLocalUser();if(!currentUser){accountBootRunning=false;showLogin();document.documentElement.dataset.accountBoot='complete';return}paintShell(currentUser);
  const version=accountVersion;let checking=true;
  accountBootPending();
  try{
@@ -782,7 +814,7 @@ async function bootAccount(){
   if(!ok&&(response.status>=500||!json)||!json){const error=new Error('服务暂不可用，请稍后重试');error.status=response.status;throw error}
   let result;try{result=await response.json()}catch{const error=new Error('服务暂不可用，请稍后重试');error.status=response.status;throw error}
   if(!ok){const error=new Error(result&&typeof result.detail==='string'?result.detail:'登录状态检查失败');error.status=response.status;throw error}
-  if(!result?.user?.id||typeof result.user.displayName!=='string'||typeof result.csrf!=='string'){const error=new Error('服务暂不可用，请稍后重试');error.status=200;throw error}
+  if(!result?.user?.id||typeof result.user.id!=='string'||typeof result.user.displayName!=='string'||typeof result.csrf!=='string'){const error=new Error('服务暂不可用，请稍后重试');error.status=200;throw error}
   if(version!==accountVersion)return;
   checking=false;await loginAccount(result);
   accountBootSettle(!currentUser);
@@ -794,9 +826,9 @@ async function bootAccount(){
   accountBootSettle(!currentUser);
   const reason=e.network?'连接超时，请检查网络后重试':pageFault?'页面出错，请刷新重试':e.message;
   const notice=document.querySelector(currentUser?'#storage-warning':'#account-auth-error');
-  if(currentUser){syncStatus('同步未完成');notice?.classList.remove('hidden')}
+  if(currentUser){syncStatus('暂未同步');document.querySelector('#workbench').dataset.sync='warn';notice?.classList.remove('hidden')}
   if(notice)notice.innerHTML=`${esc(reason||'登录状态检查失败')} <button type="button" class="account-link" data-event-id="EVT-ACCOUNT-BOOT-RETRY">重试</button>`;
- }finally{accountBootRunning=false;document.documentElement.dataset.accountBoot='complete'}
+ }finally{if(generation===accountBootGeneration){accountBootRunning=false;document.documentElement.dataset.accountBoot='complete'}}
 }
 document.addEventListener('click',e=>{if(e.target.closest('[data-event-id="EVT-ACCOUNT-BOOT-RETRY"]'))bootAccount()});
 const accountBootRender=render;render=function(){accountBootRender();if(accountBootRunning)accountBootPending()};
