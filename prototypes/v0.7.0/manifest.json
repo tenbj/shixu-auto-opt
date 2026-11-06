@@ -1,0 +1,155 @@
+{
+  "asoc_version": "1.0.0",
+  "skill": "H01_原型设计",
+  "intent": "第8轮原型（目标 v0.7.0，方案第1条）：登录/注册提交后立刻显示「登录中…/创建中…」并禁用；失败恢复原文案+现有中文错误；成功进入 r7 现有同步中流程；只改前端",
+  "capabilities": [
+    "responsive-web-v1"
+  ],
+  "artifacts": [
+    {
+      "id": "prd",
+      "path": "prd.md",
+      "layer": "human"
+    },
+    {
+      "id": "prototype",
+      "path": "prototype.html",
+      "layer": "human"
+    },
+    {
+      "id": "ui",
+      "path": "ui.schema.json",
+      "layer": "machine"
+    },
+    {
+      "id": "interaction",
+      "path": "interaction.json",
+      "layer": "machine"
+    },
+    {
+      "id": "flow",
+      "path": "user-flow.md",
+      "layer": "human"
+    },
+    {
+      "id": "api",
+      "path": "api.yaml",
+      "layer": "machine"
+    },
+    {
+      "id": "database",
+      "path": "database.sql",
+      "layer": "machine"
+    },
+    {
+      "id": "evaluation",
+      "path": "evaluation/report.json",
+      "layer": "evaluation"
+    },
+    {
+      "id": "responsive",
+      "path": "evaluation/responsive-report.json",
+      "layer": "evaluation"
+    }
+  ],
+  "input": {
+    "intent": "第7轮原型（对齐 v0.6.0，方案第2条）：刷新后有本地 {id,displayName} 时由内联早期脚本先画工作台外壳，主脚本 bootAccount 接管不重画；数据确认后按已确认账号加载；不闪登录表单、不闪上一账号",
+    "product_context": "拾序 shixu-auto-opt；本轮只改前端生成脚本产出的首页启动顺序，不改 account_api.py、鉴权接口与数据库。",
+    "target_users": [
+      "个人工作台用户",
+      "需求官/编码代理"
+    ],
+    "target_platform": "web",
+    "responsive": {
+      "mode": "adaptive"
+    },
+    "constraints": [
+      "本地只存用户 id 与显示名，不存 token/密码/csrf",
+      "不动 account_api.py 与鉴权接口；登录是否有效仍由服务端判断",
+      "只动 shixu-auto-opt / daily-opt；禁止访问 shixu-personal-desk",
+      "原型离线可演示三态；不连接生产"
+    ],
+    "assumptions": [
+      "演示账号 test / 1234，显示名可用「测试用户」",
+      "localStorage 键名原型用 shixu-local-user，落地可改为与 accounts-api.js 约定一致",
+      "「连接 AI」目标页 /connect 在本原型用弹层说明，不跳外链",
+      "后台确认延迟可用演示控件切换：成功 / 延迟确认中 / 401 失效",
+      "原型用 600ms 忙等模拟线上约 230KB 主脚本解析，真实线上耗时以公网验收为准",
+      "演示第二账号 林夏(u-lin) 仅用于验证不闪上一账号"
+    ],
+    "requirements": [
+      {
+        "id": "REQ-001",
+        "statement": "登录页「连接 AI」链接样式与整体一致（r6 已落地，本轮保持）",
+        "acceptance_criteria": [
+          "不再使用浏览器默认蓝色下划线",
+          "颜色与账号辅助链接一致（品牌绿），触达区≥44px",
+          "与登录按钮有清晰间距；hover/focus 可见"
+        ]
+      },
+      {
+        "id": "REQ-002",
+        "statement": "刷新时若有本地登录缓存，先显示工作台",
+        "acceptance_criteria": [
+          "本地仅存 id 与 displayName",
+          "有缓存时立即显示工作台与显示名，标「同步中」",
+          "不再先闪登录页或长时间「正在确认登录状态…」空白等待"
+        ]
+      },
+      {
+        "id": "REQ-003",
+        "statement": "后台确认成功后结束同步中",
+        "acceptance_criteria": [
+          "确认成功后同步徽标变为「已同步」",
+          "工作台保持，不重登"
+        ]
+      },
+      {
+        "id": "REQ-004",
+        "statement": "后台确认失效（401）清缓存并退回登录",
+        "acceptance_criteria": [
+          "401 立即清除本地 id/显示名",
+          "退回登录页并提示登录已过期",
+          "退出登录同样清除本地缓存"
+        ]
+      },
+      {
+        "id": "REQ-005",
+        "statement": "有本地缓存时，刷新后在主脚本解析前先画出工作台外壳",
+        "acceptance_criteria": [
+          "外壳（侧栏/顶栏/显示名/同步中）由主脚本之前的内联脚本绘制",
+          "外壳不发请求、不加载工作台数据",
+          "公网刷新 1 秒内见到外壳（原型只证明顺序）"
+        ]
+      },
+      {
+        "id": "REQ-006",
+        "statement": "不与现有 bootAccount 抢画",
+        "acceptance_criteria": [
+          "同一 id 外壳只绘制一次（data-shell-owner）",
+          "bootAccount 接管后只做确认与数据填充",
+          "无闪烁、无登录表单闪现"
+        ]
+      },
+      {
+        "id": "REQ-007",
+        "statement": "不闪上一账号",
+        "acceptance_criteria": [
+          "外壳只用当前缓存的 displayName；静态 HTML 无任何账号名",
+          "工作台数据只在确认后按已确认 id 加载",
+          "会话账号≠缓存时先清身份再按确认账号重画并改写缓存",
+          "其它标签页登录/退出时本页跟随（storage 事件）"
+        ]
+      },
+      {
+        "id": "REQ-008",
+        "statement": "非 401 失败不踢回登录",
+        "acceptance_criteria": [
+          "超时/502/403/非 JSON/网络错误：保留工作台，显示「暂未同步」与重试",
+          "不当作确认成功、不加载数据"
+        ]
+      }
+    ]
+  },
+  "version": "0.7.0"
+}

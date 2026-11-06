@@ -74,6 +74,10 @@ def integrate(html,root):
     css+='\n'+(root/'static/ai-access.css').read_text(encoding='utf-8')
     # 类名与冻结原型 v0.4.0 的 style 块一致；只追加 CSS，不改写 build 已生成的标记。
     css += '''
+.auth-submit:disabled{cursor:progress;opacity:.82}
+.auth-submit[aria-busy="true"]::after{content:"";width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:auth-spin .8s linear infinite}
+@keyframes auth-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.auth-submit[aria-busy="true"]::after{animation:none}}
 /* R4: 9 处内联样式 → 类（含视觉微调） */
 .sidebar-meta{font-size:11px;line-height:1.7;margin-top:10px;color:#8a957f}
 .crumb-sep{margin:0 10px;color:#bcc6b2;font-weight:300}
