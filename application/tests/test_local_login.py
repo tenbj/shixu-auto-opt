@@ -112,16 +112,32 @@ def test_login_and_refresh_store_only_identity(screen):
     assert page.evaluate('csrfToken') == 'fresh-csrf'
 
 
-def test_without_cache_goes_directly_to_login(screen):
+def test_without_cache_confirms_session_then_login(screen):
     page, held = screen
     page.evaluate('clearLocalAccount()')
     held.pop().fulfill(status=401, json={})
-    page.reload(wait_until='domcontentloaded')
-    expect(page.locator('#account-boot-status')).to_have_count(0)
+    with page.expect_request(lambda r: '/api/auth/me' in r.url):
+        page.reload(wait_until='domcontentloaded')
     expect(page.locator('#workbench')).to_be_hidden()
-    assert not held
+    expect(page.locator('#account-boot-status')).to_have_text('正在确认登录状态…')
+    held.pop().fulfill(status=401, json={})
+    expect(page.locator('#account-boot-status')).to_have_count(0)
     expect(page.locator('#account-auth-form')).to_be_visible()
     expect(page.locator('#account-auth-error')).to_be_empty()
+    expect(page.locator('#workbench')).to_be_hidden()
+
+
+def test_without_cache_session_restores_workbench(screen):
+    page, held = screen
+    page.evaluate('clearLocalAccount()')
+    held.pop().fulfill(status=401, json={})
+    with page.expect_request(lambda r: '/api/auth/me' in r.url):
+        page.reload(wait_until='domcontentloaded')
+    held.pop().fulfill(json={'user': NEW, 'csrf': 'memory-only'})
+    expect(page.locator('#sync-state')).to_have_text('已同步')
+    expect(page.locator('#workbench')).to_be_visible()
+    expect(page.locator('#account-auth-form')).to_be_hidden()
+    assert page.evaluate(f"JSON.parse(localStorage.getItem('{KEY}'))") == {'id': 'b', 'displayName': '新账号'}
 
 
 @pytest.mark.parametrize('screen', [360, 390, 430, 1440], indirect=True)
@@ -158,7 +174,10 @@ def test_mismatch_clears_old_content_before_loading_new_data(screen):
 def test_invalid_cache_is_removed(screen, raw):
     page, held = screen
     page.evaluate('(raw) => localStorage.setItem("shixu-local-user",raw)', raw)
-    page.reload(wait_until='domcontentloaded')
+    with page.expect_request(lambda r: '/api/auth/me' in r.url):
+        page.reload(wait_until='domcontentloaded')
+    assert page.evaluate(f'localStorage.getItem("{KEY}")') is None
+    held.pop().fulfill(status=401, json={})
     expect(page.locator('#account-auth-form')).to_be_visible()
     assert page.evaluate(f'localStorage.getItem("{KEY}")') is None
 

@@ -90,7 +90,7 @@ def integrate(html,root):
     layer="let currentUser=null,csrfToken='',lastPreviewConfig=null;\n"+layer+'\n'+(root/'static/accounts-api.js').read_text(encoding='utf-8')+'\n'+(root/'static/ai-access-api.js').read_text(encoding='utf-8')
     # Keep the existing session checks/data loader, but hand off the already painted shell.
     layer=layer.replace('let currentUser=null,', 'let currentUser=readLocalUser(),')
-    layer=layer.replace("if(!currentUser)try{const user=JSON.parse(localStorage.getItem(LOCAL_USER_KEY));if(typeof user?.id==='string'&&user.id&&typeof user.displayName==='string'){currentUser={id:user.id,displayName:user.displayName};cacheLocalUser(currentUser);render()}}catch{}", "if(!currentUser)currentUser=readLocalUser();if(!currentUser){accountBootRunning=false;showLogin();document.documentElement.dataset.accountBoot='complete';return}paintShell(currentUser);")
+    layer=layer.replace("if(!currentUser)try{const user=JSON.parse(localStorage.getItem(LOCAL_USER_KEY));if(typeof user?.id==='string'&&user.id&&typeof user.displayName==='string'){currentUser={id:user.id,displayName:user.displayName};cacheLocalUser(currentUser);render()}}catch{}", "if(!currentUser)currentUser=readLocalUser();if(currentUser)paintShell(currentUser);")
     layer=layer.replace("accountVersion++;loaded=false;", "accountVersion++;if(currentUser?.id!==result.user.id)resetShell();loaded=false;")
     layer=layer.replace("render();syncStatus('同步中');", "paintShell(user);renderAccountChrome();syncStatus('同步中');")
     layer=layer.replace("function clearLocalAccount(notice=''){", "function clearLocalAccount(notice='',forget=true){")

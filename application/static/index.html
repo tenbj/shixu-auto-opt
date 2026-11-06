@@ -799,7 +799,7 @@ let accountBootRunning=false,accountBootGeneration=0;
 window.addEventListener('storage',e=>{if(e.storageArea===localStorage&&(e.key===LOCAL_USER_KEY||e.key===null)){clearLocalAccount('登录已过期，请重新登录',false);if(readLocalUser())bootAccount()}});
 async function bootAccount(){
  if(accountBootRunning)return;accountBootRunning=true;const generation=++accountBootGeneration;
- if(!currentUser)currentUser=readLocalUser();if(!currentUser){accountBootRunning=false;showLogin();document.documentElement.dataset.accountBoot='complete';return}paintShell(currentUser);
+ if(!currentUser)currentUser=readLocalUser();if(currentUser)paintShell(currentUser);
  const version=accountVersion;let checking=true;
  accountBootPending();
  try{
