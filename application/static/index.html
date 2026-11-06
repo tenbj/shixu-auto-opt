@@ -87,6 +87,10 @@ a.auth-connect:hover{text-decoration:underline;text-underline-offset:4px}
 
 .ai-device-meta{display:grid;grid-template-columns:1fr 1fr;gap:12px}.ai-device-meta dd{margin:4px 0;font-size:13px}.ai-device-head{display:flex;justify-content:space-between;gap:12px}.ai-device-card{padding:20px;border:1px solid var(--border,#dce3d8);border-radius:14px;margin:12px 0;background:white}.ai-device-head h3{margin:0}.ai-device-actions{display:flex;gap:8px}#issued-config{width:100%;box-sizing:border-box}.ai-steps{display:flex;flex-wrap:wrap;gap:24px;padding:20px 24px} .ai-primary-actions a,.ai-install-options a{display:inline-flex;padding:12px;text-decoration:none;border:1px solid #d5ddcf;border-radius:10px;color:inherit} @media(max-width:600px){.ai-device-meta{grid-template-columns:1fr}.ai-device-head{flex-wrap:wrap}}
 
+.auth-submit:disabled{cursor:progress;opacity:.82}
+.auth-submit[aria-busy="true"]::after{content:"";width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:auth-spin .8s linear infinite}
+@keyframes auth-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.auth-submit[aria-busy="true"]::after{animation:none}}
 /* R4: 9 处内联样式 → 类（含视觉微调） */
 .sidebar-meta{font-size:11px;line-height:1.7;margin-top:10px;color:#8a957f}
 .crumb-sep{margin:0 10px;color:#bcc6b2;font-weight:300}
@@ -840,7 +844,16 @@ async function showAuthorization(){
 }
 async function completeConsent(allow,scope){const key=new URLSearchParams(location.search).get('authorize');if(!key)return;const result=await request('/api/oauth/requests/'+encodeURIComponent(key),{method:'POST',body:JSON.stringify({allow,scope})});location.assign(result.redirect)}
 document.addEventListener('submit',async e=>{
- const form=e.target;if(form.dataset.eventId!=='EVT-ACCOUNT')return;e.preventDefault();const v=Object.fromEntries(new FormData(form));const error=form.querySelector('.account-error')||document.querySelector('#account-auth-error');const button=form.querySelector('[type=submit]');if(button)button.disabled=true;
+ const form=e.target;if(form.dataset.eventId!=='EVT-ACCOUNT')return;e.preventDefault();const v=Object.fromEntries(new FormData(form));const error=form.querySelector('.account-error')||document.querySelector('#account-auth-error');const button=form.querySelector('[type=submit]');
+ const auth=form.id==='account-auth-form';
+ let idle;
+ if(auth&&button){
+  if(button.disabled)return;
+  idle=button.innerHTML;
+  button.disabled=true;
+  button.setAttribute('aria-busy','true');
+  button.textContent=form.dataset.mode==='register'?'创建中…':'登录中…';
+ }else if(button)button.disabled=true;
  try{
   if(form.id==='account-auth-form'){
    if(form.dataset.mode==='register'&&v.password!==v.confirm)throw Error('两次密码不一致');
@@ -852,7 +865,12 @@ document.addEventListener('submit',async e=>{
    const result=await request('/api/account/mcp-access',{method:'POST',body:JSON.stringify({name:v.name,scope:v.scope})});closeDialog();accountTabs.connections='list';await openAccountPanel('connections');showIssuedConfig({...result.item,url:result.url},result.token);
   }
   if(form.id==='account-oauth-form')await completeConsent(true,v.scope);
- }catch(e){if(error)error.textContent=e.message;else toast(e.message)}finally{if(button)button.disabled=false}
+ }catch(e){if(error)error.textContent=e.message;else toast(e.message)}finally{
+  if(button){
+   if(auth){button.innerHTML=idle;button.removeAttribute('aria-busy')}
+   button.disabled=false;
+  }
+ }
 });
 
 let accountDraft='';

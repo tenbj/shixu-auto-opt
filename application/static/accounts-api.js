@@ -84,7 +84,16 @@ async function showAuthorization(){
 }
 async function completeConsent(allow,scope){const key=new URLSearchParams(location.search).get('authorize');if(!key)return;const result=await request('/api/oauth/requests/'+encodeURIComponent(key),{method:'POST',body:JSON.stringify({allow,scope})});location.assign(result.redirect)}
 document.addEventListener('submit',async e=>{
- const form=e.target;if(form.dataset.eventId!=='EVT-ACCOUNT')return;e.preventDefault();const v=Object.fromEntries(new FormData(form));const error=form.querySelector('.account-error')||document.querySelector('#account-auth-error');const button=form.querySelector('[type=submit]');if(button)button.disabled=true;
+ const form=e.target;if(form.dataset.eventId!=='EVT-ACCOUNT')return;e.preventDefault();const v=Object.fromEntries(new FormData(form));const error=form.querySelector('.account-error')||document.querySelector('#account-auth-error');const button=form.querySelector('[type=submit]');
+ const auth=form.id==='account-auth-form';
+ let idle;
+ if(auth&&button){
+  if(button.disabled)return;
+  idle=button.innerHTML;
+  button.disabled=true;
+  button.setAttribute('aria-busy','true');
+  button.textContent=form.dataset.mode==='register'?'创建中…':'登录中…';
+ }else if(button)button.disabled=true;
  try{
   if(form.id==='account-auth-form'){
    if(form.dataset.mode==='register'&&v.password!==v.confirm)throw Error('两次密码不一致');
@@ -96,7 +105,12 @@ document.addEventListener('submit',async e=>{
    const result=await request('/api/account/mcp-access',{method:'POST',body:JSON.stringify({name:v.name,scope:v.scope})});closeDialog();accountTabs.connections='list';await openAccountPanel('connections');showIssuedConfig({...result.item,url:result.url},result.token);
   }
   if(form.id==='account-oauth-form')await completeConsent(true,v.scope);
- }catch(e){if(error)error.textContent=e.message;else toast(e.message)}finally{if(button)button.disabled=false}
+ }catch(e){if(error)error.textContent=e.message;else toast(e.message)}finally{
+  if(button){
+   if(auth){button.innerHTML=idle;button.removeAttribute('aria-busy')}
+   button.disabled=false;
+  }
+ }
 });
 
 let accountDraft='';
