@@ -1,0 +1,157 @@
+{
+  "checked_at": "2026-11-06T03:46:57.701391+00:00",
+  "status": "passed",
+  "passed": true,
+  "prototype_sha256": "7247f8166534d6c615df29e721d4161aeb94a0122e1a60b5b898e257844ec033",
+  "config_sha256": "a68c9bcc59a89dd7a591ce60134c815504ca9e90547ee2d175e8ab25fd77b8b4",
+  "results": [
+    {
+      "width": 360,
+      "height": 844,
+      "passed": true,
+      "scenarios": [
+        {
+          "id": "connect-link-style-and-open",
+          "passed": true
+        },
+        {
+          "id": "login-writes-local-cache",
+          "passed": true
+        },
+        {
+          "id": "refresh-early-shell-then-fill",
+          "passed": true
+        },
+        {
+          "id": "switch-account-no-previous-flash",
+          "passed": true
+        },
+        {
+          "id": "non-401-keeps-workbench",
+          "passed": true
+        },
+        {
+          "id": "confirm-fail-401-back-to-login",
+          "passed": true
+        },
+        {
+          "id": "logout-clears-cache",
+          "passed": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "passed": true,
+      "scenarios": [
+        {
+          "id": "connect-link-style-and-open",
+          "passed": true
+        },
+        {
+          "id": "login-writes-local-cache",
+          "passed": true
+        },
+        {
+          "id": "refresh-early-shell-then-fill",
+          "passed": true
+        },
+        {
+          "id": "switch-account-no-previous-flash",
+          "passed": true
+        },
+        {
+          "id": "non-401-keeps-workbench",
+          "passed": true
+        },
+        {
+          "id": "confirm-fail-401-back-to-login",
+          "passed": true
+        },
+        {
+          "id": "logout-clears-cache",
+          "passed": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "width": 430,
+      "height": 844,
+      "passed": true,
+      "scenarios": [
+        {
+          "id": "connect-link-style-and-open",
+          "passed": true
+        },
+        {
+          "id": "login-writes-local-cache",
+          "passed": true
+        },
+        {
+          "id": "refresh-early-shell-then-fill",
+          "passed": true
+        },
+        {
+          "id": "switch-account-no-previous-flash",
+          "passed": true
+        },
+        {
+          "id": "non-401-keeps-workbench",
+          "passed": true
+        },
+        {
+          "id": "confirm-fail-401-back-to-login",
+          "passed": true
+        },
+        {
+          "id": "logout-clears-cache",
+          "passed": true
+        }
+      ],
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "height": 1000,
+      "passed": true,
+      "scenarios": [
+        {
+          "id": "connect-link-style-and-open",
+          "passed": true
+        },
+        {
+          "id": "login-writes-local-cache",
+          "passed": true
+        },
+        {
+          "id": "refresh-early-shell-then-fill",
+          "passed": true
+        },
+        {
+          "id": "switch-account-no-previous-flash",
+          "passed": true
+        },
+        {
+          "id": "non-401-keeps-workbench",
+          "passed": true
+        },
+        {
+          "id": "confirm-fail-401-back-to-login",
+          "passed": true
+        },
+        {
+          "id": "logout-clears-cache",
+          "passed": true
+        }
+      ],
+      "errors": []
+    }
+  ],
+  "errors": [],
+  "engine_sha256": "6617c1acda7652009e45f8794995a4c33424d65d4769ddf3404237e66561225e",
+  "scope": "本地自包含HTML、Chromium视口/触摸模拟；不代表iOS、软键盘或真机验收",
+  "browser_version": "156.0.8078.4"
+}

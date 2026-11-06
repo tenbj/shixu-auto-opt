@@ -1,5 +1,6 @@
 """真实生成页 + 拦截响应；不启动后端、不访问数据库。"""
 import json
+import re
 from pathlib import Path
 import pytest
 from playwright.sync_api import expect, sync_playwright
@@ -13,20 +14,38 @@ WORKSPACE = {'revision': 1, 'data': {'issues': [], 'tasks': [], 'identityProfile
 
 
 @pytest.fixture
-def screen():
+def screen(request):
     with sync_playwright() as pw:
         browser = pw.chromium.launch(channel='chromium')
-        page = browser.new_page(storage_state={'cookies': [], 'origins': [{'origin': 'http://shixu.test', 'localStorage': [{'name': KEY, 'value': json.dumps(OLD)}]}]})
-        held, errors = [], []
+        context = browser.new_context(viewport={'width': getattr(request, 'param', 1440), 'height': 900}, storage_state={'cookies': [], 'origins': [{'origin': 'http://shixu.test', 'localStorage': [{'name': KEY, 'value': json.dumps(OLD)}]}]})
+        page = context.new_page()
+        held, errors, scripts, workspaces = [], [], [], []
         page.on('pageerror', lambda error: errors.append(str(error)))
-        page.route('http://shixu.test/', lambda r: r.fulfill(content_type='text/html', body=INDEX))
-        page.route('**/api/workspace', lambda r: r.fulfill(json=WORKSPACE))
+        main = re.search(r'<script>(.*?)</script>', INDEX, re.S).group(1)
+        paused = INDEX.replace('<script>'+main+'</script>', '<script src="/main-for-test.js"></script>', 1)
+        page.route('http://shixu.test/', lambda r: r.fulfill(content_type='text/html', body=paused))
+        page.route('**/main-for-test.js', lambda r: scripts.append(r))
+        page.route('**/api/workspace', lambda r: (workspaces.append(r.request.url), r.fulfill(json=WORKSPACE)))
         page.route('**/api/auth/login', lambda r: r.fulfill(json={'user': NEW, 'csrf': 'memory-only'}))
         page.route('**/api/auth/me', lambda r: held.append(r))
-        page.goto('http://shixu.test/', wait_until='domcontentloaded')
-        expect(page.locator('.account-pill:visible')).to_contain_text(OLD['displayName'])
+        page.goto('http://shixu.test/', wait_until='commit')
+        expect(page.locator('#workbench')).to_be_visible()
+        expect(page.locator('#workbench')).to_have_attribute('data-shell-owner', OLD['id'])
+        expect(page.locator('#account-auth-form')).to_be_hidden()
+        expect(page.locator('#sync-state')).to_have_text('同步中')
+        assert page.evaluate('typeof bootAccount') == 'undefined'
+        page.evaluate('window.shellNode = document.querySelector("#app").firstElementChild')
+        assert not workspaces
+        scripts.pop().fulfill(content_type='text/javascript', body=main)
+        page.wait_for_load_state('domcontentloaded')
+        assert page.evaluate('window.shellNode === document.querySelector("#app").firstElementChild')
+        expect(page.locator('#account-auth-form')).to_be_hidden()
+        page.unroute('**/main-for-test.js')
+        page.route('**/main-for-test.js', lambda r: r.fulfill(content_type='text/javascript', body=main))
+        expect(page.locator('#account-menu .account-pill')).to_contain_text(OLD['displayName'])
         expect(page.locator('#sync-state')).to_have_text('同步中')
         assert page.evaluate('loaded') is False
+        assert not workspaces
         yield page, held
         browser.close()
         assert not errors
@@ -50,6 +69,8 @@ def test_401_clears_cache(screen, content_type, width):
 @pytest.mark.parametrize('failure', ['502', '403', 'html', 'bad-json', 'null', 'network', 'timeout'])
 def test_non_401_keeps_workbench_and_retries(screen, failure):
     page, held = screen
+    calls = []
+    page.on('request', lambda r: calls.append(r.url) if r.url.endswith('/api/workspace') else None)
     route = held.pop()
     if failure == 'timeout':
         expect(page.locator('#storage-warning')).to_contain_text('连接超时，请检查网络后重试', timeout=20000)
@@ -62,10 +83,11 @@ def test_non_401_keeps_workbench_and_retries(screen, failure):
                       body='{"detail":"账号已停用"}' if failure == '403' else 'null' if failure == 'null' else '<html>unavailable</html>')
     tip = '连接超时，请检查网络后重试' if failure in ('network', 'timeout') else '账号已停用' if failure == '403' else '服务暂不可用，请稍后重试'
     expect(page.locator('#storage-warning')).to_contain_text(tip)
-    expect(page.locator('#sync-state')).to_have_text('同步未完成')
+    expect(page.locator('#sync-state')).to_have_text('暂未同步')
     expect(page.locator('.account-pill:visible')).to_contain_text(OLD['displayName'])
     assert page.evaluate(f"JSON.parse(localStorage.getItem('{KEY}'))") == OLD
     assert page.evaluate('loaded') is False
+    assert not calls
     page.get_by_role('button', name='重试', exact=True).click()
     expect(page.locator('#sync-state')).to_have_text('同步中')
     held.pop().fulfill(json={'user': NEW, 'csrf': 'memory-only'})
@@ -74,6 +96,23 @@ def test_non_401_keeps_workbench_and_retries(screen, failure):
     expect(page.locator('.account-pill:visible')).to_contain_text(NEW['displayName'])
     assert page.evaluate(f"JSON.parse(localStorage.getItem('{KEY}'))") == {'id': 'b', 'displayName': '新账号'}
     assert page.evaluate('csrfToken') == 'memory-only'
+
+
+
+
+def test_retry_then_401_removes_boot_retry(screen):
+    page, held = screen
+    held.pop().fulfill(status=502, content_type='text/html', body='<html>bad gateway</html>')
+    expect(page.locator('#storage-warning')).to_contain_text('服务暂不可用，请稍后重试')
+    expect(page.locator('[data-event-id="EVT-ACCOUNT-BOOT-RETRY"]')).to_have_text('重试')
+    page.get_by_role('button', name='重试', exact=True).click()
+    expect(page.locator('#sync-state')).to_have_text('同步中')
+    held.pop().fulfill(status=401, content_type='application/json', body='{}')
+    expect(page.locator('#account-auth')).to_be_visible()
+    expect(page.locator('#account-auth-form')).to_be_visible()
+    expect(page.locator('[data-event-id="EVT-ACCOUNT-BOOT-RETRY"]')).to_have_count(0)
+    expect(page.locator('#account-auth-error')).to_have_text('登录已过期，请重新登录')
+    assert page.evaluate(f"localStorage.getItem('{KEY}')") is None
 
 
 def test_login_and_refresh_store_only_identity(screen):
@@ -90,18 +129,99 @@ def test_login_and_refresh_store_only_identity(screen):
     assert page.evaluate('csrfToken') == 'fresh-csrf'
 
 
-def test_without_cache_preserves_login_error_and_retry(screen):
+def test_without_cache_confirms_session_then_login(screen):
     page, held = screen
     page.evaluate('clearLocalAccount()')
     held.pop().fulfill(status=401, json={})
-    page.reload(wait_until='domcontentloaded')
+    with page.expect_request(lambda r: '/api/auth/me' in r.url):
+        page.reload(wait_until='domcontentloaded')
+    expect(page.locator('#workbench')).to_be_hidden()
     expect(page.locator('#account-boot-status')).to_have_text('正在确认登录状态…')
-    held.pop().fulfill(status=502, content_type='text/html', body='unavailable')
-    expect(page.locator('#account-auth-error')).to_contain_text('服务暂不可用，请稍后重试')
-    page.get_by_role('button', name='重试', exact=True).click()
     held.pop().fulfill(status=401, json={})
+    expect(page.locator('#account-boot-status')).to_have_count(0)
     expect(page.locator('#account-auth-form')).to_be_visible()
     expect(page.locator('#account-auth-error')).to_be_empty()
+    expect(page.locator('#workbench')).to_be_hidden()
+
+
+def test_without_cache_session_restores_workbench(screen):
+    page, held = screen
+    page.evaluate('clearLocalAccount()')
+    held.pop().fulfill(status=401, json={})
+    with page.expect_request(lambda r: '/api/auth/me' in r.url):
+        page.reload(wait_until='domcontentloaded')
+    held.pop().fulfill(json={'user': NEW, 'csrf': 'memory-only'})
+    expect(page.locator('#sync-state')).to_have_text('已同步')
+    expect(page.locator('#workbench')).to_be_visible()
+    expect(page.locator('#account-auth-form')).to_be_hidden()
+    assert page.evaluate(f"JSON.parse(localStorage.getItem('{KEY}'))") == {'id': 'b', 'displayName': '新账号'}
+
+
+@pytest.mark.parametrize('screen', [360, 390, 430, 1440], indirect=True)
+def test_early_shell_same_identity_then_data(screen):
+    page, held = screen
+    page.route('**/api/workspace', lambda r: held.append(r))
+    held.pop().fulfill(json={'user': OLD, 'csrf': 'memory-only'})
+    page.wait_for_function('csrfToken === "memory-only"')
+    assert page.evaluate('window.shellNode === document.querySelector("#app").firstElementChild')
+    expect(page.locator('#workbench')).to_have_attribute('data-fill', 'pending')
+    held.pop().fulfill(json={'revision': 1, 'data': {'issues': [], 'tasks': [], 'identityProfiles': [
+        {'id': 'a', 'name': OLD['displayName'], 'kind': 'person', 'via': 'manual'}]}})
+    expect(page.locator('#sync-state')).to_have_text('已同步')
+    expect(page.locator('#workbench')).to_have_attribute('data-fill', 'ready')
+    assert page.evaluate('loaded') is True
+
+
+def test_mismatch_clears_old_content_before_loading_new_data(screen):
+    page, held = screen
+    page.evaluate('document.querySelector("#app").textContent = "旧账号的私有数据"')
+    page.route('**/api/workspace', lambda r: held.append(r))
+    held.pop().fulfill(json={'user': NEW, 'csrf': 'memory-only'})
+    expect(page.locator('#workbench')).to_have_attribute('data-shell-owner', 'b')
+    expect(page.locator('body')).not_to_contain_text('旧账号')
+    expect(page.locator('#account-menu')).to_contain_text(NEW['displayName'])
+    expect(page.locator('#account-auth-form')).to_be_hidden()
+    expect(page.locator('#sync-state')).to_have_text('同步中')
+    assert page.evaluate('[currentUser.id, loaded, db.issues.length]') == ['b', False, 0]
+    held.pop().fulfill(json=WORKSPACE)
+    expect(page.locator('#sync-state')).to_have_text('已同步')
+
+
+@pytest.mark.parametrize('raw', ['broken', 'null', '0', '[]', '{"id":"a","displayName":""}', '{"id":"a","displayName":"旧账号","token":"forbidden"}'])
+def test_invalid_cache_is_removed(screen, raw):
+    page, held = screen
+    page.evaluate('(raw) => localStorage.setItem("shixu-local-user",raw)', raw)
+    with page.expect_request(lambda r: '/api/auth/me' in r.url):
+        page.reload(wait_until='domcontentloaded')
+    assert page.evaluate(f'localStorage.getItem("{KEY}")') is None
+    held.pop().fulfill(status=401, json={})
+    expect(page.locator('#account-auth-form')).to_be_visible()
+    assert page.evaluate(f'localStorage.getItem("{KEY}")') is None
+
+
+@pytest.mark.parametrize('pending', ['me', 'workspace'])
+def test_storage_switch_discards_stale_responses(screen, pending):
+    page, held = screen
+    if pending == 'workspace':
+        page.route('**/api/workspace', lambda r: held.append(r))
+        held.pop().fulfill(json={'user': OLD, 'csrf': 'old-csrf'})
+        page.wait_for_function('csrfToken === "old-csrf"')
+    stale = held.pop()
+    sibling = page.context.new_page()
+    sibling.route('http://shixu.test/storage', lambda r: r.fulfill(body=''))
+    sibling.goto('http://shixu.test/storage')
+    sibling.evaluate('(u) => localStorage.setItem("shixu-local-user", JSON.stringify(u))', {'id': 'b', 'displayName': '新账号'})
+    expect(page.locator('#workbench')).to_have_attribute('data-shell-owner', 'b')
+    expect(page.locator('body')).not_to_contain_text(OLD['displayName'])
+    expect(page.locator('#sync-state')).to_have_text('同步中')
+    stale.fulfill(status=401, json={})
+    assert page.evaluate('currentUser.id') == 'b'
+    held.pop().fulfill(status=502, body='unavailable')
+    expect(page.locator('#sync-state')).to_have_text('暂未同步')
+    sibling.evaluate('localStorage.clear()')
+    expect(page.locator('#account-auth-error')).to_have_text('登录已过期，请重新登录')
+    expect(page.locator('#workbench')).to_be_hidden()
+    sibling.close()
 
 
 @pytest.mark.parametrize('status', [401, 502])

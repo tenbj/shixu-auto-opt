@@ -1,6 +1,34 @@
 """冻结原型账号界面接入真实API。"""
 import re
 
+# Shared by the inline bootstrap and the main script; no requests or workspace data.
+EARLY_SHELL = '''<script id="early-shell">
+function readLocalUser(){
+ try{const u=JSON.parse(localStorage.getItem('shixu-local-user'));if(u&&typeof u.id==='string'&&u.id.trim()&&typeof u.displayName==='string'&&u.displayName.trim()&&Object.keys(u).every(k=>k==='id'||k==='displayName'))return u}catch{}
+ try{localStorage.removeItem('shixu-local-user')}catch{}return null;
+}
+function resetShell(){
+ const wb=document.querySelector('#workbench');delete wb.dataset.shellOwner;wb.dataset.fill='pending';wb.dataset.sync='confirming';
+ document.querySelector('#app').innerHTML=document.querySelector('#shell-skeleton').innerHTML;
+ document.querySelectorAll('#account-menu,#mobile-identity,#desktop-identity,.nav-label,.topbar>span,#modal-content,#modal-title').forEach(e=>e.replaceChildren());
+ document.querySelectorAll('#account-dropdown,#account-modal,#child-modal').forEach(e=>e.remove());
+ document.querySelectorAll('#nav span').forEach(e=>e.textContent='');document.querySelector('#storage-warning').replaceChildren();document.querySelector('#storage-warning').classList.add('hidden');
+}
+function paintShell(user){
+ const wb=document.querySelector('#workbench');if(wb.dataset.shellOwner===user.id&&!wb.hidden)return;
+ resetShell();
+ document.querySelectorAll('#account-menu,#mobile-identity').forEach(el=>{
+  el.innerHTML='<button type="button" class="account-pill" data-event-id="EVT-ACCOUNT" data-account-action="toggle-menu" aria-haspopup="menu" aria-expanded="false"><span class="account-avatar"></span><span><b></b><small>独立工作台</small></span><span>⌄</span></button>';
+  el.querySelector('.account-avatar').textContent=Array.from(user.displayName)[0];el.querySelector('b').textContent=user.displayName;el.querySelector('button').setAttribute('aria-label','账号菜单：'+user.displayName);
+ });
+ document.querySelector('.nav-label').textContent=user.displayName+' 的工作台';
+ document.querySelector('.topbar>span').textContent=user.displayName+' 的工作台 / 今日概览';
+ document.querySelectorAll('#sync-state,#mobile-sync-state').forEach(el=>el.textContent='同步中');
+ document.querySelector('#account-auth')?.setAttribute('hidden','');document.body.classList.remove('account-logged-out');wb.hidden=false;wb.dataset.shellOwner=user.id;
+}
+{const user=readLocalUser();if(user)paintShell(user)}
+</script>'''
+
 def integrate(html,root):
     layer=(root/'reference/accounts-layer.js').read_text(encoding='utf-8')
     css=(root/'reference/accounts-style.css').read_text(encoding='utf-8')
@@ -60,9 +88,22 @@ def integrate(html,root):
 @media(max-width:700px){.sync-state{display:none}.form-context{font-size:14px}}
 '''
     layer="let currentUser=null,csrfToken='',lastPreviewConfig=null;\n"+layer+'\n'+(root/'static/accounts-api.js').read_text(encoding='utf-8')+'\n'+(root/'static/ai-access-api.js').read_text(encoding='utf-8')
+    # Keep the existing session checks/data loader, but hand off the already painted shell.
+    layer=layer.replace('let currentUser=null,', 'let currentUser=readLocalUser(),')
+    layer=layer.replace("if(!currentUser)try{const user=JSON.parse(localStorage.getItem(LOCAL_USER_KEY));if(typeof user?.id==='string'&&user.id&&typeof user.displayName==='string'){currentUser={id:user.id,displayName:user.displayName};cacheLocalUser(currentUser);render()}}catch{}", "if(!currentUser)currentUser=readLocalUser();if(currentUser)paintShell(currentUser);")
+    layer=layer.replace("accountVersion++;loaded=false;", "accountVersion++;if(currentUser?.id!==result.user.id)resetShell();loaded=false;")
+    layer=layer.replace("render();syncStatus('同步中');", "paintShell(user);renderAccountChrome();syncStatus('同步中');")
+    layer=layer.replace("function clearLocalAccount(notice=''){", "function clearLocalAccount(notice='',forget=true){")
+    layer=layer.replace("clearLocalAccount();", "clearLocalAccount('登录已过期，请重新登录');")
+    layer=layer.replace("accountVersion++;cacheLocalUser(null);", "accountVersion++;accountBootRunning=false;if(forget)cacheLocalUser(null);resetShell();document.querySelector('#workbench').hidden=true;")
+    layer=layer.replace("syncStatus('同步未完成')", "syncStatus('暂未同步');document.querySelector('#workbench').dataset.sync='warn'")
+    layer=layer.replace("let accountBootRunning=false;", "let accountBootRunning=false,accountBootGeneration=0;\nwindow.addEventListener('storage',e=>{if(e.storageArea===localStorage&&(e.key===LOCAL_USER_KEY||e.key===null)){clearLocalAccount('登录已过期，请重新登录',false);if(readLocalUser())bootAccount()}});")
+    layer=layer.replace("accountBootRunning=true;", "accountBootRunning=true;const generation=++accountBootGeneration;")
+    layer=layer.replace("finally{accountBootRunning=false;document.documentElement.dataset.accountBoot='complete'}", "finally{if(generation===accountBootGeneration){accountBootRunning=false;document.documentElement.dataset.accountBoot='complete'}}")
+    layer=layer.replace("typeof result.user.displayName!=='string'", "typeof result.user.id!=='string'||typeof result.user.displayName!=='string'")
     html=html.replace('\nloadWorkspace();\n','\nqueueMicrotask(bootAccount);\n',1)
     html=html.replace("document.querySelector('#mobile-identity').innerHTML=identitySwitch('mobile-identity');", "// Account chrome owns the mobile identity control and preserves its focus across renders.")
-    html=html.replace('function render(){',"function render(){\n if(!currentUser){showLogin();return;}\n",1)
+    html=html.replace('function render(){',"function render(){\n if(!currentUser){showLogin();return;}\n if(!loaded){paintShell(currentUser);return;}\n document.querySelector('#workbench').dataset.fill='ready';\n",1)
     marker="\n}\ndocument.addEventListener('change',e=>{if(e.target.id==='mobile-problem-select')"
     assert marker in html
     html=html.replace(marker,"\n renderAccountChrome();\n}\ndocument.addEventListener('change',e=>{if(e.target.id==='mobile-problem-select')",1)
@@ -74,4 +115,15 @@ def integrate(html,root):
     html=html.replace("catch(e){loaded=false;showConnection(", "catch(e){if(currentUser!==user)return;loaded=false;showConnection(")
     html=html.replace("localStorage.setItem('shixu-system-active-identity',activeProfileId)","localStorage.setItem('shixu-system-active-identity:'+currentUser.id,activeProfileId)")
     html=html.replace("try{activeProfileId=localStorage.getItem('shixu-system-active-identity')||''}catch{}",'')
+    html=html.replace("async function loadWorkspace(){", "async function loadWorkspace(){\n if(!csrfToken){bootAccount();return;}")
+    html=html.replace("function syncStatus(message){", "function syncStatus(message){if(message==='同步中'||message.startsWith('已同步'))document.querySelector('#workbench').dataset.sync=message==='同步中'?'confirming':'ok';")
+    # Static markup must exist before the small bootstrap, including both mobile account controls.
+    skeleton='<div class="pagehead"><h1>把困扰理清，把今天过好。</h1></div><div class="stats">'+''.join('<div class="stat"><div class="shell-block"></div><p>'+s+'</p></div>' for s in ['待梳理的问题','今天要推进','正在行动','已解决的问题'])+'</div><section class="panel shell-panel"><h2>今天，先做这些</h2><div class="shell-line"></div><div class="shell-line"></div></section>'
+    header=re.search(r'<header class="mobile-header">.*?</header>',html).group(0).split('${mobileAttrs')[0]+'</header>'
+    nav=''.join('<button class="nav'+(' active' if k=='today' else '')+'" data-event-id="EVT-ACTION" data-action="nav" data-id="'+k+'">'+v+'</button>' for k,v in [('today','今日'),('issues','问题'),('tasks','行动'),('analysis','统计'),('review','复盘')])
+    html=html.replace('<body><aside>','<body class="account-logged-out"><div id="workbench" hidden>'+header+'<nav class="mobile-bottom" aria-label="移动主导航">'+nav+'</nav><aside>',1)
+    html=html.replace('<nav id="nav"></nav>','<nav id="nav">'+nav+'</nav>',1).replace('<div id="desktop-identity"></div>','<div id="desktop-identity"></div><div id="account-menu"></div>',1)
+    html=html.replace('</main><dialog','</main></div><template id="shell-skeleton">'+skeleton+'</template><dialog',1)
+    html=html.replace('<script>',EARLY_SHELL+'\n<script>',1)
+    css+='\n.account-logged-out>#workbench{display:none!important}.shell-panel{padding:20px}.shell-block,.shell-line{background:#eef0e8;border-radius:6px;height:34px;width:56px;margin:8px 0}.shell-line{height:12px;width:70%;margin:14px 0}.shell-line:last-child{width:55%}\n'
     return html.replace('</style>',css+'\n</style>',1)

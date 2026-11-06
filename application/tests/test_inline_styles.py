@@ -1,5 +1,6 @@
 """生成页的 9 处静态样式改为冻结原型 v0.4.0 的类；运行时宽度仍内联。"""
 from pathlib import Path
+import runpy
 
 ROOT = Path(__file__).resolve().parents[1]
 INDEX = (ROOT / 'static' / 'index.html').read_text(encoding='utf-8')
@@ -68,6 +69,10 @@ def test_runtime_widths_stay_inline():
         assert snippet in INDEX
 
 
-def test_inlined_accounts_api_matches_source():
-    source = (ROOT / 'static' / 'accounts-api.js').read_text(encoding='utf-8')
-    assert source in INDEX
+def test_generated_frontend_matches_sources(monkeypatch):
+    # account_frontend now adapts the API bootstrap; verify the complete generated result.
+    generated = {}
+    monkeypatch.syspath_prepend(str(ROOT / 'scripts'))
+    monkeypatch.setattr(Path, 'write_text', lambda path, text, **kwargs: generated.update({path: text}))
+    runpy.run_path(str(ROOT / 'scripts' / 'build_frontend.py'))
+    assert generated[ROOT / 'static' / 'index.html'] == INDEX

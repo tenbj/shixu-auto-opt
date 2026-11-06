@@ -1,0 +1,68 @@
+openapi: 3.0.3
+info:
+  title: 拾序 r7 刷新先画外壳原型 API（示意，不改鉴权）
+  version: 0.6.0
+  description: |
+    本包不修改 account_api.py。下列路径仅表达原型与落地契约；
+    本地缓存只含 id/displayName，token/密码不进 localStorage。
+paths:
+  /api/auth/login:
+    post:
+      summary: 登录（落地已有）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username: {type: string}
+                password: {type: string}
+                displayName: {type: string}
+      responses:
+        "200":
+          description: 登录成功，前端只把 user.id 与 user.displayName 写入本地
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id: {type: string}
+                      displayName: {type: string}
+                  csrf: {type: string}
+        "401":
+          description: 账号或密码不正确
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail: {type: string}
+  /api/auth/me:
+    get:
+      summary: 后台确认当前会话（落地已有；本轮不改接口）
+      responses:
+        "200":
+          description: 会话有效；前端结束「同步中」；若返回 user.id 与本地缓存不同，先清身份再按返回账号重画并改写缓存；随后按该 id 加载数据
+        "401":
+          description: 失效；前端清本地 id/显示名并退回登录
+        "502":
+          description: 非 401（含 403/超时/非 JSON/网络错误）；前端保留工作台，显示「暂未同步」+ 重试，不加载数据
+  /api/auth/logout:
+    post:
+      summary: 退出登录
+      responses:
+        "200":
+          description: 退出成功；前端清本地缓存
+        "401":
+          description: 已无会话；前端仍清本地并回登录
+  /connect:
+    get:
+      summary: AI 接入指引页（正式环境）；原型用弹层代替
+      responses:
+        "200":
+          description: 指引页
