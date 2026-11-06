@@ -41,7 +41,8 @@ def integrate(html,root):
     chrome_start=layer.index('function renderAccountChrome(){');chrome_end=layer.index('function accountHead(',chrome_start)
     layer=layer[:chrome_start]+layer[chrome_start:chrome_end].replace("setAttribute('aria-expanded','false')","setAttribute('aria-expanded',String(!!document.querySelector('#account-dropdown')))")+layer[chrome_end:]
     layer=layer.replace('MCP 接入','AI 接入').replace('MCP接入','AI接入').replace('服务器令牌','访问令牌').replace("connections:'list'","connections:'quick'")
-    layer=layer.replace('<div class="auth-switch">','<p><a href="/connect">连接 AI · 查看接入指引</a></p><div class="auth-switch">')
+    layer=layer.replace('<div class="auth-switch">','<p><a class="auth-connect" href="/connect">连接 AI · 查看接入指引</a></p><div class="auth-switch">')
+    css+='\na.auth-connect{color:#42684e;text-decoration:none}\na.auth-connect:hover{text-decoration:underline;text-underline-offset:4px}\n'
     css+='\n'+(root/'static/ai-access.css').read_text(encoding='utf-8')
     # 类名与冻结原型 v0.4.0 的 style 块一致；只追加 CSS，不改写 build 已生成的标记。
     css += '''
@@ -67,7 +68,10 @@ def integrate(html,root):
     html=html.replace(marker,"\n renderAccountChrome();\n}\ndocument.addEventListener('change',e=>{if(e.target.id==='mobile-problem-select')",1)
     html=html.replace('// MOBILE-DESIGN-END',layer+'\n// MOBILE-DESIGN-END',1)
     html=html.replace("headers:{'Content-Type':'application/json',...options.headers}","headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken,...options.headers}")
-    html=html.replace("const e=new Error(typeof result.detail", "if(response.status===401&&currentUser){currentUser=null;loaded=false;document.querySelectorAll('dialog[open]').forEach(d=>d.close());showLogin('login','登录已过期，请重新登录')}const e=new Error(typeof result.detail")
+    html=html.replace("const response=await fetch(route,", "const user=currentUser;\n const response=await fetch(route,")
+    html=html.replace("const result=await response.json();if(!response.ok)", "if(response.status===401&&currentUser&&currentUser===user)clearLocalAccount('登录已过期，请重新登录');\n const result=await response.json();if(!response.ok)")
+    html=html.replace("try{const result=await request('/api/workspace');db=", "const user=currentUser;\n try{const result=await request('/api/workspace');if(currentUser!==user)return;db=")
+    html=html.replace("catch(e){loaded=false;showConnection(", "catch(e){if(currentUser!==user)return;loaded=false;showConnection(")
     html=html.replace("localStorage.setItem('shixu-system-active-identity',activeProfileId)","localStorage.setItem('shixu-system-active-identity:'+currentUser.id,activeProfileId)")
     html=html.replace("try{activeProfileId=localStorage.getItem('shixu-system-active-identity')||''}catch{}",'')
     return html.replace('</style>',css+'\n</style>',1)
