@@ -233,6 +233,7 @@ def create_app(db_path=None):
         return app.state.store.read()
 
     @app.get('/', include_in_schema=False)
+    @app.head('/', include_in_schema=False)
     def index():
         return FileResponse(ROOT / 'static' / 'index.html')
 
