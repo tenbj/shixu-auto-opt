@@ -98,6 +98,23 @@ def test_non_401_keeps_workbench_and_retries(screen, failure):
     assert page.evaluate('csrfToken') == 'memory-only'
 
 
+
+
+def test_retry_then_401_removes_boot_retry(screen):
+    page, held = screen
+    held.pop().fulfill(status=502, content_type='text/html', body='<html>bad gateway</html>')
+    expect(page.locator('#storage-warning')).to_contain_text('服务暂不可用，请稍后重试')
+    expect(page.locator('[data-event-id="EVT-ACCOUNT-BOOT-RETRY"]')).to_have_text('重试')
+    page.get_by_role('button', name='重试', exact=True).click()
+    expect(page.locator('#sync-state')).to_have_text('同步中')
+    held.pop().fulfill(status=401, content_type='application/json', body='{}')
+    expect(page.locator('#account-auth')).to_be_visible()
+    expect(page.locator('#account-auth-form')).to_be_visible()
+    expect(page.locator('[data-event-id="EVT-ACCOUNT-BOOT-RETRY"]')).to_have_count(0)
+    expect(page.locator('#account-auth-error')).to_have_text('登录已过期，请重新登录')
+    assert page.evaluate(f"localStorage.getItem('{KEY}')") is None
+
+
 def test_login_and_refresh_store_only_identity(screen):
     page, held = screen
     held.pop().fulfill(json={'user': NEW, 'csrf': 'memory-only'})

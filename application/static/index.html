@@ -112,7 +112,7 @@ function resetShell(){
  document.querySelector('#app').innerHTML=document.querySelector('#shell-skeleton').innerHTML;
  document.querySelectorAll('#account-menu,#mobile-identity,#desktop-identity,.nav-label,.topbar>span,#modal-content,#modal-title').forEach(e=>e.replaceChildren());
  document.querySelectorAll('#account-dropdown,#account-modal,#child-modal').forEach(e=>e.remove());
- document.querySelectorAll('#nav span').forEach(e=>e.textContent='');document.querySelector('#storage-warning').classList.add('hidden');
+ document.querySelectorAll('#nav span').forEach(e=>e.textContent='');document.querySelector('#storage-warning').replaceChildren();document.querySelector('#storage-warning').classList.add('hidden');
 }
 function paintShell(user){
  const wb=document.querySelector('#workbench');if(wb.dataset.shellOwner===user.id&&!wb.hidden)return;
