@@ -1,7 +1,9 @@
 """HTTP 系统入口：python -m uvicorn app.main:app --host 127.0.0.1 --port 8765"""
 import os
 import gzip
+import logging
 import re
+import threading
 from contextlib import asynccontextmanager
 import sqlite3
 import pymysql
@@ -27,6 +29,22 @@ from .models import (Write, IssueCreate, IssueUpdate, IssueTransition, Followup,
 def create_app(db_path=None):
     @asynccontextmanager
     async def lifespan(application):
+        def warm_database():
+            try:
+                with application.state.store.connect() as connection:
+                    if isinstance(connection, sqlite3.Connection):
+                        connection.execute('SELECT 1')
+                    else:
+                        with connection.cursor() as cursor:
+                            cursor.execute('SELECT 1')
+            except Exception:
+                logging.exception('Database warmup failed')
+
+        # Best effort: never wait for this thread during startup or shutdown.
+        try:
+            threading.Thread(target=warm_database, daemon=True).start()
+        except Exception:
+            logging.exception('Database warmup thread failed to start')
         async with application.state.mcp_http.router.lifespan_context(application.state.mcp_http):
             application.state.mcp_running = True
             try:
@@ -43,6 +61,8 @@ def create_app(db_path=None):
         app.state.store = MySQLStore()
     from .account_api import install_accounts
     install_accounts(app, app.state.store)
+    # AccountStore wraps the backend; expose its connection for startup warmup.
+    app.state.store.connect = app.state.store.base.connect
     from .onboarding import install_onboarding
     install_onboarding(app)
     allowed_hosts = ['localhost', '127.0.0.1', '[::1]', 'testserver', 'eliasliu.cc']
